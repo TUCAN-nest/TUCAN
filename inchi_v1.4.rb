@@ -391,7 +391,7 @@ def serialization(molecule)
   if(molecule == [])
     print "\nStructure is empty\n"
     return "Structure is empty"
-  elsif
+  else
     print molecule,"\n\n"
   end
   tempMolecule=Array.new
@@ -438,7 +438,7 @@ def create_dot_file(molecule)
   if(molecule == [])
     print "Structure is empty\n"
     return "Structure is empty"
-  elsif
+  else
     print molecule,"\n\n"
   end
   tempMolecule=Array.new

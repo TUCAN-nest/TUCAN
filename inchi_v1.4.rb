@@ -213,20 +213,20 @@ def canonicalization1(old_molecule)
 
   print "atomCount: ",atomCount,"\n\n"
   i=0
-  exitLoop=FALSE
-  while(exitLoop == FALSE)
+  exitLoop = false
+  while(!exitLoop)
     print i,": ",new_molecule[i]," ",i+1,": ",new_molecule[i+1],"\n"
     if(new_molecule[i][0] == new_molecule[i+1][0])
       if(new_molecule[i].length > new_molecule[i+1].length)
         oldAtom=i
         newAtom=i+1
         print "Swap ",oldAtom," vs. ",newAtom,"\n\n"
-        exitLoop=TRUE
+        exitLoop = true
       end
     end
     i=i+1
     if(i >= atomCount)
-      exitLoop=TRUE
+      exitLoop = true
       print "\n"
       return new_molecule
     end
@@ -328,8 +328,8 @@ def canonicalization2(old_molecule)
 
   print "atomCount: ",atomCount,"\n\n"
   i=0
-  exitLoop=FALSE
-  while(exitLoop == FALSE)
+  exitLoop = false
+  while(!exitLoop)
     print i,": ",new_molecule[i]," ",i+1,": ",new_molecule[i+1],"\n"
     if((new_molecule[i][0] == new_molecule[i+1][0]) && (new_molecule[i].length == new_molecule[i+1].length))
         do_swap=(new_molecule[i] <=> new_molecule[i+1])
@@ -339,12 +339,12 @@ def canonicalization2(old_molecule)
         oldAtom=i
         newAtom=i+1
         print "Swap ",oldAtom," vs. ",newAtom,"\n\n"
-        exitLoop=TRUE
+        exitLoop = true
       end
     end
     i=i+1
     if(i >= atomCount)
-      exitLoop=TRUE
+      exitLoop = true
       print "\n"
       return new_molecule
     end

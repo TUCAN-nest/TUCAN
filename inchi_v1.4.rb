@@ -505,3 +505,23 @@ def create_dot_file(molecule)
   dotfile=dotfile+"}\n"
   return dotfile
 end
+
+
+def canonicalize_molecule(molecule)
+  if(molecule.length > 1)
+      for i in 0..(molecule.length-1)*20
+          print "=== Start Pass #",i," ===\n\n"
+          canonicalized_molecule = canonicalization1(molecule)
+          canonicalized_molecule = canonicalization2(canonicalized_molecule)
+          print "=== End Pass #",i," ===\n\n"
+      end
+  end
+  return canonicalized_molecule
+end
+
+
+def create_ninchi_string(molecule)
+  sumFormulaString=calculate_sum_formula(molecule)
+  ninchi_string = "nInChI=1S/#{sumFormulaString}/c#{serialization(molecule)}"
+  return ninchi_string
+end

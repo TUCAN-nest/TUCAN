@@ -11,7 +11,12 @@
 	},
 
 	// Set *default* container specific settings.json values on container create.
-	"settings": {},
+	"settings": {
+		"[ruby]": {
+			"editor.insertSpaces": true,
+			"editor.tabSize": 2
+		  },
+	},
 
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [

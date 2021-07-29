@@ -505,12 +505,12 @@ def canonicalize_molecule(molecule)
   if(molecule.length > 1)
       for i in 0..(molecule.length-1)*20
           print "=== Start Pass #",i," ===\n\n"
-          canonicalized_molecule = canonicalization1(molecule)
-          canonicalized_molecule = canonicalization2(canonicalized_molecule)
+          molecule = canonicalization1(molecule)
+          molecule = canonicalization2(molecule)
           print "=== End Pass #",i," ===\n\n"
       end
   end
-  return canonicalized_molecule
+  molecule
 end
 
 

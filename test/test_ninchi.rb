@@ -17,7 +17,7 @@ class TestnInChI < Minitest::Test
     cisplatin_molfile = read_molfile("test/testfiles/cisplatin.mol")
     cisplatin_array = create_molecule_array(cisplatin_molfile, "cisplation")
     @@canonicalized_cisplatin = canonicalize_molecule(cisplatin_array)
-    @@ninchi_string_cisplatin = "nInChI=1S/H6Cl2N2Pt/c(0-7)(1-6)(2-7)(3-6)(4-7)(5-6)(6-10)(7-10)(8-10)(9-10)"
+    @@ninchi_string_cisplatin = "nInChI=1S/H6Cl2N2Pt/c(0-6)(1-6)(2-6)(3-7)(4-7)(5-7)(6-10)(7-10)(8-10)(9-10)"
     @@dot_file_string_cisplatin = "graph test\n{\n  bgcolor=grey\n"\
     "  0 [label=\"H 0\" color=lightgrey,style=filled,shape=circle,fontname=Calibri];\n"\
     "  1 [label=\"H 1\" color=lightgrey,style=filled,shape=circle,fontname=Calibri];\n"\
@@ -30,12 +30,12 @@ class TestnInChI < Minitest::Test
     "  8 [label=\"Cl 8\" color=lightgrey,style=filled,shape=circle,fontname=Calibri];\n"\
     "  9 [label=\"Cl 9\" color=lightgrey,style=filled,shape=circle,fontname=Calibri];\n"\
     "  10 [label=\"Pt 10\" color=lightgrey,style=filled,shape=circle,fontname=Calibri];\n"\
-    "  0 -- 7 [color=black,style=bold];\n"\
+    "  0 -- 6 [color=black,style=bold];\n"\
     "  1 -- 6 [color=black,style=bold];\n"\
-    "  2 -- 7 [color=black,style=bold];\n"\
-    "  3 -- 6 [color=black,style=bold];\n"\
+    "  2 -- 6 [color=black,style=bold];\n"\
+    "  3 -- 7 [color=black,style=bold];\n"\
     "  4 -- 7 [color=black,style=bold];\n"\
-    "  5 -- 6 [color=black,style=bold];\n"\
+    "  5 -- 7 [color=black,style=bold];\n"\
     "  6 -- 10 [color=black,style=bold];\n"\
     "  7 -- 10 [color=black,style=bold];\n"\
     "  8 -- 10 [color=black,style=bold];\n"\

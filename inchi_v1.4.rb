@@ -142,193 +142,6 @@ def calculate_sum_formula(molecule)
   sumFormulaString
 end
 
-def canonicalization1(old_molecule)
-  if old_molecule == []
-    print "Structure is empty\n"
-    return 'Structure is empty'
-  end
-  periodicTable = PeriodicTable::Elements
-  atomCount = old_molecule.length - 1 # determine number of rows, make sure to properly account for array starting at index zero
-  printf("Now sorting the array\n\n")
-  sort_connection_numbers(old_molecule)
-  print "Old array: \n\n", old_molecule, "\n\n"
-  new_molecule = []
-  correspondenceTable = [] # contains pairs of array positions [old,new]
-  j = 0
-  periodicTable.each do |element| # second pass - sort by element in increasing order, lowest atomic mass element to the left/bottom
-    (0..atomCount).each do |i|
-      next unless old_molecule[i][0] == element
-
-      new_molecule.push(old_molecule[i])
-      correspondenceTable.push([i, j])
-      j += 1
-    end
-  end
-  old_molecule = Marshal.load(Marshal.dump(new_molecule))
-  temp = # sort the correspondence table by lowest old atom position
-    correspondenceTable.sort do |a, b|
-      b[0] <=> a[0]
-    end
-  correspondenceTable = temp
-  print "New array withOUT labels re-organized: \n\n", new_molecule, "\n\n"
-  new_molecule = []
-  (0..atomCount).each do |i|
-    tempArray = []
-    tempArray.push(old_molecule[i][0]) # add element symbol to temporary array
-    (1..old_molecule[i].length - 1).each do |j|
-      (0..correspondenceTable.length - 1).each do |k|
-        if old_molecule[i][j] == correspondenceTable[k][0]
-          tempArray.push(correspondenceTable[k][1]) # append new connection to temporary array
-        end
-      end
-    end
-    new_molecule.push(tempArray) # add whole new atom connection list for atom to temporary array
-  end
-  sort_connection_numbers(new_molecule)
-  print 'atomCount: ', atomCount, "\n\n"
-  i = 0
-  exitLoop = false
-  until exitLoop
-    print i, ': ', new_molecule[i], ' ', i + 1, ': ', new_molecule[i + 1], "\n"
-    if new_molecule[i][0] == new_molecule[i + 1][0] && (new_molecule[i].length > new_molecule[i + 1].length)
-      oldAtom = i
-      newAtom = i + 1
-      print 'Swap ', oldAtom, ' vs. ', newAtom, "\n\n"
-      exitLoop = true
-    end
-    i += 1
-    next unless i >= atomCount
-
-    exitLoop = true
-    print "\n"
-    return new_molecule
-  end
-  old_molecule = Marshal.load(Marshal.dump(new_molecule))
-  old_molecule[oldAtom], old_molecule[newAtom] = old_molecule[newAtom], old_molecule[oldAtom]
-  (0..atomCount).each do |i|
-    line = []
-    line = old_molecule[i]
-    print line, ' '
-    (1..line.length - 1).each do |j|
-      print j, ':', line[j]
-      if line[j] == oldAtom
-        print 'c', newAtom
-        line[j] = newAtom
-      elsif line[j] == newAtom
-        print 'c', oldAtom
-        line[j] = oldAtom
-      end
-      print ' '
-    end
-    print "\n"
-  end
-  sort_connection_numbers(old_molecule)
-  print "\nSuggestion to re-order: ", old_molecule, "\n\n"
-  old_molecule
-  #
-  #
-  #
-  #    print "CorrespondenceTable [old,new]: \n\n",correspondenceTable,"\n\n"
-  #    print "New array WITH labels re-organized: \n\n",new_molecule,"\n\n"
-  #    return new_molecule
-end
-
-def canonicalization2(old_molecule)
-  if old_molecule == []
-    print "Structure is empty\n"
-    return 'Structure is empty'
-  end
-  periodicTable = PeriodicTable::Elements
-  atomCount = old_molecule.length - 1 # determine number of rows, make sure to properly account for array starting at index zero
-  printf("Now sorting the array\n\n")
-  sort_connection_numbers(old_molecule)
-  print "Old array: \n\n", old_molecule, "\n\n"
-  new_molecule = []
-  correspondenceTable = [] # contains pairs of array positions [old,new]
-  j = 0
-  periodicTable.each do |element| # second pass - sort by element in increasing order, lowest atomic mass element to the left/bottom
-    (0..atomCount).each do |i|
-      next unless old_molecule[i][0] == element
-
-      new_molecule.push(old_molecule[i])
-      correspondenceTable.push([i, j])
-      j += 1
-    end
-  end
-  old_molecule = Marshal.load(Marshal.dump(new_molecule))
-  temp = # sort the correspondence table by lowest old atom position
-    correspondenceTable.sort do |a, b|
-      b[0] <=> a[0]
-    end
-  correspondenceTable = temp
-  print "New array withOUT labels re-organized: \n\n", new_molecule, "\n\n"
-  new_molecule = []
-  (0..atomCount).each do |i|
-    tempArray = []
-    tempArray.push(old_molecule[i][0]) # add element symbol to temporary array
-    (1..old_molecule[i].length - 1).each do |j|
-      (0..correspondenceTable.length - 1).each do |k|
-        if old_molecule[i][j] == correspondenceTable[k][0]
-          tempArray.push(correspondenceTable[k][1]) # append new connection to temporary array
-        end
-      end
-    end
-    new_molecule.push(tempArray) # add whole new atom connection list for atom to temporary array
-  end
-  sort_connection_numbers(new_molecule)
-  print 'atomCount: ', atomCount, "\n\n"
-  i = 0
-  exitLoop = false
-  until exitLoop
-    print i, ': ', new_molecule[i], ' ', i + 1, ': ', new_molecule[i + 1], "\n"
-    if (new_molecule[i][0] == new_molecule[i + 1][0]) && (new_molecule[i].length == new_molecule[i + 1].length)
-      do_swap = (new_molecule[i] <=> new_molecule[i + 1])
-      #        do_swap=(new_molecule[i].to_s <=> new_molecule[i+1].to_s)
-      #        if(new_molecule[i].to_s > new_molecule[i+1].to_s)
-      if do_swap == 1
-        oldAtom = i
-        newAtom = i + 1
-        print 'Swap ', oldAtom, ' vs. ', newAtom, "\n\n"
-        exitLoop = true
-      end
-    end
-    i += 1
-    next unless i >= atomCount
-
-    exitLoop = true
-    print "\n"
-    return new_molecule
-  end
-  old_molecule = Marshal.load(Marshal.dump(new_molecule))
-  old_molecule[oldAtom], old_molecule[newAtom] = old_molecule[newAtom], old_molecule[oldAtom]
-  (0..atomCount).each do |i|
-    line = []
-    line = old_molecule[i]
-    print line, ' '
-    (1..line.length - 1).each do |j|
-      print j, ':', line[j]
-      if line[j] == oldAtom
-        print 'c', newAtom
-        line[j] = newAtom
-      elsif line[j] == newAtom
-        print 'c', oldAtom
-        line[j] = oldAtom
-      end
-      print ' '
-    end
-    print "\n"
-  end
-  sort_connection_numbers(old_molecule)
-  print "\nSuggestion to re-order: ", old_molecule, "\n\n"
-  old_molecule
-  #
-  #
-  #
-  #    print "CorrespondenceTable [old,new]: \n\n",correspondenceTable,"\n\n"
-  #    print "New array WITH labels re-organized: \n\n",new_molecule,"\n\n"
-  #    return new_molecule
-end
-
 def serialization(molecule)
   if molecule == []
     print "\nStructure is empty\n"
@@ -434,18 +247,6 @@ def create_dot_file(molecule)
   dotfile + "}\n"
 end
 
-def canonicalize_molecule(molecule)
-  if molecule.length > 1
-    (0..(molecule.length - 1) * 20).each do |i|
-      print '=== Start Pass #', i, " ===\n\n"
-      molecule = canonicalization1(molecule)
-      molecule = canonicalization2(molecule)
-      print '=== End Pass #', i, " ===\n\n"
-    end
-  end
-  molecule
-end
-
 def create_ninchi_string(molecule)
   sumFormulaString = calculate_sum_formula(molecule)
   "nInChI=1S/#{sumFormulaString}/c#{serialization(molecule)}"
@@ -461,4 +262,127 @@ def sort_connection_numbers(molecule)
     atom.sort!.reverse! if atom.length > 1
     atom.insert(0, element_symbol)
   end
+end
+
+def swap_logic1(molecule, index)
+  if (molecule[index][0] == molecule[index + 1][0]) && (molecule[index].length == molecule[index + 1].length)
+    if (molecule[index] <=> molecule[index + 1]) == 1
+      old_atom = index
+      new_atom = index + 1
+      return [old_atom, new_atom]
+    end
+  end
+  nil
+end
+
+def swap_logic2(molecule, index)
+  if molecule[index][0] == molecule[index + 1][0] && (molecule[index].length > molecule[index + 1].length)
+    old_atom = index
+    new_atom = index + 1
+    return [old_atom, new_atom]
+  end
+  nil
+end
+
+def canonicalization(old_molecule, swap_logic)
+  if old_molecule == []
+    print "Structure is empty\n"
+    return 'Structure is empty'
+  end
+  periodicTable = PeriodicTable::Elements
+  atomCount = old_molecule.length - 1 # determine number of rows, make sure to properly account for array starting at index zero
+  printf("Now sorting the array\n\n")
+  sort_connection_numbers(old_molecule)
+  print "Old array: \n\n", old_molecule, "\n\n"
+  new_molecule = []
+  correspondenceTable = [] # contains pairs of array positions [old,new]
+  j = 0
+  periodicTable.each do |element| # second pass - sort by element in increasing order, lowest atomic mass element to the left/bottom
+    (0..atomCount).each do |i|
+      next unless old_molecule[i][0] == element
+
+      new_molecule.push(old_molecule[i])
+      correspondenceTable.push([i, j])
+      j += 1
+    end
+  end
+  old_molecule = Marshal.load(Marshal.dump(new_molecule))
+  temp = # sort the correspondence table by lowest old atom position
+    correspondenceTable.sort do |a, b|
+      b[0] <=> a[0]
+    end
+  correspondenceTable = temp
+  print "New array withOUT labels re-organized: \n\n", new_molecule, "\n\n"
+  new_molecule = []
+  (0..atomCount).each do |i|
+    tempArray = []
+    tempArray.push(old_molecule[i][0]) # add element symbol to temporary array
+    (1..old_molecule[i].length - 1).each do |j|
+      (0..correspondenceTable.length - 1).each do |k|
+        if old_molecule[i][j] == correspondenceTable[k][0]
+          tempArray.push(correspondenceTable[k][1]) # append new connection to temporary array
+        end
+      end
+    end
+    new_molecule.push(tempArray) # add whole new atom connection list for atom to temporary array
+  end
+  sort_connection_numbers(new_molecule)
+  print 'atomCount: ', atomCount, "\n\n"
+  i = 0
+  exitLoop = false
+  until exitLoop
+    print i, ': ', new_molecule[i], ' ', i + 1, ': ', new_molecule[i + 1], "\n"
+    swap_update = swap_logic.call(new_molecule, i)
+    if swap_update
+      oldAtom, newAtom = swap_update
+      puts "Swap #{oldAtom} vs. #{newAtom} \n"
+      exitLoop = true
+    end
+    i += 1
+    next unless i >= atomCount
+
+    exitLoop = true
+    print "\n"
+    return new_molecule
+  end
+  old_molecule = Marshal.load(Marshal.dump(new_molecule))
+  old_molecule[oldAtom], old_molecule[newAtom] = old_molecule[newAtom], old_molecule[oldAtom]
+  (0..atomCount).each do |i|
+    line = []
+    line = old_molecule[i]
+    print line, ' '
+    (1..line.length - 1).each do |j|
+      print j, ':', line[j]
+      if line[j] == oldAtom
+        print 'c', newAtom
+        line[j] = newAtom
+      elsif line[j] == newAtom
+        print 'c', oldAtom
+        line[j] = oldAtom
+      end
+      print ' '
+    end
+    print "\n"
+  end
+  sort_connection_numbers(old_molecule)
+  print "\nSuggestion to re-order: ", old_molecule, "\n\n"
+  old_molecule
+  #
+  #
+  #
+  #    print "CorrespondenceTable [old,new]: \n\n",correspondenceTable,"\n\n"
+  #    print "New array WITH labels re-organized: \n\n",new_molecule,"\n\n"
+  #    return new_molecule
+end
+
+def canonicalize_molecule(molecule)
+  if molecule.length > 1
+    (0..(molecule.length - 1) * 20).each do |i|
+      print '=== Start Pass #', i, " ===\n\n"
+      molecule = canonicalization(molecule, method(:swap_logic1))
+      molecule = canonicalization(molecule, method(:swap_logic2))
+      print '=== End Pass #', i, " ===\n\n"
+    end
+  end
+  molecule
 end

@@ -441,7 +441,7 @@ def create_dot_file(molecule)
   print "  bgcolor=grey\n"
   i = 0
   molecule.each do |atom|
-    color = elementColor.fetch(:atom[0], 'lightgrey') # if color is unspecified fall back on lightgray
+    color = elementColor.fetch(atom[0], 'lightgrey') # if color is unspecified fall back on lightgray
     print '  ', i, ' [label="', atom[0], ' ', i, '" color=', color, ",style=filled,shape=circle,fontname=Calibri];\n"
     i += 1
   end
@@ -458,7 +458,7 @@ def create_dot_file(molecule)
   dotfile += "  bgcolor=grey\n"
   i = 0
   molecule.each do |atom|
-    color = elementColor.fetch(:atom[0], 'lightgrey')
+    color = elementColor.fetch(atom[0], 'lightgrey')
     dotfile = dotfile + '  ' + i.to_s + ' [label="' + atom[0].to_s + ' ' + i.to_s + '" color=' + color + ",style=filled,shape=circle,fontname=Calibri];\n"
     i += 1
   end

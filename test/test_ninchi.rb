@@ -23,11 +23,11 @@ class TestnInChI < Minitest::Test
   "  3 [label=\"H 3\" color=lightgrey,style=filled,shape=circle,fontname=Calibri];\n"\
   "  4 [label=\"H 4\" color=lightgrey,style=filled,shape=circle,fontname=Calibri];\n"\
   "  5 [label=\"H 5\" color=lightgrey,style=filled,shape=circle,fontname=Calibri];\n"\
-  "  6 [label=\"N 6\" color=lightgrey,style=filled,shape=circle,fontname=Calibri];\n"\
-  "  7 [label=\"N 7\" color=lightgrey,style=filled,shape=circle,fontname=Calibri];\n"\
-  "  8 [label=\"Cl 8\" color=lightgrey,style=filled,shape=circle,fontname=Calibri];\n"\
-  "  9 [label=\"Cl 9\" color=lightgrey,style=filled,shape=circle,fontname=Calibri];\n"\
-  "  10 [label=\"Pt 10\" color=lightgrey,style=filled,shape=circle,fontname=Calibri];\n"\
+  "  6 [label=\"N 6\" color=\"#3050F8\",style=filled,shape=circle,fontname=Calibri];\n"\
+  "  7 [label=\"N 7\" color=\"#3050F8\",style=filled,shape=circle,fontname=Calibri];\n"\
+  "  8 [label=\"Cl 8\" color=\"#1FF01F\",style=filled,shape=circle,fontname=Calibri];\n"\
+  "  9 [label=\"Cl 9\" color=\"#1FF01F\",style=filled,shape=circle,fontname=Calibri];\n"\
+  "  10 [label=\"Pt 10\" color=\"#D0D0E0\",style=filled,shape=circle,fontname=Calibri];\n"\
   "  0 -- 6 [color=black,style=bold];\n"\
   "  1 -- 6 [color=black,style=bold];\n"\
   "  2 -- 6 [color=black,style=bold];\n"\

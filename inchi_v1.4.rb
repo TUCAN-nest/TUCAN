@@ -147,16 +147,10 @@ def canonicalization1(old_molecule)
     print "Structure is empty\n"
     return 'Structure is empty'
   end
-  periodicTable = []
   periodicTable = PeriodicTable::Elements
   atomCount = old_molecule.length - 1 # determine number of rows, make sure to properly account for array starting at index zero
   printf("Now sorting the array\n\n")
-  old_molecule.each do |atom| # first pass - sort connection numbers of each atom left to right from large to small
-    elementSymbol = atom[0]
-    atom.shift
-    atom.sort!.reverse! if atom.length > 1
-    atom.insert(0, elementSymbol)
-  end
+  sort_connection_numbers(old_molecule)
   print "Old array: \n\n", old_molecule, "\n\n"
   new_molecule = []
   correspondenceTable = [] # contains pairs of array positions [old,new]
@@ -171,7 +165,6 @@ def canonicalization1(old_molecule)
     end
   end
   old_molecule = Marshal.load(Marshal.dump(new_molecule))
-  temp = []
   temp = # sort the correspondence table by lowest old atom position
     correspondenceTable.sort do |a, b|
       b[0] <=> a[0]
@@ -191,13 +184,7 @@ def canonicalization1(old_molecule)
     end
     new_molecule.push(tempArray) # add whole new atom connection list for atom to temporary array
   end
-  new_molecule.each do |atom|   # again, sort connection numbers of each atom left to right from large to small
-    elementSymbol = atom[0]
-    atom.shift
-    atom.sort!.reverse! if atom.length > 1
-    atom.insert(0, elementSymbol)
-  end
-
+  sort_connection_numbers(new_molecule)
   print 'atomCount: ', atomCount, "\n\n"
   i = 0
   exitLoop = false
@@ -235,12 +222,7 @@ def canonicalization1(old_molecule)
     end
     print "\n"
   end
-  old_molecule.each do |atom|   # again, sort connection numbers of each atom left to right from large to small
-    elementSymbol = atom[0]
-    atom.shift
-    atom.sort!.reverse! if atom.length > 1
-    atom.insert(0, elementSymbol)
-  end
+  sort_connection_numbers(old_molecule)
   print "\nSuggestion to re-order: ", old_molecule, "\n\n"
   old_molecule
   #
@@ -256,16 +238,10 @@ def canonicalization2(old_molecule)
     print "Structure is empty\n"
     return 'Structure is empty'
   end
-  periodicTable = []
   periodicTable = PeriodicTable::Elements
   atomCount = old_molecule.length - 1 # determine number of rows, make sure to properly account for array starting at index zero
   printf("Now sorting the array\n\n")
-  old_molecule.each do |atom| # first pass - sort connection numbers of each atom left to right from large to small
-    elementSymbol = atom[0]
-    atom.shift
-    atom.sort!.reverse! if atom.length > 1
-    atom.insert(0, elementSymbol)
-  end
+  sort_connection_numbers(old_molecule)
   print "Old array: \n\n", old_molecule, "\n\n"
   new_molecule = []
   correspondenceTable = [] # contains pairs of array positions [old,new]
@@ -280,7 +256,6 @@ def canonicalization2(old_molecule)
     end
   end
   old_molecule = Marshal.load(Marshal.dump(new_molecule))
-  temp = []
   temp = # sort the correspondence table by lowest old atom position
     correspondenceTable.sort do |a, b|
       b[0] <=> a[0]
@@ -300,13 +275,7 @@ def canonicalization2(old_molecule)
     end
     new_molecule.push(tempArray) # add whole new atom connection list for atom to temporary array
   end
-  new_molecule.each do |atom| # again, sort connection numbers of each atom left to right from large to small
-    elementSymbol = atom[0]
-    atom.shift
-    atom.sort!.reverse! if atom.length > 1
-    atom.insert(0, elementSymbol)
-  end
-
+  sort_connection_numbers(new_molecule)
   print 'atomCount: ', atomCount, "\n\n"
   i = 0
   exitLoop = false
@@ -349,12 +318,7 @@ def canonicalization2(old_molecule)
     end
     print "\n"
   end
-  old_molecule.each do |atom| # again, sort connection numbers of each atom left to right from large to small
-    elementSymbol = atom[0]
-    atom.shift
-    atom.sort!.reverse! if atom.length > 1
-    atom.insert(0, elementSymbol)
-  end
+  sort_connection_numbers(old_molecule)
   print "\nSuggestion to re-order: ", old_molecule, "\n\n"
   old_molecule
   #
@@ -485,4 +449,16 @@ end
 def create_ninchi_string(molecule)
   sumFormulaString = calculate_sum_formula(molecule)
   "nInChI=1S/#{sumFormulaString}/c#{serialization(molecule)}"
+end
+
+def sort_connection_numbers(molecule)
+  # Sort connection numbers of each atom left to right
+  # from large to small.
+  # Mutates `molecule`.
+  molecule.each do |atom|
+    element_symbol = atom[0]
+    atom.shift
+    atom.sort!.reverse! if atom.length > 1
+    atom.insert(0, element_symbol)
+  end
 end

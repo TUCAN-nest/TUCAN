@@ -3,6 +3,7 @@
 #
 
 require './periodic_table'
+require 'set'
 
 def read_molfile(filename)
   filename = 'NONE' if filename.empty?
@@ -315,13 +316,19 @@ def canonicalization(old_molecule, swap_logic, periodic_table_elements)
 end
 
 def canonicalize_molecule(molecule)
-  if molecule.length > 1
-    (0..(molecule.length - 1) * 20).each do |i|
-      print '=== Start Pass #', i, " ===\n\n"
-      molecule = canonicalization(molecule, method(:swap_logic1), PeriodicTable::Elements)
-      molecule = canonicalization(molecule, method(:swap_logic2), PeriodicTable::Elements)
-      print '=== End Pass #', i, " ===\n\n"
-    end
+  return molecule unless molecule.length > 1
+
+  previous_molecule_states = Set[molecule]
+  (0..(molecule.length - 1) * 20).each do |i|
+    puts "=== Start Pass ##{i} ===\n"
+    molecule = canonicalization(molecule, method(:swap_logic1), PeriodicTable::Elements)
+    molecule = canonicalization(molecule, method(:swap_logic2), PeriodicTable::Elements)
+    puts "=== End Pass ##{i} ===\n"
+    # Stop iterating if this molecule state occurred before. Recurrence of molecule states
+    # heuristically implies convergence in the form of either a) cyclic recurrence of
+    # molecule states (e.g., A, B, A) or b) unchanging/stable molecule state (e.g., A, A).
+    break if previous_molecule_states.include?(molecule)
+    previous_molecule_states.add(molecule)
   end
   molecule
 end

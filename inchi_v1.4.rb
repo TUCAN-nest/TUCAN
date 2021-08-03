@@ -296,7 +296,7 @@ def canonicalization(old_molecule, swap_logic, periodic_table_elements)
 
   correspondence_table = compute_correspondance_table(periodic_table_elements, old_molecule, atom_count)
 
-  old_molecule = Marshal.load(Marshal.dump(new_molecule))
+  old_molecule = Marshal.load(Marshal.dump(new_molecule)) # marshalling results in deep (as opposed to shallow) copy
 
   new_molecule = compute_element_connections(old_molecule, correspondence_table, atom_count)
   sort_connection_numbers(new_molecule)

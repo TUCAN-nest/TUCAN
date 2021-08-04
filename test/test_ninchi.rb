@@ -3,7 +3,7 @@ require 'minitest/autorun'
 
 class TestnInChI < Minitest::Test
   hydrogen_molfile = read_molfile('test/testfiles/hydrogen.mol')
-  hydrogen_array = create_molecule_array(hydrogen_molfile, 'hydrogen')
+  hydrogen_array = create_molecule_array(hydrogen_molfile)
   @@canonicalized_hydrogen = canonicalize_molecule(hydrogen_array)
   @@ninchi_string_hydrogen = 'nInChI=1S/H2/c(0-1)'
   @@dot_file_string_hydrogen = "graph test\n{\n  bgcolor=grey\n"\
@@ -13,7 +13,7 @@ class TestnInChI < Minitest::Test
   "}\n"
 
   cisplatin_molfile = read_molfile('test/testfiles/cisplatin.mol')
-  cisplatin_array = create_molecule_array(cisplatin_molfile, 'cisplation')
+  cisplatin_array = create_molecule_array(cisplatin_molfile)
   @@canonicalized_cisplatin = canonicalize_molecule(cisplatin_array)
   @@ninchi_string_cisplatin = 'nInChI=1S/H6Cl2N2Pt/c(0-6)(1-6)(2-6)(3-7)(4-7)(5-7)(6-10)(7-10)(8-10)(9-10)'
   @@dot_file_string_cisplatin = "graph test\n{\n  bgcolor=grey\n"\

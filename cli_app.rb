@@ -18,9 +18,9 @@ puts 'A new International Chemical Identifier (nInChI)'
 puts 'CC BY-SA | Ulrich Schatzschneider | Universität Würzburg | NFDI4Chem | v1.4 | 06/2021'
 
 filename = options[:molfile]
-file = read_molfile(filename)
+molfile_data = read_molfile(filename)
 
-molecule = create_molecule_array(file, filename)
+molecule = create_molecule_array(molfile_data)
 canonicalized_molecule = canonicalize_molecule(molecule)
 create_ninchi_string(canonicalized_molecule)
 create_dot_file(canonicalized_molecule)

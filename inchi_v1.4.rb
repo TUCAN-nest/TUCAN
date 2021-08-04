@@ -6,53 +6,43 @@ require './periodic_table'
 require 'set'
 
 def read_molfile(filename)
-  filename = 'NONE' if filename.empty?
-  print "\nSupplied argument was: ", filename, "\n\n"
-  if !File.exist?(filename)
-    print 'File ', filename, " does not exist\n\n"
-    return nil
-  else
-    print 'File ', filename, " exists\n\n"
+  raise "#{filename} doesn't exist." unless File.exist?(filename)
+
+  molfile = File.read(filename) # reads entire file and closes it
+  molfile_lines = molfile.split("\n")
+
+  puts "Printing molfile\n"
+  puts "Start of file: #{filename}\n"
+  puts "-----------------------------------"
+  puts molfile
+  puts "-----------------------------------"
+  puts "End of file: #{filename}\n"
+
+  puts "Printing molfile header"
+  puts "-----------------------------------"
+  (0..3).each do |i| # header of a molfile is 4 lines long
+    puts "#{i}: #{molfile_lines[i]}\n"
   end
-  File.open(filename, 'rt').read # open text file in read-only mode
+  puts "-----------------------------------"
+
+  molfile_lines
 end
 
-def create_molecule_array(file, filename)
-  input = []
-  file.each_line do |line|
-    input.push(line)
-  end
-  print "Printing molfile\n\n"
-  print 'Start of file: ', filename, "\n"
-  print "-----------------------------------\n"
-  print file
-  print "\n-----------------------------------\n"
-  print 'End of file: ', filename, "\n\n"
-  #
-  # header of a molfile is 4 lines long
-  #
-  print "Printing molfile header\n"
-  print "-----------------------------------\n"
-  (0..3).each do |i|
-    printf('%i: %s', i, input[i])
-  end
-  print "-----------------------------------\n"
-  #
+def create_molecule_array(molfile_lines)
+
   # number of atoms in file is 1st number of 4th line (with index "3" as counting starts at zero)
   # number of bonds is 2nd number of 4th line (NOT: length of file minus header length (4 lines) minus number of atom definition lines { minus one (as final line is "M END") } )
   # (This is not true, since there can be additional lines with definitions starting with letter "M", thus rather use second number which is the number of bonds)
-  #
-  atom_count, bondCount = input[3].scan(/\d+/).map { |n| n.to_i }
-  print "\nLength of file is ", input.length, " lines\n\n"
+  atom_count, bondCount = molfile_lines[3].scan(/\d+/).map { |n| n.to_i }
+  print "\nLength of file is ", molfile_lines.length, " lines\n\n"
   print 'Number of atoms is ', atom_count, "\n\n"
   print 'Number of bonds is ', bondCount, "\n\n"
-  #
+
   # now read the next lines containing the atom definitions
   # first three "fields" are "pseudo-coordinates", the 4th (with index 3 as counting starts at zero) is the element symbol which is what we want here, everything else is ignored
-  #
   molecule = []
   (4..atom_count + 3).each do |i|
-    atom = input[i].split(' ')
+    atom = molfile_lines[i].split(' ')
     printf("Line %i Atom %i: %s %s\n", i, i - 4, atom[3], atom)
     molecule.push([atom[3]])
   end
@@ -61,7 +51,7 @@ def create_molecule_array(file, filename)
   # now read the remaining lines containing the bond definitions in the sequence atom1 atom2 bond_order ... unknown/unused ... (can be ignored)
   #
   (0..bondCount - 1).each do |i|
-    connectionTable = input[i + 4 + atom_count].split(' ')
+    connectionTable = molfile_lines[i + 4 + atom_count].split(' ')
     if connectionTable[0] > connectionTable[1]
       connectionTable[0], connectionTable[1] = connectionTable[1], connectionTable[0] # make sure first atom always has lower (not: higher?) index
     end

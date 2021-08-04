@@ -26,7 +26,6 @@ def read_molfile(filename)
 end
 
 def create_molecule_array(molfile_lines)
-
   # number of atoms in file is 1st number of 4th line (with index "3" as counting starts at zero)
   # number of bonds is 2nd number of 4th line (NOT: length of file minus header length (4 lines) minus number of atom definition lines { minus one (as final line is "M END") } )
   # (This is not true, since there can be additional lines with definitions starting with letter "M", thus rather use second number which is the number of bonds)
@@ -61,22 +60,7 @@ def create_molecule_array(molfile_lines)
   # print_connection_table(molecule, atom_count)
 end
 
-def print_connection_table(molecule, atom_count)
-  # Print the "connection table" in format "atom number: element_symbol connected_atoms".
-  # Start with highest priority atom.
-  puts "\nPrinting Connection Table\n"
-  molecule.reverse_each do |atom|
-    puts "#{atom_count - 1}:"
-    atom.each do |connection_table|
-      puts " #{connection_table}"
-    end
-    atom_count -= 1
-    print '\n'
-  end
-end
-
 def calculate_sum_formula(molecule, periodic_table_elements)
-
   # Create sum formula array in the order C > H > all other elements in alphabetic order.
   # "atom count" is set to zero.
   sum_formula = []
@@ -108,20 +92,36 @@ def calculate_sum_formula(molecule, periodic_table_elements)
   sum_formula_string
 end
 
-def compute_graph(molecule)
-  temp_molecule = Marshal.load(Marshal.dump(molecule))
-  graph = []
-  temp_molecule.each_with_index do |atom, i|
-    atom.shift
-    atom.each do |connected_atom|
-      if i < connected_atom
-        graph.push([i, connected_atom])
-      else
-        graph.push([connected_atom, i])
-      end
-    end
-  end
-  graph = graph.uniq.sort!
+def canonicalization(old_molecule, swap_logic, periodic_table_elements)
+  fail "Structure is empty\n" if old_molecule.empty?
+
+  atom_count = old_molecule.length - 1 # determine number of rows, make sure to properly account for array starting at index zero
+
+  puts "Now sorting the array\n"
+  sort_connection_numbers(old_molecule)
+  puts "Old array:\n#{old_molecule}\n"
+
+  new_molecule = compute_new_molecule(periodic_table_elements, old_molecule, atom_count)
+  puts "New array withOUT labels re-organized:\n#{new_molecule}\n"
+
+  correspondence_table = compute_correspondance_table(periodic_table_elements, old_molecule, atom_count)
+
+  old_molecule = Marshal.load(Marshal.dump(new_molecule)) # marshalling results in deep (as opposed to shallow) copy
+
+  new_molecule = compute_element_connections(old_molecule, correspondence_table, atom_count)
+  sort_connection_numbers(new_molecule)
+
+  puts "atom_count: #{atom_count} \n"
+  atom_update = compute_atom_swaps(new_molecule, atom_count, swap_logic)
+  return new_molecule unless atom_update
+  old_atom, new_atom = atom_update
+  old_molecule = Marshal.load(Marshal.dump(new_molecule))
+  old_molecule[old_atom], old_molecule[new_atom] = old_molecule[new_atom], old_molecule[old_atom]
+  swap_atoms(old_molecule, old_atom, new_atom, atom_count)
+  sort_connection_numbers(old_molecule)
+  puts "\nSuggestion to re-order: #{old_molecule}\n"
+  old_molecule
+  # puts "New array WITH labels re-organized:\n#{new_molecule}\n"
 end
 
 def serialization(molecule)
@@ -171,6 +171,27 @@ def create_ninchi_string(molecule, periodic_table_elements)
   "nInChI=1S/#{calculate_sum_formula(molecule, periodic_table_elements)}/c#{serialization(molecule)}"
 end
 
+def canonicalize_molecule(molecule, periodic_table_elements)
+  return molecule unless molecule.length > 1
+
+  previous_molecule_states = Set[molecule]
+  (0..(molecule.length - 1) * 20).each do |i|
+    puts "=== Start Pass ##{i} ===\n"
+    molecule = canonicalization(molecule, method(:swap_logic1), periodic_table_elements)
+    molecule = canonicalization(molecule, method(:swap_logic2), periodic_table_elements)
+    puts "=== End Pass ##{i} ===\n"
+    # Stop iterating if this molecule state occurred before. Recurrence of molecule states
+    # heuristically implies convergence in the form of either a) cyclic recurrence of
+    # molecule states (e.g., A, B, A) or b) unchanging/stable molecule state (e.g., A, A).
+    break if previous_molecule_states.include?(molecule)
+    previous_molecule_states.add(molecule)
+  end
+  molecule
+end
+
+# Helper methods ###################################################################################S
+private
+
 def sort_connection_numbers(molecule)
   # Sort connection numbers of each atom left to right from large to small.
   # Mutates `molecule`.
@@ -200,56 +221,6 @@ def swap_logic2(molecule, index)
     return [old_atom, new_atom]
   end
   nil
-end
-
-def canonicalization(old_molecule, swap_logic, periodic_table_elements)
-  fail "Structure is empty\n" if old_molecule.empty?
-
-  atom_count = old_molecule.length - 1 # determine number of rows, make sure to properly account for array starting at index zero
-
-  puts "Now sorting the array\n"
-  sort_connection_numbers(old_molecule)
-  puts "Old array:\n#{old_molecule}\n"
-
-  new_molecule = compute_new_molecule(periodic_table_elements, old_molecule, atom_count)
-  puts "New array withOUT labels re-organized:\n#{new_molecule}\n"
-
-  correspondence_table = compute_correspondance_table(periodic_table_elements, old_molecule, atom_count)
-
-  old_molecule = Marshal.load(Marshal.dump(new_molecule)) # marshalling results in deep (as opposed to shallow) copy
-
-  new_molecule = compute_element_connections(old_molecule, correspondence_table, atom_count)
-  sort_connection_numbers(new_molecule)
-
-  puts "atom_count: #{atom_count} \n"
-  atom_update = compute_atom_swaps(new_molecule, atom_count, swap_logic)
-  return new_molecule unless atom_update
-  old_atom, new_atom = atom_update
-  old_molecule = Marshal.load(Marshal.dump(new_molecule))
-  old_molecule[old_atom], old_molecule[new_atom] = old_molecule[new_atom], old_molecule[old_atom]
-  swap_atoms(old_molecule, old_atom, new_atom, atom_count)
-  sort_connection_numbers(old_molecule)
-  puts "\nSuggestion to re-order: #{old_molecule}\n"
-  old_molecule
-  # puts "New array WITH labels re-organized:\n#{new_molecule}\n"
-end
-
-def canonicalize_molecule(molecule, periodic_table_elements)
-  return molecule unless molecule.length > 1
-
-  previous_molecule_states = Set[molecule]
-  (0..(molecule.length - 1) * 20).each do |i|
-    puts "=== Start Pass ##{i} ===\n"
-    molecule = canonicalization(molecule, method(:swap_logic1), periodic_table_elements)
-    molecule = canonicalization(molecule, method(:swap_logic2), periodic_table_elements)
-    puts "=== End Pass ##{i} ===\n"
-    # Stop iterating if this molecule state occurred before. Recurrence of molecule states
-    # heuristically implies convergence in the form of either a) cyclic recurrence of
-    # molecule states (e.g., A, B, A) or b) unchanging/stable molecule state (e.g., A, A).
-    break if previous_molecule_states.include?(molecule)
-    previous_molecule_states.add(molecule)
-  end
-  molecule
 end
 
 def compute_new_molecule(periodic_table_elements, molecule, atom_count)
@@ -329,4 +300,34 @@ def swap_atoms(molecule, old_atom, new_atom, atom_count)
     end
     print "\n"
   end
+end
+
+def print_connection_table(molecule, atom_count)
+  # Print the "connection table" in format "atom number: element_symbol connected_atoms".
+  # Start with highest priority atom.
+  puts "\nPrinting Connection Table\n"
+  molecule.reverse_each do |atom|
+    puts "#{atom_count - 1}:"
+    atom.each do |connection_table|
+      puts " #{connection_table}"
+    end
+    atom_count -= 1
+    print '\n'
+  end
+end
+
+def compute_graph(molecule)
+  temp_molecule = Marshal.load(Marshal.dump(molecule))
+  graph = []
+  temp_molecule.each_with_index do |atom, i|
+    atom.shift
+    atom.each do |connected_atom|
+      if i < connected_atom
+        graph.push([i, connected_atom])
+      else
+        graph.push([connected_atom, i])
+      end
+    end
+  end
+  graph = graph.uniq.sort!
 end

@@ -1,10 +1,14 @@
 require './inchi_v1.4'
 require 'minitest/autorun'
+require './periodic_table'
 
 class TestnInChI < Minitest::Test
+  @@periodic_table_elements = PeriodicTable::Elements
+  @@periodic_table_colors = PeriodicTable::ElementColor
+
   hydrogen_molfile = read_molfile('test/testfiles/hydrogen.mol')
   hydrogen_array = create_molecule_array(hydrogen_molfile)
-  @@canonicalized_hydrogen = canonicalize_molecule(hydrogen_array)
+  @@canonicalized_hydrogen = canonicalize_molecule(hydrogen_array, @@periodic_table_elements)
   @@ninchi_string_hydrogen = 'nInChI=1S/H2/c(0-1)'
   @@dot_file_string_hydrogen = "graph test\n{\n  bgcolor=grey\n"\
   "  0 [label=\"H 0\" color=lightgrey,style=filled,shape=circle,fontname=Calibri];\n"\
@@ -14,7 +18,7 @@ class TestnInChI < Minitest::Test
 
   cisplatin_molfile = read_molfile('test/testfiles/cisplatin.mol')
   cisplatin_array = create_molecule_array(cisplatin_molfile)
-  @@canonicalized_cisplatin = canonicalize_molecule(cisplatin_array)
+  @@canonicalized_cisplatin = canonicalize_molecule(cisplatin_array, @@periodic_table_elements)
   @@ninchi_string_cisplatin = 'nInChI=1S/H6Cl2N2Pt/c(0-6)(1-6)(2-6)(3-7)(4-7)(5-7)(6-10)(7-10)(8-10)(9-10)'
   @@dot_file_string_cisplatin = "graph test\n{\n  bgcolor=grey\n"\
   "  0 [label=\"H 0\" color=lightgrey,style=filled,shape=circle,fontname=Calibri];\n"\
@@ -41,18 +45,18 @@ class TestnInChI < Minitest::Test
   "}\n"
 
   def test_hydrogen_ninchi_string
-    assert_equal @@ninchi_string_hydrogen, create_ninchi_string(@@canonicalized_hydrogen)
+    assert_equal @@ninchi_string_hydrogen, create_ninchi_string(@@canonicalized_hydrogen, @@periodic_table_elements)
   end
 
   def test_cisplatin_ninchi_string
-    assert_equal @@ninchi_string_cisplatin, create_ninchi_string(@@canonicalized_cisplatin)
+    assert_equal @@ninchi_string_cisplatin, create_ninchi_string(@@canonicalized_cisplatin, @@periodic_table_elements)
   end
 
   def test_hydrogen_dot_file_string
-    assert_equal @@dot_file_string_hydrogen, create_dot_file(@@canonicalized_hydrogen)
+    assert_equal @@dot_file_string_hydrogen, create_dot_file(@@canonicalized_hydrogen, @@periodic_table_colors)
   end
 
   def test_cisplatin_dot_file_string
-    assert_equal @@dot_file_string_cisplatin, create_dot_file(@@canonicalized_cisplatin)
+    assert_equal @@dot_file_string_cisplatin, create_dot_file(@@canonicalized_cisplatin, @@periodic_table_colors)
   end
 end

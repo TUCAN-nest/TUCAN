@@ -1,8 +1,5 @@
-#
 # (c) CC BY-SA | Ulrich Schatzschneider | Universität Würzburg | NFDI4Chem | v1.4 | 06.06.2021
-#
 
-require './periodic_table'
 require 'set'
 
 def read_molfile(filename)
@@ -78,10 +75,8 @@ def print_connection_table(molecule, atom_count)
   end
 end
 
-def calculate_sum_formula(molecule)
-  periodic_table_elements = []
-  periodic_table_elements = PeriodicTable::Elements
-  #
+def calculate_sum_formula(molecule, periodic_table_elements)
+
   # create sum formula array in the order C > H > all other elements in alphabetic order and "atom count" set to zero
   #
   sumFormula = []
@@ -159,7 +154,7 @@ def serialization(molecule)
   inChIstring
 end
 
-def create_dot_file(molecule)
+def create_dot_file(molecule, periodic_table_colors)
   dotfile = ''
   print "\nPrinting Connection Table\n\n"
   if molecule == []
@@ -184,7 +179,6 @@ def create_dot_file(molecule)
     i += 1
   end
   graph = graph.uniq.sort!
-  elementColor = PeriodicTable::ElementColor
   #
   # print output to console
   #
@@ -195,7 +189,7 @@ def create_dot_file(molecule)
   print "  bgcolor=grey\n"
   i = 0
   molecule.each do |atom|
-    color = elementColor.fetch(atom[0], 'lightgrey') # if color is unspecified fall back on lightgray
+    color = periodic_table_colors.fetch(atom[0], 'lightgrey') # if color is unspecified fall back on lightgray
     print '  ', i, ' [label="', atom[0], ' ', i, '" color=', color, ",style=filled,shape=circle,fontname=Calibri];\n"
     i += 1
   end
@@ -212,7 +206,7 @@ def create_dot_file(molecule)
   dotfile += "  bgcolor=grey\n"
   i = 0
   molecule.each do |atom|
-    color = elementColor.fetch(atom[0], 'lightgrey')
+    color = periodic_table_colors.fetch(atom[0], 'lightgrey')
     dotfile = dotfile + '  ' + i.to_s + ' [label="' + atom[0].to_s + ' ' + i.to_s + '" color=' + color + ",style=filled,shape=circle,fontname=Calibri];\n"
     i += 1
   end
@@ -224,8 +218,8 @@ def create_dot_file(molecule)
   dotfile + "}\n"
 end
 
-def create_ninchi_string(molecule)
-  "nInChI=1S/#{calculate_sum_formula(molecule)}/c#{serialization(molecule)}"
+def create_ninchi_string(molecule, periodic_table_elements)
+  "nInChI=1S/#{calculate_sum_formula(molecule, periodic_table_elements)}/c#{serialization(molecule)}"
 end
 
 def sort_connection_numbers(molecule)
@@ -291,14 +285,14 @@ def canonicalization(old_molecule, swap_logic, periodic_table_elements)
   # puts "New array WITH labels re-organized:\n#{new_molecule}\n"
 end
 
-def canonicalize_molecule(molecule)
+def canonicalize_molecule(molecule, periodic_table_elements)
   return molecule unless molecule.length > 1
 
   previous_molecule_states = Set[molecule]
   (0..(molecule.length - 1) * 20).each do |i|
     puts "=== Start Pass ##{i} ===\n"
-    molecule = canonicalization(molecule, method(:swap_logic1), PeriodicTable::Elements)
-    molecule = canonicalization(molecule, method(:swap_logic2), PeriodicTable::Elements)
+    molecule = canonicalization(molecule, method(:swap_logic1), periodic_table_elements)
+    molecule = canonicalization(molecule, method(:swap_logic2), periodic_table_elements)
     puts "=== End Pass ##{i} ===\n"
     # Stop iterating if this molecule state occurred before. Recurrence of molecule states
     # heuristically implies convergence in the form of either a) cyclic recurrence of

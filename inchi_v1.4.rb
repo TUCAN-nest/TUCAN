@@ -108,9 +108,7 @@ def calculate_sum_formula(molecule, periodic_table_elements)
   sum_formula_string
 end
 
-def serialization(molecule)
-  raise '\nStructure is empty\n' if molecule.empty?
-
+def compute_graph(molecule)
   temp_molecule = Marshal.load(Marshal.dump(molecule))
   graph = []
   temp_molecule.each_with_index do |atom, i|
@@ -124,8 +122,13 @@ def serialization(molecule)
     end
   end
   graph = graph.uniq.sort!
+end
 
-  # add output to inchi_string
+def serialization(molecule)
+  raise '\nStructure is empty\n' if molecule.empty?
+
+  graph = compute_graph(molecule)
+
   inchi_string = ''
   graph.each do |line|
     inchi_string += "(#{line[0]}-#{line[1]})" if line[0] != line[1]
@@ -138,33 +141,11 @@ def serialization(molecule)
 end
 
 def create_dot_file(molecule, periodic_table_colors)
-  dotfile = ''
-  print "\nPrinting Connection Table\n\n"
-  if molecule == []
-    print "Structure is empty\n"
-    return 'Structure is empty'
-  else
-    print molecule, "\n\n"
-  end
-  temp_molecule = []
-  temp_molecule = Marshal.load(Marshal.dump(molecule))
-  graph = []
-  i = 0
-  temp_molecule.each do |atom|
-    atom.shift
-    atom.each do |connected_atom|
-      if i < connected_atom
-        graph.push([i, connected_atom])
-      else
-        graph.push([connected_atom, i])
-      end
-    end
-    i += 1
-  end
-  graph = graph.uniq.sort!
-  #
-  # print output to console
-  #
+  raise '\nStructure is empty\n' if molecule.empty?
+
+  graph = compute_graph(molecule)
+
+  puts '\nPrinting Connection Table\n'
   print "Now printing graph\n\n"
   print "---------------------------------------\n"
   print "graph test\n"
@@ -181,9 +162,8 @@ def create_dot_file(molecule, periodic_table_colors)
   end
   print "}\n"
   print "---------------------------------------\n"
-  #
   # add output to dotfile
-  #
+  dotfile = ''
   dotfile += "graph test\n"
   dotfile += "{\n"
   dotfile += "  bgcolor=grey\n"

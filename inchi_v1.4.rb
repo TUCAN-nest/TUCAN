@@ -141,44 +141,30 @@ def serialization(molecule)
 end
 
 def create_dot_file(molecule, periodic_table_colors)
-  raise '\nStructure is empty\n' if molecule.empty?
+  raise 'Structure is empty.' if molecule.empty?
 
   graph = compute_graph(molecule)
 
-  puts '\nPrinting Connection Table\n'
-  print "Now printing graph\n\n"
-  print "---------------------------------------\n"
-  print "graph test\n"
-  print "{\n"
-  print "  bgcolor=grey\n"
-  i = 0
-  molecule.each do |atom|
-    color = periodic_table_colors.fetch(atom[0], 'lightgrey') # if color is unspecified fall back on lightgray
-    print '  ', i, ' [label="', atom[0], ' ', i, '" color=', color, ",style=filled,shape=circle,fontname=Calibri];\n"
-    i += 1
-  end
-  graph.each do |line|
-    print '  ', line[0], ' -- ', line[1], " [color=black,style=bold];\n" if line[0] != line[1]
-  end
-  print "}\n"
-  print "---------------------------------------\n"
-  # add output to dotfile
   dotfile = ''
   dotfile += "graph test\n"
   dotfile += "{\n"
   dotfile += "  bgcolor=grey\n"
-  i = 0
-  molecule.each do |atom|
+  molecule.each_with_index do |atom, i|
     color = periodic_table_colors.fetch(atom[0], 'lightgrey')
-    dotfile = dotfile + '  ' + i.to_s + ' [label="' + atom[0].to_s + ' ' + i.to_s + '" color=' + color + ",style=filled,shape=circle,fontname=Calibri];\n"
-    i += 1
+    dotfile += "  #{i} [label=\"#{atom[0]} #{i}\" color=#{color},style=filled,shape=circle,fontname=Calibri];\n"
   end
   graph.each do |line|
-    if line[0] != line[1]
-      dotfile = dotfile + '  ' + line[0].to_s + ' -- ' + line[1].to_s + " [color=black,style=bold];\n"
-    end
+    dotfile += "  #{line[0]} -- #{line[1]} [color=black,style=bold];\n" if line[0] != line[1]
   end
-  dotfile + "}\n"
+  dotfile += "}\n"
+
+  puts "\nPrinting Connection Table\n"
+  puts "Now printing graph\n"
+  puts "---------------------------------------"
+  puts dotfile
+  puts "---------------------------------------"
+
+  dotfile
 end
 
 def create_ninchi_string(molecule, periodic_table_elements)

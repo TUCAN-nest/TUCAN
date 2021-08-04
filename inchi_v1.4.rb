@@ -33,63 +33,49 @@ def create_molecule_array(molfile_lines)
   # number of atoms in file is 1st number of 4th line (with index "3" as counting starts at zero)
   # number of bonds is 2nd number of 4th line (NOT: length of file minus header length (4 lines) minus number of atom definition lines { minus one (as final line is "M END") } )
   # (This is not true, since there can be additional lines with definitions starting with letter "M", thus rather use second number which is the number of bonds)
-  atom_count, bondCount = molfile_lines[3].scan(/\d+/).map { |n| n.to_i }
-  print "\nLength of file is ", molfile_lines.length, " lines\n\n"
-  print 'Number of atoms is ', atom_count, "\n\n"
-  print 'Number of bonds is ', bondCount, "\n\n"
+  atom_count, bond_count = molfile_lines[3].scan(/\d+/).map { |n| n.to_i }
+  puts "\nLength of file is #{molfile_lines.length} lines\n"
+  puts "Number of atoms is #{atom_count}\n"
+  puts "Number of bonds is #{bond_count}\n"
 
   # now read the next lines containing the atom definitions
   # first three "fields" are "pseudo-coordinates", the 4th (with index 3 as counting starts at zero) is the element symbol which is what we want here, everything else is ignored
   molecule = []
   (4..atom_count + 3).each do |i|
     atom = molfile_lines[i].split(' ')
-    printf("Line %i Atom %i: %s %s\n", i, i - 4, atom[3], atom)
+    puts "Line #{i} Atom #{i - 4}: #{atom[3]} #{atom}"
     molecule.push([atom[3]])
   end
-  print "\n"
-  #
+
   # now read the remaining lines containing the bond definitions in the sequence atom1 atom2 bond_order ... unknown/unused ... (can be ignored)
-  #
-  (0..bondCount - 1).each do |i|
-    connectionTable = molfile_lines[i + 4 + atom_count].split(' ')
-    if connectionTable[0] > connectionTable[1]
-      connectionTable[0], connectionTable[1] = connectionTable[1], connectionTable[0] # make sure first atom always has lower (not: higher?) index
+  (0..bond_count - 1).each do |i|
+    connection_table = molfile_lines[i + 4 + atom_count].split(' ')
+    if connection_table[0] > connection_table[1]
+      connection_table[0], connection_table[1] = connection_table[1], connection_table[0] # make sure first atom always has lower (not: higher?) index
     end
-    connectionTable[0] = String(connectionTable[0].to_i - 1)
-    connectionTable[1] = String(connectionTable[1].to_i - 1)
-    printf("Bond %i: %s\n", i + 1, connectionTable[0] + '-' + connectionTable[1])
-    molecule[connectionTable[0].to_i].push(connectionTable[1].to_i)    # need to push twice, to the first atom of a bond
-    molecule[connectionTable[1].to_i].push(connectionTable[0].to_i)    # and then to the second atom of the bond
+    connection_table[0] = connection_table[0].to_i - 1
+    connection_table[1] = connection_table[1].to_i - 1
+    puts "Bond #{i + 1}: #{connection_table[0]}-#{connection_table[1]}"
+    molecule[connection_table[0]].push(connection_table[1])    # need to push twice, to the first atom of a bond
+    molecule[connection_table[1]].push(connection_table[0])    # and then to the second atom of the bond
   end
-  sortedMolecule = []
-  molecule.each do |atom|
-    atomSorted = []
-    elementSymbol = atom[0]
-    atom.shift
-    atomSorted = atom.sort.reverse
-    atom = atomSorted
-    atom.unshift(elementSymbol)
-    sortedMolecule.push(atom)
-  end
-  molecule = sortedMolecule
-  #
-  # The "real" routine ends here, the rest is just around for test purpose
-  #
-  print "\nPrinting Connection Table\n\n"
-  #
-  # print the "connection table" in format "atom number: element_symbol connected_atoms"
-  # start with highest priority atom
-  #
+
+  molecule = sort_connection_numbers(molecule) # method ends here, printing connection table is just around for test purpose
+  # print_connection_table(molecule, atom_count)
+end
+
+def print_connection_table(molecule, atom_count)
+  # Print the "connection table" in format "atom number: element_symbol connected_atoms".
+  # Start with highest priority atom.
+  puts "\nPrinting Connection Table\n"
   molecule.reverse_each do |atom|
-    print atom_count - 1, ':'
-    atom.each do |connectionTable|
-      print ' ' + connectionTable.to_s
+    puts "#{atom_count - 1}:"
+    atom.each do |connection_table|
+      puts " #{connection_table}"
     end
     atom_count -= 1
-    print "\n"
+    print '\n'
   end
-  print "\n", molecule, "\n\n"
-  molecule
 end
 
 def calculate_sum_formula(molecule)

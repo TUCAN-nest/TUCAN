@@ -109,43 +109,32 @@ def calculate_sum_formula(molecule, periodic_table_elements)
 end
 
 def serialization(molecule)
-  if molecule == []
-    print "\nStructure is empty\n"
-    return 'Structure is empty'
-  else
-    print molecule, "\n\n"
-  end
-  tempMolecule = []
-  tempMolecule = Marshal.load(Marshal.dump(molecule))
+  raise '\nStructure is empty\n' if molecule.empty?
+
+  temp_molecule = Marshal.load(Marshal.dump(molecule))
   graph = []
-  i = 0
-  tempMolecule.each do |atom|
+  temp_molecule.each_with_index do |atom, i|
     atom.shift
-    atom.each do |connectedAtom|
-      if i < connectedAtom
-        graph.push([i, connectedAtom])
+    atom.each do |connected_atom|
+      if i < connected_atom
+        graph.push([i, connected_atom])
       else
-        graph.push([connectedAtom, i])
+        graph.push([connected_atom, i])
       end
     end
-    i += 1
   end
   graph = graph.uniq.sort!
-  print "Now printing new InChI\n\n"
-  print "---------------------------------------\n"
-  print 'InChI=1S/sum_formula/'
+
+  # add output to inchi_string
+  inchi_string = ''
   graph.each do |line|
-    print '(', line[0], '-', line[1], ')' if line[0] != line[1]
+    inchi_string += "(#{line[0]}-#{line[1]})" if line[0] != line[1]
   end
-  print "\n---------------------------------------\n"
-  #
-  # add output to inChIstring
-  #
-  inChIstring = ''
-  graph.each do |line|
-    inChIstring = inChIstring + '(' + line[0].to_s + '-' + line[1].to_s + ')' if line[0] != line[1]
-  end
-  inChIstring
+  puts "Now printing new InChI\n"
+  puts "---------------------------------------"
+  puts "InChI=1S/sum_formula/#{inchi_string}"
+  puts "---------------------------------------"
+  inchi_string
 end
 
 def create_dot_file(molecule, periodic_table_colors)
@@ -157,17 +146,17 @@ def create_dot_file(molecule, periodic_table_colors)
   else
     print molecule, "\n\n"
   end
-  tempMolecule = []
-  tempMolecule = Marshal.load(Marshal.dump(molecule))
+  temp_molecule = []
+  temp_molecule = Marshal.load(Marshal.dump(molecule))
   graph = []
   i = 0
-  tempMolecule.each do |atom|
+  temp_molecule.each do |atom|
     atom.shift
-    atom.each do |connectedAtom|
-      if i < connectedAtom
-        graph.push([i, connectedAtom])
+    atom.each do |connected_atom|
+      if i < connected_atom
+        graph.push([i, connected_atom])
       else
-        graph.push([connectedAtom, i])
+        graph.push([connected_atom, i])
       end
     end
     i += 1

@@ -77,41 +77,35 @@ end
 
 def calculate_sum_formula(molecule, periodic_table_elements)
 
-  # create sum formula array in the order C > H > all other elements in alphabetic order and "atom count" set to zero
-  #
-  sumFormula = []
-  sumFormula.push(['C', 0], ['H', 0])
+  # Create sum formula array in the order C > H > all other elements in alphabetic order.
+  # "atom count" is set to zero.
+  sum_formula = []
+  sum_formula.push(['C', 0], ['H', 0])
   periodic_table_elements = periodic_table_elements - ['C'] - ['H']
   periodic_table_elements.sort!
   periodic_table_elements.each do |element|
-    sumFormula.push([element, 0])
+    sum_formula.push([element, 0])
   end
-  #
-  # sum up
-  #
-  sumFormula.each do |element|
+  sum_formula.each do |element|
     molecule.each do |atom|
-      element[1] = element[1] + 1 if element[0] == atom[0]
+      element[1] += 1 if element[0] == atom[0] # sum up
     end
   end
-  #
+
   # generate output string
-  #
-  sumFormulaString = ''
-  sumFormula.each do |element|
+  sum_formula_string = ''
+  sum_formula.each do |element|
     if element[1] > 1
-      sumFormulaString = sumFormulaString + element[0].to_s + String(element[1])
+      sum_formula_string = sum_formula_string + element[0].to_s + String(element[1])
     elsif element[1] > 0
-      sumFormulaString += element[0].to_s # if there is only one atom of a particular element in the molecule, only add the element symbol without stoichiometric count
+      sum_formula_string += element[0].to_s # if there is only one atom of a particular element in the molecule, only add the element symbol without stoichiometric count
     end
   end
-  sumFormulaString = 'ERROR - This *.mol file does not contain any molecular structure' if sumFormulaString == ''
-  #
-  # print sum formula
-  #
-  print 'The sum formula of this molecule is: ', sumFormulaString, "\n\n"
-  print sumFormula, "\n\n"
-  sumFormulaString
+  raise 'ERROR - This *.mol file does not contain any molecular structure' if sum_formula_string == ''
+
+  puts "The sum formula of this molecule is: #{sum_formula_string}\n"
+  print sum_formula, "\n\n"
+  sum_formula_string
 end
 
 def serialization(molecule)

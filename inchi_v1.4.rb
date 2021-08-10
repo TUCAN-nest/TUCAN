@@ -37,23 +37,19 @@ def create_molecule_array(molfile_lines)
   # now read the next lines containing the atom definitions
   # first three "fields" are "pseudo-coordinates", the 4th (with index 3 as counting starts at zero) is the element symbol which is what we want here, everything else is ignored
   molecule = []
-  (4..atom_count + 3).each do |i|
-    atom = molfile_lines[i].split(' ')
-    puts "Line #{i} Atom #{i - 4}: #{atom[3]} #{atom}"
+  (4..atom_count + 3).each do |atom_index|
+    atom = molfile_lines[atom_index].split(' ')
+    puts "Line #{atom_index} Atom #{atom_index - 4}: #{atom[3]} #{atom}"
     molecule.push([atom[3]])
   end
 
   # now read the remaining lines containing the bond definitions in the sequence atom1 atom2 bond_order ... unknown/unused ... (can be ignored)
-  (0..bond_count - 1).each do |i|
-    connection_table = molfile_lines[i + 4 + atom_count].split(' ')
-    if connection_table[0] > connection_table[1]
-      connection_table[0], connection_table[1] = connection_table[1], connection_table[0] # make sure first atom always has lower (not: higher?) index
-    end
-    connection_table[0] = connection_table[0].to_i - 1
-    connection_table[1] = connection_table[1].to_i - 1
-    puts "Bond #{i + 1}: #{connection_table[0]}-#{connection_table[1]}"
-    molecule[connection_table[0]].push(connection_table[1])    # need to push twice, to the first atom of a bond
-    molecule[connection_table[1]].push(connection_table[0])    # and then to the second atom of the bond
+  (0..bond_count - 1).each do |bond_index|
+    vertex1, vertex2, * = molfile_lines[bond_index + 4 + atom_count].split(' ').map { |i| i.to_i - 1 }
+    vertex1, vertex2 = vertex2, vertex1 if vertex1 > vertex2 # make sure first atom always has lower (not: higher?) index
+    puts "Bond #{bond_index + 1}: #{vertex1}-#{vertex2}"
+    molecule[vertex1].push(vertex2)    # need to push twice, to the first atom of a bond
+    molecule[vertex2].push(vertex1)    # and then to the second atom of the bond
   end
 
   molecule = sort_connection_numbers(molecule) # method ends here, printing connection table is just around for test purpose

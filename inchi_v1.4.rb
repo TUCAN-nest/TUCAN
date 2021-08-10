@@ -52,7 +52,7 @@ def create_molecule_array(molfile_lines)
     molecule[vertex2].push(vertex1)    # and then to the second atom of the bond
   end
 
-  molecule = sort_connection_numbers(molecule) # method ends here, printing connection table is just around for test purpose
+  sort_connection_numbers(molecule) # method ends here, printing connection table is just around for test purpose
   # print_connection_table(molecule, atom_count)
 end
 

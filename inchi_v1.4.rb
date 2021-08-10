@@ -191,11 +191,10 @@ private
 def sort_connection_numbers(molecule)
   # Sort connection numbers of each atom left to right from large to small.
   # Mutates `molecule`.
-  molecule.each do |atom|
-    element_symbol = atom[0]
-    atom.shift
-    atom.sort!.reverse! if atom.length > 1
-    atom.insert(0, element_symbol)
+  molecule.map! do |atom|
+    element_symbol, *connections = atom
+    connections.sort!.reverse! if connections.length > 1
+    [element_symbol] + connections
   end
 end
 

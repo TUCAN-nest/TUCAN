@@ -91,8 +91,6 @@ end
 def canonicalization(old_molecule, swap_logic, periodic_table_elements)
   fail "Structure is empty\n" if old_molecule.empty?
 
-  atom_count = old_molecule.length - 1 # determine number of rows, make sure to properly account for array starting at index zero
-
   puts "Now sorting the array\n"
   sort_connection_numbers(old_molecule)
   puts "Old array:\n#{old_molecule}\n"
@@ -105,8 +103,7 @@ def canonicalization(old_molecule, swap_logic, periodic_table_elements)
   new_molecule = compute_element_connections(new_molecule, correspondence_table)
   sort_connection_numbers(new_molecule)
 
-  puts "atom_count: #{atom_count} \n"
-  atom_update = compute_atom_swaps(new_molecule, atom_count, swap_logic)
+  atom_update = compute_atom_swaps(new_molecule, swap_logic)
   return new_molecule unless atom_update
 
   old_atom, new_atom = atom_update
@@ -257,11 +254,13 @@ def compute_element_connections(molecule, correspondence_table)
   new_molecule
 end
 
-def compute_atom_swaps(molecule, atom_count, swap_logic)
+def compute_atom_swaps(molecule, swap_logic)
   # If there's a swap while `atom_count` has not been reached, break and return
   # `old_atom` and `new_atom`. Otherwise, if no swap occurs while iterating over
   # atoms in `molecule` return nil.
-  (0..atom_count - 1).each do |i|
+  last_atom_index = molecule.length - 1
+  puts "last_atom_index: #{last_atom_index} \n"
+  (0..last_atom_index - 1).each do |i|
     puts "#{i}: #{molecule[i]}, #{i + 1}: #{molecule[i + 1]}"
     swap_update = swap_logic.call(molecule, i)
     next unless swap_update

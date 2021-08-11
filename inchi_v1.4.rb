@@ -229,18 +229,18 @@ def sort_elements_by_atomic_mass(periodic_table_elements, molecule)
 end
 
 def compute_correspondance_table(periodic_table_elements, molecule)
-  # Compute correspondance table containing pairs of array positions [old,new].
-  correspondence_table = []
+  # Compute correspondance hash table mapping old to new array positions.
+  correspondence_table = {}
   j = 0
   periodic_table_elements.each do |element| # sort by element in increasing order, lowest atomic mass element to the left/bottom
     molecule.each_with_index do |molecule_element, i|
       next unless molecule_element[0] == element
 
-      correspondence_table.push([i, j])
+      correspondence_table[i] = j
       j += 1
     end
   end
-  correspondence_table.sort! { |a, b| b[0] <=> a[0] } # sort (in-place) by lowest old atom position
+  correspondence_table.sort.to_h # sort (in-place) by lowest old atom position
 end
 
 def compute_element_connections(molecule, correspondence_table)
@@ -250,9 +250,7 @@ def compute_element_connections(molecule, correspondence_table)
     element_symbol, *connections = element
     temp_array.push(element_symbol)
     connections.each do |connection|
-      correspondence_table.each do |correspondence|
-      temp_array.push(correspondence[1]) if connection == correspondence[0]
-      end
+      temp_array.push(correspondence_table[connection])
     end
     new_molecule.push(temp_array) # add whole new atom connection list for atom to temporary array
   end

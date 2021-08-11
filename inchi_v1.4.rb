@@ -108,13 +108,13 @@ def canonicalization(old_molecule, swap_logic, periodic_table_elements)
   puts "atom_count: #{atom_count} \n"
   atom_update = compute_atom_swaps(new_molecule, atom_count, swap_logic)
   return new_molecule unless atom_update
+
   old_atom, new_atom = atom_update
-  old_molecule = Marshal.load(Marshal.dump(new_molecule))
-  old_molecule[old_atom], old_molecule[new_atom] = old_molecule[new_atom], old_molecule[old_atom]
-  swap_atoms(old_molecule, old_atom, new_atom, atom_count)
-  sort_connection_numbers(old_molecule)
-  puts "\nSuggestion to re-order: #{old_molecule}\n"
-  old_molecule
+  new_molecule[old_atom], new_molecule[new_atom] = new_molecule[new_atom], new_molecule[old_atom]
+  swap_atoms(new_molecule, old_atom, new_atom, atom_count)
+  sort_connection_numbers(new_molecule)
+  puts "\nSuggestion to re-order: #{new_molecule}\n"
+  new_molecule
   # puts "New array WITH labels re-organized:\n#{new_molecule}\n"
 end
 

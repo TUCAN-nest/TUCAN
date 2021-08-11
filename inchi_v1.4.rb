@@ -52,8 +52,8 @@ def create_molecule_array(molfile_lines)
     molecule[vertex2].push(vertex1)    # and then to the second atom of the bond
   end
 
-  sort_connection_numbers(molecule) # method ends here, printing connection table is just around for test purpose
-  # print_connection_table(molecule, atom_count)
+  sort_connection_numbers(molecule) # method ends here
+  # puts molecule.inspect # printing connection table is just around for test purpose
 end
 
 def calculate_sum_formula(molecule, periodic_table_elements)
@@ -294,20 +294,6 @@ def swap_atoms(molecule, old_atom, new_atom, atom_count)
       print ' '
     end
     print "\n"
-  end
-end
-
-def print_connection_table(molecule, atom_count)
-  # Print the "connection table" in format "atom number: element_symbol connected_atoms".
-  # Start with highest priority atom.
-  puts "\nPrinting Connection Table\n"
-  molecule.reverse_each do |atom|
-    puts "#{atom_count - 1}:"
-    atom.each do |connection_table|
-      puts " #{connection_table}"
-    end
-    atom_count -= 1
-    print '\n'
   end
 end
 

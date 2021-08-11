@@ -102,7 +102,7 @@ def canonicalization(old_molecule, swap_logic, periodic_table_elements)
 
   correspondence_table = compute_correspondance_table(periodic_table_elements, old_molecule, atom_count)
 
-  new_molecule = compute_element_connections(new_molecule, correspondence_table, atom_count)
+  new_molecule = compute_element_connections(new_molecule, correspondence_table)
   sort_connection_numbers(new_molecule)
 
   puts "atom_count: #{atom_count} \n"
@@ -243,16 +243,15 @@ def compute_correspondance_table(periodic_table_elements, molecule, atom_count)
   correspondence_table.sort! { |a, b| b[0] <=> a[0] } # sort (in-place) by lowest old atom position
 end
 
-def compute_element_connections(molecule, correspondence_table, atom_count)
+def compute_element_connections(molecule, correspondence_table)
   new_molecule = []
-  (0..atom_count).each do |i|
+  molecule.each do |element|
     temp_array = []
-    temp_array.push(molecule[i][0]) # add element symbol to temporary array
-    (1..molecule[i].length - 1).each do |j|
-      (0..correspondence_table.length - 1).each do |k|
-        if molecule[i][j] == correspondence_table[k][0]
-          temp_array.push(correspondence_table[k][1]) # append new connection to temporary array
-        end
+    element_symbol, *connections = element
+    temp_array.push(element_symbol)
+    connections.each do |connection|
+      correspondence_table.each do |correspondence|
+      temp_array.push(correspondence[1]) if connection == correspondence[0]
       end
     end
     new_molecule.push(temp_array) # add whole new atom connection list for atom to temporary array

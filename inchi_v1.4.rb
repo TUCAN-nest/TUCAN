@@ -111,7 +111,7 @@ def canonicalization(old_molecule, swap_logic, periodic_table_elements)
 
   old_atom, new_atom = atom_update
   new_molecule[old_atom], new_molecule[new_atom] = new_molecule[new_atom], new_molecule[old_atom]
-  swap_atoms(new_molecule, old_atom, new_atom, atom_count)
+  swap_atoms(new_molecule, old_atom, new_atom)
   sort_connection_numbers(new_molecule)
   puts "\nSuggestion to re-order: #{new_molecule}\n"
   new_molecule
@@ -273,18 +273,18 @@ def compute_atom_swaps(molecule, atom_count, swap_logic)
   nil
 end
 
-def swap_atoms(molecule, old_atom, new_atom, atom_count)
+def swap_atoms(molecule, old_atom, new_atom)
   # Mutates `molecule`.
-  (0..atom_count).each do |i|
-    print "#{molecule[i]} "
-    (1..molecule[i].length - 1).each do |j|
-      print "#{j}:#{molecule[i][j]}"
-      if molecule[i][j] == old_atom
+  molecule.each do |element|
+    print "#{element} "
+    (1..element.length - 1).each do |i|
+      print "#{i}:#{element[i]}"
+      if element[i] == old_atom
         print "c#{new_atom}"
-        molecule[i][j] = new_atom
-      elsif molecule[i][j] == new_atom
+        element[i] = new_atom
+      elsif element[i] == new_atom
         print "c#{old_atom}"
-        molecule[i][j] = old_atom
+        element[i] = old_atom
       end
       print ' '
     end

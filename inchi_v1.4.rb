@@ -124,10 +124,6 @@ def serialization(molecule)
   graph.each do |line|
     inchi_string += "(#{line[0]}-#{line[1]})" if line[0] != line[1]
   end
-  puts "Now printing new InChI\n"
-  puts "---------------------------------------"
-  puts "InChI=1S/sum_formula/#{inchi_string}"
-  puts "---------------------------------------"
   inchi_string
 end
 
@@ -159,7 +155,12 @@ def create_dot_file(molecule, periodic_table_colors)
 end
 
 def create_ninchi_string(molecule, periodic_table_elements)
-  "nInChI=1S/#{calculate_sum_formula(molecule, periodic_table_elements)}/c#{serialization(molecule)}"
+  ninchi_string = "nInChI=1S/#{calculate_sum_formula(molecule, periodic_table_elements)}/c#{serialization(molecule)}"
+  puts "Now printing new InChI\n"
+  puts "---------------------------------------"
+  puts ninchi_string
+  puts "---------------------------------------"
+  ninchi_string
 end
 
 def canonicalize_molecule(molecule, periodic_table_elements)

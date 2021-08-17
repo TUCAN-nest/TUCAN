@@ -94,11 +94,9 @@ def canonicalization(old_molecule, swap_logic, periodic_table_elements)
   puts "Now sorting the array\n"
   puts "Old array:\n#{old_molecule}\n"
 
-  new_molecule = sort_elements_by_atomic_mass(periodic_table_elements, old_molecule)
+  new_molecule = sort_across_elements_by_atomic_mass(periodic_table_elements, old_molecule)
   puts "New array withOUT labels re-organized:\n#{new_molecule}\n"
 
-  correspondence_table = compute_correspondance_table(periodic_table_elements, old_molecule)
-  new_molecule = update_element_connection_indices(new_molecule, correspondence_table)
   sort_connection_numbers(new_molecule)
 
   atom_update = compute_atom_swaps(new_molecule, swap_logic)
@@ -215,8 +213,10 @@ def swap_logic2(molecule, index)
   nil
 end
 
-def sort_elements_by_atomic_mass(periodic_table_elements, molecule)
-  molecule.sort_by { |atom| periodic_table_elements.index(atom[0]) }
+def sort_across_elements_by_atomic_mass(periodic_table_elements, molecule)
+  sorted_molecule = molecule.sort_by { |atom| periodic_table_elements.index(atom[0]) }
+  correspondence_table = compute_correspondance_table(periodic_table_elements, molecule)
+  update_element_connection_indices(sorted_molecule, correspondence_table)
 end
 
 def compute_correspondance_table(periodic_table_elements, molecule)

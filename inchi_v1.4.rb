@@ -92,14 +92,12 @@ def canonicalization(old_molecule, swap_logic, periodic_table_elements)
   fail "Structure is empty\n" if old_molecule.empty?
 
   puts "Now sorting the array\n"
-  sort_connection_numbers(old_molecule)
   puts "Old array:\n#{old_molecule}\n"
 
   new_molecule = sort_elements_by_atomic_mass(periodic_table_elements, old_molecule)
   puts "New array withOUT labels re-organized:\n#{new_molecule}\n"
 
   correspondence_table = compute_correspondance_table(periodic_table_elements, old_molecule)
-
   new_molecule = update_element_connection_indices(new_molecule, correspondence_table)
   sort_connection_numbers(new_molecule)
 

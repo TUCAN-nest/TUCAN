@@ -52,7 +52,7 @@ def create_molecule_array(molfile_lines)
     molecule[vertex2].push(vertex1)    # and then to the second atom of the bond
   end
 
-  sort_connection_numbers(molecule) # method ends here
+  sort_within_elements_by_connection_indices(molecule) # method ends here
   # puts molecule.inspect # printing connection table is just around for test purpose
 end
 
@@ -97,7 +97,7 @@ def canonicalization(old_molecule, swap_logic, periodic_table_elements)
   new_molecule = sort_across_elements_by_atomic_mass(periodic_table_elements, old_molecule)
   puts "New array withOUT labels re-organized:\n#{new_molecule}\n"
 
-  sort_connection_numbers(new_molecule)
+  sort_within_elements_by_connection_indices(new_molecule)
 
   atom_update = compute_atom_swaps(new_molecule, swap_logic)
   return new_molecule unless atom_update
@@ -105,7 +105,7 @@ def canonicalization(old_molecule, swap_logic, periodic_table_elements)
   old_atom, new_atom = atom_update
   new_molecule[old_atom], new_molecule[new_atom] = new_molecule[new_atom], new_molecule[old_atom]
   swap_atoms(new_molecule, old_atom, new_atom)
-  sort_connection_numbers(new_molecule)
+  sort_within_elements_by_connection_indices(new_molecule)
   puts "\nSuggestion to re-order: #{new_molecule}\n"
   new_molecule
   # puts "New array WITH labels re-organized:\n#{new_molecule}\n"
@@ -180,7 +180,7 @@ end
 # Helper methods ###################################################################################
 private
 
-def sort_connection_numbers(molecule)
+def sort_within_elements_by_connection_indices(molecule)
   # Sort connection numbers of each atom left to right from large to small.
   # Mutates `molecule`.
   molecule.map! do |atom|

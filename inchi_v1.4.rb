@@ -193,18 +193,21 @@ def sort_connection_numbers(molecule)
 end
 
 def swap_logic1(molecule, index)
-  if (molecule[index][0] == molecule[index + 1][0]) && (molecule[index].length == molecule[index + 1].length)
-    if (molecule[index] <=> molecule[index + 1]) == 1
-      old_atom = index
-      new_atom = index + 1
-      return [old_atom, new_atom]
-    end
+  # Swap element A (molecule[index]) and element B (molecule[index + 1]) if ...
+  if (molecule[index][0] == molecule[index + 1][0]) && # A and B are the same element ...
+     (molecule[index].length == molecule[index + 1].length) && # with the same number of connections ...
+     (molecule[index] <=> molecule[index + 1]) == 1 # and the connection indices of A are larger than the ones of B.
+    old_atom = index
+    new_atom = index + 1
+    return [old_atom, new_atom]
   end
   nil
 end
 
 def swap_logic2(molecule, index)
-  if molecule[index][0] == molecule[index + 1][0] && (molecule[index].length > molecule[index + 1].length)
+  # Swap element A (molecule[index]) and element B (molecule[index + 1]) if ...
+  if (molecule[index][0] == molecule[index + 1][0]) && # A and B are the same element ...
+     (molecule[index].length > molecule[index + 1].length) # and A has more connections than B.
     old_atom = index
     new_atom = index + 1
     return [old_atom, new_atom]

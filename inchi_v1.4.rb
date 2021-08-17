@@ -215,15 +215,7 @@ def swap_logic2(molecule, index)
 end
 
 def sort_elements_by_atomic_mass(periodic_table_elements, molecule)
-  new_molecule = []
-  periodic_table_elements.each do |element| # second pass - sort by element in increasing order, lowest atomic mass element to the left/bottom
-    molecule.each do |molecule_element|
-      next unless molecule_element[0] == element
-
-      new_molecule.push(molecule_element)
-    end
-  end
-  new_molecule
+  molecule.sort_by { |atom| periodic_table_elements.index(atom[0]) }
 end
 
 def compute_correspondance_table(periodic_table_elements, molecule)

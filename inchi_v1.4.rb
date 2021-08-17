@@ -100,7 +100,7 @@ def canonicalization(old_molecule, swap_logic, periodic_table_elements)
 
   correspondence_table = compute_correspondance_table(periodic_table_elements, old_molecule)
 
-  new_molecule = compute_element_connections(new_molecule, correspondence_table)
+  new_molecule = update_element_connection_indices(new_molecule, correspondence_table)
   sort_connection_numbers(new_molecule)
 
   atom_update = compute_atom_swaps(new_molecule, swap_logic)
@@ -181,7 +181,7 @@ def canonicalize_molecule(molecule, periodic_table_elements)
   molecule
 end
 
-# Helper methods ###################################################################################S
+# Helper methods ###################################################################################
 private
 
 def sort_connection_numbers(molecule)
@@ -233,7 +233,7 @@ def compute_correspondance_table(periodic_table_elements, molecule)
   correspondence_table.sort.to_h # sort (in-place) by lowest old atom position
 end
 
-def compute_element_connections(molecule, correspondence_table)
+def update_element_connection_indices(molecule, correspondence_table)
   new_molecule = []
   molecule.each do |element|
     temp_array = []

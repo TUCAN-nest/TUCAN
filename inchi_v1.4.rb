@@ -215,23 +215,19 @@ end
 
 def sort_across_elements_by_atomic_mass(periodic_table_elements, molecule)
   sorted_molecule = molecule.sort_by { |atom| periodic_table_elements.index(atom[0]) }
-  correspondence_table = compute_correspondance_table(periodic_table_elements, molecule)
+  correspondence_table = compute_correspondence_table(periodic_table_elements, molecule)
   update_element_connection_indices(sorted_molecule, correspondence_table)
 end
 
-def compute_correspondance_table(periodic_table_elements, molecule)
-  # Compute correspondance hash table mapping old to new array positions.
+def compute_correspondence_table(periodic_table_elements, molecule)
+  # Compute correspondence hash table mapping old to new array positions.
   correspondence_table = {}
-  j = 0
-  periodic_table_elements.each do |element| # sort by element in increasing order, lowest atomic mass element to the left/bottom
-    molecule.each_with_index do |molecule_element, i|
-      next unless molecule_element[0] == element
-
-      correspondence_table[i] = j
-      j += 1
-    end
+  molecule.each_with_index do |atom, i|
+    periodic_table_index = periodic_table_elements.index(atom[0])
+    correspondence_table[i] = periodic_table_index # map old index to index in periodic table
   end
-  correspondence_table.sort.to_h # sort (in-place) by lowest old atom position
+  correspondence_table = correspondence_table.sort_by(&:last).to_h # sort by index in periodic table
+  correspondence_table.transform_values!.with_index { |_, idx| idx } # transform index in periodic table to new index
 end
 
 def update_element_connection_indices(molecule, correspondence_table)

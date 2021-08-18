@@ -94,7 +94,9 @@ def canonicalization(old_molecule, swap_logic, periodic_table_elements)
   puts "Now sorting the array\n"
   puts "Old array:\n#{old_molecule}\n"
 
-  new_molecule = sort_across_elements_by_atomic_mass(periodic_table_elements, old_molecule)
+  correspondence_table = compute_correspondence_table(periodic_table_elements, old_molecule)
+  new_molecule = sort_across_elements_by_atomic_mass(correspondence_table, old_molecule)
+  update_element_connection_indices(correspondence_table, new_molecule)
   puts "New array withOUT labels re-organized:\n#{new_molecule}\n"
 
   sort_within_elements_by_connection_indices(new_molecule)
@@ -213,10 +215,12 @@ def swap_logic2(molecule, index)
   nil
 end
 
-def sort_across_elements_by_atomic_mass(periodic_table_elements, molecule)
-  sorted_molecule = molecule.sort_by { |atom| periodic_table_elements.index(atom[0]) }
-  correspondence_table = compute_correspondence_table(periodic_table_elements, molecule)
-  update_element_connection_indices(sorted_molecule, correspondence_table)
+def sort_across_elements_by_atomic_mass(correspondence_table, molecule)
+  molecule_sorted_by_atomic_mass = []
+  correspondence_table.each do |old_idx, _|
+    molecule_sorted_by_atomic_mass.push(molecule[old_idx])
+  end
+  molecule_sorted_by_atomic_mass
 end
 
 def compute_correspondence_table(periodic_table_elements, molecule)
@@ -230,18 +234,13 @@ def compute_correspondence_table(periodic_table_elements, molecule)
   correspondence_table.transform_values!.with_index { |_, idx| idx } # transform index in periodic table to new index
 end
 
-def update_element_connection_indices(molecule, correspondence_table)
-  new_molecule = []
-  molecule.each do |element|
-    temp_array = []
-    element_symbol, *connections = element
-    temp_array.push(element_symbol)
-    connections.each do |connection|
-      temp_array.push(correspondence_table[connection])
-    end
-    new_molecule.push(temp_array) # add whole new atom connection list for atom to temporary array
+def update_element_connection_indices(correspondence_table, molecule)
+  # Mutates `molecule`.
+  molecule.map! do |atom|
+    element_symbol, *connections = atom
+    connections.map! { |i| correspondence_table[i] }
+    [element_symbol] + connections
   end
-  new_molecule
 end
 
 def compute_atom_swaps(molecule, swap_logic)

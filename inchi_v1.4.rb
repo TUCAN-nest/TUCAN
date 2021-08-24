@@ -38,10 +38,10 @@ def create_molecule_array(molfile_lines, periodic_table_elements)
   end
 
   molecule_graph.map! do |atom|
-    atom, connections = atom
+    atom, edges = atom
     atom = [atom, atomic_masses[atom]]
-    connections.map! { |connection| [connection, atomic_masses[connection]]}
-    [atom, connections]
+    edges.map! { |edge| [edge, atomic_masses[edge]]}
+    [atom, edges]
   end
 
   molecule_graph
@@ -51,31 +51,31 @@ def canonicalize_molecule(molecule)
   puts "\nInitial molecule:"
   molecule.each { |atom| puts atom.inspect }
 
-  sorted_molecule = sort_across_elements_by_atomic_mass(molecule)
+  sorted_molecule = sort_elements_by_atomic_mass(molecule)
   puts "\nMolecule with elements sorted by atomic mass (increasing):"
   sorted_molecule.each { |atom| puts atom.inspect }
 
-  sorted_molecule = update_molecule_indices(sorted_molecule)
+  sorted_molecule = update_molecule_indices(sorted_molecule, update_edges=true)
   puts "\nMolecule with updated indices after sorting:"
   sorted_molecule.each { |atom| puts atom.inspect }
 
-  sorted_molecule = sort_connections_by_atomic_mass(sorted_molecule)
-  puts "\nMolecule with connections sorted by atomic mass (decreasing):"
+  sorted_molecule = sort_edges_by_atomic_mass(sorted_molecule)
+  puts "\nMolecule with edges sorted by atomic mass (decreasing) per element:"
   sorted_molecule.each { |atom| puts atom.inspect }
 
-  swap_logic1(sorted_molecule)
-  puts "\nMolecule with elements of same kind sorted by atomic mass of connections (increasing):"
+  sort_elements_by_number_of_edges(sorted_molecule)
+  puts "\nMolecule with elements of same kind sorted by number of edges (increasing):"
   sorted_molecule.each { |atom| puts atom.inspect }
 
-  sorted_molecule = update_molecule_indices(sorted_molecule)
+  sorted_molecule = update_molecule_indices(sorted_molecule, update_edges=true)
   puts "\nMolecule with updated indices after sorting:"
   sorted_molecule.each { |atom| puts atom.inspect }
 
-  swap_logic2(sorted_molecule)
-  puts "\nMolecule with elements of same kind sorted by number of connections (increasing):"
+  sort_elements_by_index_of_edges(sorted_molecule)
+  puts "\nMolecule with elements of same kind and same number of edges sorted by atomic mass of edges (increasing):"
   sorted_molecule.each { |atom| puts atom.inspect }
 
-  sorted_molecule = update_molecule_indices(sorted_molecule)
+  sorted_molecule = update_molecule_indices(sorted_molecule, update_edges=true)
   puts "\nMolecule with updated indices after sorting:"
   sorted_molecule.each { |atom| puts atom.inspect }
 
@@ -115,9 +115,9 @@ end
 def compute_graph(molecule)
   graph = []
   molecule.each do |atom|
-    element, connections = atom
-    connections.each do |connection|
-      graph.push([element[0], connection[0]].sort)
+    element, edges = atom
+    edges.each do |edge|
+      graph.push([element[0], edge[0]].sort)
     end
   end
   graph.uniq.sort
@@ -145,31 +145,31 @@ def compute_element_counts(molecule, periodic_table_elements)
   element_counts.transform_keys! { |k| periodic_table_elements[k] } # change atomic mass to element symbol
 end
 
-def sort_connections_by_atomic_mass(molecule)
-  # Sort connection numbers of each atom left to right from large to small.
+def sort_edges_by_atomic_mass(molecule)
+  # Sort edge numbers of each atom left to right from large to small.
   sorted_molecule = []
   molecule.each do |atom|
-    element, connections = atom
-    sorted_connections = connections.sort { |a, b| b[1] <=> a[1] }
-    sorted_molecule.push([element, sorted_connections])
+    element, edges = atom
+    sorted_edges = edges.sort { |a, b| b[1] <=> a[1] }
+    sorted_molecule.push([element, sorted_edges])
   end
   sorted_molecule
 end
 
-def swap_logic1(molecule)
+def sort_elements_by_index_of_edges(molecule)
   # Mutates `molecule`.
   molecule.sort! do |atom_a, atom_b|
     mass_a, mass_b = atom_a[0][1], atom_b[0][1]
-    mass_connections_a = atom_a[1].map { |atom| atom[1] }
-    mass_connections_b = atom_b[1].map { |atom| atom[1] }
+    mass_edges_a = atom_a[1].map { |atom| atom[1] }
+    mass_edges_b = atom_b[1].map { |atom| atom[1] }
     case
     when (mass_a == mass_b) && # A and B are the same element ...
-         (mass_connections_a.length == mass_connections_b.length) && # with the same number of connections ...
-         (mass_connections_a <=> mass_connections_b) == 1 # and the connection indices of A are larger than the ones of B.
+         (mass_edges_a.length == mass_edges_b.length) && # with the same number of edges ...
+         (mass_edges_a <=> mass_edges_b) == 1 # and the edge indices of A are larger than the ones of B.
       1
     when (mass_a == mass_b) && # A and B are the same element ...
-         (mass_connections_a.length == mass_connections_b.length) && # with the same number of connections ...
-         (mass_connections_a <=> mass_connections_b) == -1 # and the connection indices of A are smaller than the ones of B.
+         (mass_edges_a.length == mass_edges_b.length) && # with the same number of edges ...
+         (mass_edges_a <=> mass_edges_b) == -1 # and the edge indices of A are smaller than the ones of B.
       -1
     else
       0
@@ -177,15 +177,15 @@ def swap_logic1(molecule)
   end
 end
 
-def swap_logic2(molecule)
+def sort_elements_by_number_of_edges(molecule)
   # Mutates `molecule`.
   molecule.sort! do |atom_a, atom_b|
     case
     when (atom_a[0][1] == atom_b[0][1]) && # A and B are the same element ...
-         (atom_a[1].length > atom_b[1].length) # and A has more connections than B.
+         (atom_a[1].length > atom_b[1].length) # and A has more edges than B.
       1
     when (atom_a[0][1] == atom_b[0][1]) && # A and B are the same element ...
-         (atom_a[1].length < atom_b[1].length) # and A has less connections than B.
+         (atom_a[1].length < atom_b[1].length) # and A has less edges than B.
       -1
     else
       0
@@ -193,18 +193,18 @@ def swap_logic2(molecule)
   end
 end
 
-def sort_across_elements_by_atomic_mass(molecule)
+def sort_elements_by_atomic_mass(molecule)
   molecule.sort { |a, b| a[0][1] <=> b[0][1] }
 end
 
-def update_molecule_indices(molecule)
+def update_molecule_indices(molecule, update_edges=false)
   index_updates = compute_index_updates(molecule)
   updated_molecule = []
   molecule.each do |atom|
-    element, connections = atom
+    element, edges = atom
     updated_element = update_element_index(element, index_updates)
-    updated_connections = update_connection_indices(connections, index_updates)
-    updated_molecule.push([updated_element, updated_connections])
+    updated_edges = update_edges ? update_edge_indices(edges, index_updates) : edges
+    updated_molecule.push([updated_element, updated_edges])
   end
   updated_molecule
 end
@@ -214,10 +214,10 @@ def update_element_index(element, index_updates)
   element
 end
 
-def update_connection_indices(connections, index_updates)
-  connections.map do |connection|
-    connection[0] = index_updates[connection[0]] if index_updates.key?(connection[0])
-    connection
+def update_edge_indices(edges, index_updates)
+  edges.map do |edge|
+    edge[0] = index_updates[edge[0]] if index_updates.key?(edge[0])
+    edge
   end
 end
 

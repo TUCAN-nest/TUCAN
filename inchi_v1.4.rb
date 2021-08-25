@@ -55,28 +55,16 @@ def canonicalize_molecule(molecule)
   puts "\nMolecule with elements sorted by atomic mass (increasing):"
   sorted_molecule.each { |atom| puts atom.inspect }
 
-  sorted_molecule = update_molecule_indices(sorted_molecule, update_edges=true)
-  puts "\nMolecule with updated indices after sorting:"
-  sorted_molecule.each { |atom| puts atom.inspect }
-
-  sorted_molecule = sort_edges_by_atomic_mass(sorted_molecule)
-  puts "\nMolecule with edges sorted by atomic mass (decreasing) per element:"
-  sorted_molecule.each { |atom| puts atom.inspect }
-
-  sort_elements_by_number_of_edges(sorted_molecule)
+  sorted_molecule = sort_elements_by_number_of_edges(sorted_molecule)
   puts "\nMolecule with elements of same kind sorted by number of edges (increasing):"
   sorted_molecule.each { |atom| puts atom.inspect }
 
-  sorted_molecule = update_molecule_indices(sorted_molecule, update_edges=true)
+  sorted_molecule = update_molecule_indices(sorted_molecule)
   puts "\nMolecule with updated indices after sorting:"
   sorted_molecule.each { |atom| puts atom.inspect }
 
-  sort_elements_by_index_of_edges(sorted_molecule)
+  sorted_molecule = sort_elements_by_index_of_edges(sorted_molecule)
   puts "\nMolecule with elements of same kind and same number of edges sorted by atomic mass of edges (increasing):"
-  sorted_molecule.each { |atom| puts atom.inspect }
-
-  sorted_molecule = update_molecule_indices(sorted_molecule, update_edges=true)
-  puts "\nMolecule with updated indices after sorting:"
   sorted_molecule.each { |atom| puts atom.inspect }
 
   sorted_molecule
@@ -145,41 +133,43 @@ def compute_element_counts(molecule, periodic_table_elements)
   element_counts.transform_keys! { |k| periodic_table_elements[k] } # change atomic mass to element symbol
 end
 
-def sort_edges_by_atomic_mass(molecule)
-  # Sort edge numbers of each atom left to right from large to small.
-  sorted_molecule = []
-  molecule.each do |atom|
-    element, edges = atom
-    sorted_edges = edges.sort { |a, b| b[1] <=> a[1] }
-    sorted_molecule.push([element, sorted_edges])
-  end
-  sorted_molecule
-end
-
 def sort_elements_by_index_of_edges(molecule)
-  # Mutates `molecule`.
-  molecule.sort! do |atom_a, atom_b|
-    mass_a, mass_b = atom_a[0][1], atom_b[0][1]
-    mass_edges_a = atom_a[1].map { |atom| atom[1] }
-    mass_edges_b = atom_b[1].map { |atom| atom[1] }
-    case
-    when (mass_a == mass_b) && # A and B are the same element ...
-         (mass_edges_a.length == mass_edges_b.length) && # with the same number of edges ...
-         (mass_edges_a <=> mass_edges_b) == 1 # and the edge indices of A are larger than the ones of B.
-      1
-    when (mass_a == mass_b) && # A and B are the same element ...
-         (mass_edges_a.length == mass_edges_b.length) && # with the same number of edges ...
-         (mass_edges_a <=> mass_edges_b) == -1 # and the edge indices of A are smaller than the ones of B.
-      -1
-    else
-      0
+  # Cannot use built-in sort (?) since indices have to be updated after every
+  # swap, rather than once after sorting is done (like with the other sorting steps).
+  # This is because the sorting is dependent on indices.
+  return molecule if molecule.size <= 1
+
+  n_iterations = molecule.size - 2
+  sorted = false
+  while !sorted
+
+    for i in 0..n_iterations
+      atom_a = molecule[i]
+      atom_b = molecule[i + 1]
+      mass_a, mass_b = atom_a[0][1], atom_b[0][1]
+      indices_edges_a = atom_a[1].map { |atom| atom[0] }.sort.reverse
+      indices_edges_b = atom_b[1].map { |atom| atom[0] }.sort.reverse
+
+      # Swap A and B (i.e., bubble up A) if ...
+      if (mass_a == mass_b) && # A and B are the same element ...
+        (indices_edges_a.length == indices_edges_b.length) && # with the same number of edges ...
+        (indices_edges_a <=> indices_edges_b) == 1 # and A is connected to larger indices than B.   FIXME: spaceship operator array comparison breaks if first element of any of the arrays is 0
+        molecule[i], molecule[i + 1] = molecule[i + 1], molecule[i]
+        puts "#{molecule[i]}, #{ molecule[i + 1]}"
+        molecule = update_molecule_indices(molecule)
+        puts "#{molecule[i]}, #{ molecule[i + 1]}"
+
+        break
+      end
     end
+    sorted = (i == n_iterations) ?  true : false
+    puts sorted
   end
+  molecule
 end
 
 def sort_elements_by_number_of_edges(molecule)
-  # Mutates `molecule`.
-  molecule.sort! do |atom_a, atom_b|
+  molecule.sort do |atom_a, atom_b|
     case
     when (atom_a[0][1] == atom_b[0][1]) && # A and B are the same element ...
          (atom_a[1].length > atom_b[1].length) # and A has more edges than B.
@@ -197,13 +187,13 @@ def sort_elements_by_atomic_mass(molecule)
   molecule.sort { |a, b| a[0][1] <=> b[0][1] }
 end
 
-def update_molecule_indices(molecule, update_edges=false)
+def update_molecule_indices(molecule)
   index_updates = compute_index_updates(molecule)
   updated_molecule = []
   molecule.each do |atom|
     element, edges = atom
     updated_element = update_element_index(element, index_updates)
-    updated_edges = update_edges ? update_edge_indices(edges, index_updates) : edges
+    updated_edges = update_edge_indices(edges, index_updates)
     updated_molecule.push([updated_element, updated_edges])
   end
   updated_molecule

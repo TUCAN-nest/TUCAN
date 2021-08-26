@@ -15,22 +15,10 @@ end
 def create_molecule_array(molfile_lines, periodic_table_elements)
   # Represent molecule as list with each entry representing one element and its
   # linked elements in the format: [[index, atomic mass], [index, ..., index]].
-  atom_count, bond_count = molfile_lines[3].scan(/\d+/).map(&:to_i) # on 4th  line, 1st number is number of atoms, 2nd number is number of bonds.
-
-  molecule_array = []
-  (4..atom_count + 3).each_with_index do |atom_index, i|
-    atom = molfile_lines[atom_index].split(' ')[3]
-    molecule_array.push([[i, periodic_table_elements.index(atom)], []])
-  end
-
-  (0..bond_count - 1).each do |bond_index|
-    vertex1, vertex2, * = molfile_lines[bond_index + 4 + atom_count].split(' ').map { |i| i.to_i - 1 }
-    vertex1, vertex2 = vertex2, vertex1 if vertex1 > vertex2 # make sure first atom always has lower (not: higher?) index
-    molecule_array[vertex1][1].push(vertex2)    # add to the first atom of a bond
-    molecule_array[vertex2][1].push(vertex1)    # and to the second atom of the bond
-  end
-
-  molecule_array
+  atom_count, edge_count = molfile_lines[3].scan(/\d+/).map(&:to_i) # on 4th  line, 1st number is number of atoms, 2nd number is number of bonds.
+  element_array = create_element_array(molfile_lines, atom_count, periodic_table_elements)
+  edge_array = create_edge_array(molfile_lines, edge_count, atom_count)
+  element_array.zip(edge_array)
 end
 
 def canonicalize_molecule(molecule)
@@ -202,4 +190,29 @@ def compute_index_updates(molecule)
     index_updates[element[0]] = i if element[0] != i
   end
   index_updates
+end
+
+def create_element_array(molfile_lines, atom_count, periodic_table_elements)
+  elements = []
+  (4..atom_count + 3).each_with_index do |atom_index, i|
+    atom = molfile_lines[atom_index].split(' ')[3]
+    elements.push([i, periodic_table_elements.index(atom)])
+  end
+  elements
+end
+
+def create_edge_array(molfile_lines, edge_count, atom_count)
+  edges = Array.new(atom_count).map { |_| [] }
+  (0..edge_count - 1).each do |edge_index|
+    vertex1, vertex2 = parse_edge(molfile_lines[edge_index + 4 + atom_count])
+    edges[vertex1].push(vertex2)    # add to the first atom of a bond
+    edges[vertex2].push(vertex1)    # and to the second atom of the bond
+  end
+  edges
+end
+
+def parse_edge(molfile_line)
+  vertex1, vertex2, * = molfile_line.split(' ').map { |i| i.to_i - 1 }
+  vertex1, vertex2 = vertex2, vertex1 if vertex1 > vertex2    # make sure first atom always has lower (not: higher?) index
+  [vertex1, vertex2]
 end

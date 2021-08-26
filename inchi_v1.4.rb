@@ -13,38 +13,24 @@ def read_molfile(filename)
 end
 
 def create_molecule_array(molfile_lines, periodic_table_elements)
-  # number of atoms in file is 1st number of 4th line (with index "3" as counting starts at zero)
-  # number of bonds is 2nd number of 4th line (NOT: length of file minus header length (4 lines) minus number of atom definition lines { minus one (as final line is "M END") } )
-  # (This is not true, since there can be additional lines with definitions starting with letter "M", thus rather use second number which is the number of bonds)
-  atom_count, bond_count = molfile_lines[3].scan(/\d+/).map { |n| n.to_i }
+  # Represent molecule as list with each entry representing one element and its
+  # linked elements in the format: [[index, atomic mass], [index, ..., index]].
+  atom_count, bond_count = molfile_lines[3].scan(/\d+/).map(&:to_i) # on 4th  line, 1st number is number of atoms, 2nd number is number of bonds.
 
-  atomic_masses = []
-  (4..atom_count + 3).each do |atom_index|
-    atom = molfile_lines[atom_index].split(' ')
-    atomic_masses.push(periodic_table_elements.index(atom[3]))
+  molecule_array = []
+  (4..atom_count + 3).each_with_index do |atom_index, i|
+    atom = molfile_lines[atom_index].split(' ')[3]
+    molecule_array.push([[i, periodic_table_elements.index(atom)], []])
   end
 
-  molecule_graph = []
-  (0..atom_count - 1).each do |atom_index|
-    molecule_graph.push([atom_index, []])
-  end
-
-  # now read the remaining lines containing the bond definitions in the sequence atom1 atom2 bond_order ... unknown/unused ... (can be ignored)
   (0..bond_count - 1).each do |bond_index|
     vertex1, vertex2, * = molfile_lines[bond_index + 4 + atom_count].split(' ').map { |i| i.to_i - 1 }
     vertex1, vertex2 = vertex2, vertex1 if vertex1 > vertex2 # make sure first atom always has lower (not: higher?) index
-    molecule_graph[vertex1][1].push(vertex2)    # need to push twice, to the first atom of a bond
-    molecule_graph[vertex2][1].push(vertex1)    # and then to the second atom of the bond
+    molecule_array[vertex1][1].push(vertex2)    # add to the first atom of a bond
+    molecule_array[vertex2][1].push(vertex1)    # and to the second atom of the bond
   end
 
-  molecule_graph.map! do |atom|
-    atom, edges = atom
-    atom = [atom, atomic_masses[atom]]
-    edges.map! { |edge| [edge, atomic_masses[edge]]}
-    [atom, edges]
-  end
-
-  molecule_graph
+  molecule_array
 end
 
 def canonicalize_molecule(molecule)
@@ -64,7 +50,7 @@ def canonicalize_molecule(molecule)
   sorted_molecule.each { |atom| puts atom.inspect }
 
   sorted_molecule = sort_elements_by_index_of_edges(sorted_molecule)
-  puts "\nMolecule with elements of same kind and same number of edges sorted by atomic mass of edges (increasing):"
+  puts "\nMolecule with elements of same kind and same number of edges sorted by indices of edges (increasing):"
   sorted_molecule.each { |atom| puts atom.inspect }
 
   sorted_molecule
@@ -105,7 +91,7 @@ def compute_graph(molecule)
   molecule.each do |atom|
     element, edges = atom
     edges.each do |edge|
-      graph.push([element[0], edge[0]].sort)
+      graph.push([element[0], edge].sort)
     end
   end
   graph.uniq.sort
@@ -134,6 +120,7 @@ def compute_element_counts(molecule, periodic_table_elements)
 end
 
 def sort_elements_by_index_of_edges(molecule)
+  # Replicated original sorting logic.
   # Cannot use built-in sort (?) since indices have to be updated after every
   # swap, rather than once after sorting is done (like with the other sorting steps).
   # This is because the sorting is dependent on indices.
@@ -147,23 +134,21 @@ def sort_elements_by_index_of_edges(molecule)
       atom_a = molecule[i]
       atom_b = molecule[i + 1]
       mass_a, mass_b = atom_a[0][1], atom_b[0][1]
-      indices_edges_a = atom_a[1].map { |atom| atom[0] }.sort.reverse
-      indices_edges_b = atom_b[1].map { |atom| atom[0] }.sort.reverse
+      indices_edges_a = atom_a[1].sort.reverse
+      indices_edges_b = atom_b[1].sort.reverse
 
       # Swap A and B (i.e., bubble up A) if ...
       if (mass_a == mass_b) && # A and B are the same element ...
         (indices_edges_a.length == indices_edges_b.length) && # with the same number of edges ...
         (indices_edges_a <=> indices_edges_b) == 1 # and A is connected to larger indices than B.   FIXME: spaceship operator array comparison breaks if first element of any of the arrays is 0
-        molecule[i], molecule[i + 1] = molecule[i + 1], molecule[i]
-        puts "#{molecule[i]}, #{ molecule[i + 1]}"
-        molecule = update_molecule_indices(molecule)
-        puts "#{molecule[i]}, #{ molecule[i + 1]}"
 
+        molecule[i], molecule[i + 1] = molecule[i + 1], molecule[i]
+        molecule = update_molecule_indices(molecule)
         break
+
       end
     end
     sorted = (i == n_iterations) ?  true : false
-    puts sorted
   end
   molecule
 end
@@ -206,8 +191,7 @@ end
 
 def update_edge_indices(edges, index_updates)
   edges.map do |edge|
-    edge[0] = index_updates[edge[0]] if index_updates.key?(edge[0])
-    edge
+    index_updates.key?(edge) ? index_updates[edge] : edge
   end
 end
 

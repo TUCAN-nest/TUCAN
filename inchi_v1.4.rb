@@ -23,23 +23,23 @@ end
 
 def canonicalize_molecule(molecule)
   puts "\nInitial molecule:"
-  molecule.each { |atom| puts atom.inspect }
+  print_molecule(molecule)
 
   sorted_molecule = sort_elements_by_atomic_mass(molecule)
   puts "\nMolecule with elements sorted by atomic mass (increasing):"
-  sorted_molecule.each { |atom| puts atom.inspect }
+  print_molecule(sorted_molecule)
 
   sorted_molecule = sort_elements_by_number_of_edges(sorted_molecule)
   puts "\nMolecule with elements of same kind sorted by number of edges (increasing):"
-  sorted_molecule.each { |atom| puts atom.inspect }
+  print_molecule(sorted_molecule)
 
   sorted_molecule = update_molecule_indices(sorted_molecule)
   puts "\nMolecule with updated indices after sorting:"
-  sorted_molecule.each { |atom| puts atom.inspect }
+  print_molecule(sorted_molecule)
 
   sorted_molecule = sort_elements_by_index_of_edges(sorted_molecule)
   puts "\nMolecule with elements of same kind and same number of edges sorted by indices of edges (increasing):"
-  sorted_molecule.each { |atom| puts atom.inspect }
+  print_molecule(sorted_molecule)
 
   sorted_molecule
 end
@@ -215,4 +215,10 @@ def parse_edge(molfile_line)
   vertex1, vertex2, * = molfile_line.split(' ').map { |i| i.to_i - 1 }
   vertex1, vertex2 = vertex2, vertex1 if vertex1 > vertex2    # make sure first atom always has lower (not: higher?) index
   [vertex1, vertex2]
+end
+
+def print_molecule(molecule)
+  puts "\nindex\tmass\tindices of connected atoms"
+  puts "-----\t----\t--------------------------"
+  molecule.each { |atom| puts "#{atom[0][0]}\t#{atom[0][1] + 1}\t#{atom[1]}" }
 end

@@ -114,6 +114,7 @@ def sort_elements_by_index_of_edges(molecule)
   # This is because the sorting is dependent on indices.
   return molecule if molecule.size <= 1
 
+  molecule = sort_edges_by_index(molecule)
   n_iterations = molecule.size - 2
   sorted = false
   while !sorted
@@ -122,8 +123,8 @@ def sort_elements_by_index_of_edges(molecule)
       atom_a = molecule[i]
       atom_b = molecule[i + 1]
       mass_a, mass_b = atom_a[0][1], atom_b[0][1]
-      indices_edges_a = atom_a[1].sort.reverse
-      indices_edges_b = atom_b[1].sort.reverse
+      indices_edges_a = atom_a[1]
+      indices_edges_b = atom_b[1]
 
       # Swap A and B (i.e., bubble up A) if ...
       if (mass_a == mass_b) && # A and B are the same element ...
@@ -132,6 +133,7 @@ def sort_elements_by_index_of_edges(molecule)
 
         molecule[i], molecule[i + 1] = molecule[i + 1], molecule[i]
         molecule = update_molecule_indices(molecule)
+        molecule = sort_edges_by_index(molecule)
         break
 
       end
@@ -139,6 +141,18 @@ def sort_elements_by_index_of_edges(molecule)
     sorted = (i == n_iterations) ?  true : false
   end
   molecule
+end
+
+def sort_edges_by_index(molecule)
+  # Sort edges by index (decreasing order).
+  # Note that the index of an edge corresponds to its atomic mass if the
+  # entire molecule is sorted by atomic mass. Therefore, if the entire molecule
+  # is sorted by atomic mass, this method sorts the edges by atomic mass as well
+  # as by index.
+  molecule.map do |atom|
+    element, edges = atom
+    [element, edges.sort.reverse]
+  end
 end
 
 def sort_elements_by_number_of_edges(molecule)

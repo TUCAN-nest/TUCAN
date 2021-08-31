@@ -136,16 +136,11 @@ end
 
 def sort_elements_by_number_of_edges(molecule)
   molecule.sort do |atom_a, atom_b|
-    case
-    when (atom_a[0][1] == atom_b[0][1]) && # A and B are the same element ...
-         (atom_a[1].length > atom_b[1].length) # and A has more edges than B.
-      1
-    when (atom_a[0][1] == atom_b[0][1]) && # A and B are the same element ...
-         (atom_a[1].length < atom_b[1].length) # and A has less edges than B.
-      -1
-    else
-      0
-    end
+    mass_a = atom_a[0][1]
+    mass_b = atom_b[0][1]
+    edge_indices_a = atom_a[1]
+    edge_indices_b = atom_b[1]
+    mass_a == mass_b ? edge_indices_a.length <=> edge_indices_b.length : 0
   end
 end
 

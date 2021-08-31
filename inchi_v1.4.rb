@@ -115,6 +115,7 @@ def sort_elements_by_index_of_edges(molecule)
   # Sorting is resumed at index 0 after every swap.
   molecule = sort_edges_by_index(molecule)
   n_iterations = molecule.size - 2
+  previous_molecule_states = [molecule]
   sorted = false
   until sorted
 
@@ -138,6 +139,13 @@ def sort_elements_by_index_of_edges(molecule)
         break
       end
     end
+    if previous_molecule_states.include?(molecule)
+      puts "\nAborting sort due to recurring molecule state:"
+      previous_molecule_states.each { |state| puts state.inspect }
+      puts molecule.inspect
+      break
+    end
+    previous_molecule_states.push(Marshal.load(Marshal.dump(molecule)))
     sorted = (i == n_iterations) ?  true : false
   end
   molecule

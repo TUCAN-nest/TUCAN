@@ -108,18 +108,39 @@ def compute_element_counts(molecule, periodic_table_elements)
 end
 
 def sort_elements_by_index_of_edges(molecule)
-  molecule.sort do |atom_a, atom_b|
-    mass_a = atom_a[0][1]
-    mass_b = atom_b[0][1]
-    edge_indices_a = atom_a[1]
-    edge_indices_b = atom_b[1]
-    # Swap A and B (i.e., bubble up A) if ...
-    # A and B are the same element with the same number of edges and A is connected to larger indices than B.
-    # Spaceship operator (<=>) compares arrays pairwise element-by-element.
-    # I.e., first compare the two elements at index 0, etc.. Result is determined by first unequal element pair.
-    # The operator returns 1 if A > B, -1 if A < B, and 0 if A == B.
-    (mass_a == mass_b) && (edge_indices_a.length == edge_indices_b.length) ? edge_indices_a <=> edge_indices_b : 0  # A and B are the same element with the same number of edges ...
+  # Replicates original sorting logic.
+  # Cannot use built-in sort since indices have to be updated after every swap,
+  # rather than once after sorting is done (like with the other sorting steps).
+  # This is because we sort by indices.
+  # Sorting is resumed at index 0 after every swap.
+  molecule = sort_edges_by_index(molecule)
+  n_iterations = molecule.size - 2
+  sorted = false
+  until sorted
+
+    for i in 0..n_iterations
+      atom_a = molecule[i]
+      atom_b = molecule[i + 1]
+      mass_a, mass_b = atom_a[0][1], atom_b[0][1]
+      edge_indices_a = atom_a[1]
+      edge_indices_b = atom_b[1]
+
+      # Swap A and B (i.e., bubble up A) if ...
+      if (mass_a == mass_b) && # A and B are the same element ...
+        (edge_indices_a.length == edge_indices_b.length) && # with the same number of edges ...
+        (edge_indices_a <=> edge_indices_b) == 1 # and A is connected to larger indices than B.
+        # Spaceship operator (<=>) compares arrays pairwise element-by-element.
+        # I.e., first compare the two elements at index 0, etc.. Result is determined by first unequal element pair.
+        # The operator returns 1 if A > B, -1 if A < B, and 0 if A == B.
+        molecule[i], molecule[i + 1] = molecule[i + 1], molecule[i]
+        molecule = update_molecule_indices(molecule)
+        molecule = sort_edges_by_index(molecule)
+        break
+      end
+    end
+    sorted = (i == n_iterations) ?  true : false
   end
+  molecule
 end
 
 def sort_edges_by_index(molecule)

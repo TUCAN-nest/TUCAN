@@ -1,4 +1,4 @@
-require './inchi_v1.4'
+require './inchi'
 require 'minitest/autorun'
 require './periodic_table'
 

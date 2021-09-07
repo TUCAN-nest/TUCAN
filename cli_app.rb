@@ -1,4 +1,4 @@
-require './inchi_v1.4'
+require './inchi'
 require 'optparse'
 require './periodic_table'
 

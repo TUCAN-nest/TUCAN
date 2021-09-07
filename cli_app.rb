@@ -9,12 +9,6 @@ OptionParser.new do |opt|
   opt.on('--molfile MOLFILE') { |o| options[:molfile] = o }
 end.parse!
 
-# label2 = FXLabel.new(self, "Sum formula: none")
-# label3 = FXLabel.new(self, "Output format: none")
-# loadButton = FXButton.new(frame4, "Load molfile *.mol")
-# nInChIButton = FXButton.new(frame4, "Create nInChI string")
-# outputFileButton = FXButton.new(frame4, "Create DOT file")
-
 puts 'A new International Chemical Identifier (nInChI)'
 puts 'CC BY-SA | Ulrich Schatzschneider | Universität Würzburg | NFDI4Chem | v1.4 | 06/2021'
 
@@ -23,6 +17,8 @@ periodic_table_colors = PeriodicTable::ElementColor
 
 filename = options[:molfile]
 molfile_data = read_molfile(filename)
+puts "\nPrinting molfile: #{filename}. First 4 lines contain header."
+molfile_data.each { |line| puts line }
 
 molecule = create_molecule_array(molfile_data, periodic_table_elements)
 canonicalized_molecule = canonicalize_molecule(molecule)

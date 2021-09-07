@@ -4,12 +4,7 @@ def read_molfile(filename)
   raise "#{filename} doesn't exist." unless File.exist?(filename)
 
   molfile = File.read(filename) # reads entire file and closes it
-  molfile_lines = molfile.split("\n")
-
-  puts "\nPrinting molfile: #{filename}. First 4 lines contain header."
-  puts molfile
-
-  molfile_lines
+  molfile.split("\n")
 end
 
 def create_molecule_array(molfile_lines, periodic_table_elements)
@@ -219,7 +214,7 @@ def create_element_array(molfile_lines, atom_count, periodic_table_elements)
 end
 
 def create_edge_array(molfile_lines, edge_count, atom_count)
-  edges = Array.new(atom_count).map { |_| [] }
+  edges = Array.new(atom_count).map(&:to_a)
   (0..edge_count - 1).each do |edge_index|
     vertex1, vertex2 = parse_edge(molfile_lines[edge_index + 4 + atom_count])
     edges[vertex1].push(vertex2)    # add to the first atom of a bond

@@ -32,9 +32,11 @@ def canonicalize_molecule(molecule)
   puts "\nMolecule with updated indices after sorting:"
   print_molecule(sorted_molecule)
 
-  sorted_molecule = sort_elements_by_index_of_edges(sorted_molecule)
+  *previous_molecule_states, sorted_molecule = sort_elements_by_index_of_edges(sorted_molecule)
   puts "\nMolecule with elements of same kind and same number of edges sorted by indices of edges (increasing):"
   print_molecule(sorted_molecule)
+
+  inspect_molecule_states(previous_molecule_states, sorted_molecule)
 
   sorted_molecule
 end
@@ -110,7 +112,7 @@ def sort_elements_by_index_of_edges(molecule)
   # Sorting is resumed at index 0 after every swap.
   molecule = sort_edges_by_index(molecule)
   n_iterations = molecule.size - 2
-  previous_molecule_states = [molecule]
+  previous_molecule_states = [Marshal.load(Marshal.dump(molecule))]
   sorted = false
   until sorted
 
@@ -134,16 +136,11 @@ def sort_elements_by_index_of_edges(molecule)
         break
       end
     end
-    if previous_molecule_states.include?(molecule)
-      puts "\nAborting sort due to recurring molecule state:"
-      previous_molecule_states.each { |state| puts state.inspect }
-      puts molecule.inspect
-      break
-    end
+    sorted = previous_molecule_states.include?(molecule) ? true : false
+
     previous_molecule_states.push(Marshal.load(Marshal.dump(molecule)))
-    sorted = (i == n_iterations) ?  true : false
   end
-  molecule
+  previous_molecule_states
 end
 
 def sort_edges_by_index(molecule)
@@ -233,4 +230,14 @@ def print_molecule(molecule)
   puts "\nindex\tmass\tindices of connected atoms"
   puts "-----\t----\t--------------------------"
   molecule.each { |atom| puts "#{atom[0][0]}\t#{atom[0][1] + 1}\t#{atom[1]}" }
+end
+
+def inspect_molecule_states(previous_states, final_state)
+  puts "\nPrinting all molecule states that occured during sorting by indices of edges..."
+  previous_states.each_with_index do |state, i|
+    puts "\nIteration #{i} yielded the following state:"
+    print_molecule(state)
+  end
+  puts "\nSorting converged in iteration #{previous_states.size} with re-occurence of state at iteration #{previous_states.index(final_state)}:"
+  print_molecule(final_state)
 end

@@ -22,6 +22,6 @@ molfile_data.each { |line| puts line }
 
 molecule = create_molecule_array(molfile_data, periodic_table_elements)
 canonicalized_molecule = canonicalize_molecule(molecule)
-puts write_ninchi_string(canonicalized_molecule, periodic_table_elements)
-puts write_dot_file(canonicalized_molecule, periodic_table_elements, periodic_table_colors)
+puts "\n#{write_ninchi_string(canonicalized_molecule, periodic_table_elements)}"
+puts "\n#{write_dot_file(canonicalized_molecule, periodic_table_elements, periodic_table_colors)}"
 puts 'Output format: DOT file - to display go to https://dreampuf.github.io/GraphvizOnline/#'

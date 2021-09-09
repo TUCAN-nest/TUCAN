@@ -6,7 +6,7 @@ class TestnInChI < Minitest::Test
   @@periodic_table_elements = PeriodicTable::Elements
   @@periodic_table_colors = PeriodicTable::ElementColor
 
-  hydrogen_molfile = read_molfile('test/testfiles/hydrogen.mol')
+  hydrogen_molfile = read_molfile('test/testfiles/hydrogen/hydrogen.mol')
   hydrogen_array = create_molecule_array(hydrogen_molfile, @@periodic_table_elements, )
   @@canonicalized_hydrogen = canonicalize_molecule(hydrogen_array)
   @@ninchi_string_hydrogen = 'nInChI=1S/H2/c(0-1)'
@@ -16,7 +16,7 @@ class TestnInChI < Minitest::Test
   "  0 -- 1 [color=black,style=bold];\n"\
   "}\n"
 
-  cisplatin_molfile = read_molfile('test/testfiles/cisplatin.mol')
+  cisplatin_molfile = read_molfile('test/testfiles/cisplatin/cisplatin.mol')
   cisplatin_array = create_molecule_array(cisplatin_molfile, @@periodic_table_elements, )
   @@canonicalized_cisplatin = canonicalize_molecule(cisplatin_array)
   @@ninchi_string_cisplatin = 'nInChI=1S/H6Cl2N2Pt/c(0-6)(1-6)(2-6)(3-7)(4-7)(5-7)(6-10)(7-10)(8-10)(9-10)'
@@ -44,7 +44,7 @@ class TestnInChI < Minitest::Test
   "  9 -- 10 [color=black,style=bold];\n"\
   "}\n"
 
-  tpp_molfile = read_molfile('test/testfiles/tpp.mol')
+  tpp_molfile = read_molfile('test/testfiles/tpp/tpp.mol')
   tpp_array = create_molecule_array(tpp_molfile, @@periodic_table_elements, )
   @@canonicalized_tpp = canonicalize_molecule(tpp_array)
   @@ninchi_string_tpp = 'nInChI=1S/C20N4/c(0-1)(0-12)(1-13)(2-3)(2-14)(3-15)(4-6)(4-16)(5-12)(5-16)(6-17)(7-14)(7-17)(8-10)(8-18)(9-13)(9-18)(10-19)(11-15)(11-19)(12-20)(13-20)(14-21)(15-21)(16-22)(17-22)(18-23)(19-23)'

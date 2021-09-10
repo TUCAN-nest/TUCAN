@@ -1,0 +1,39 @@
+# Move molfiles, metadata, and drawings at root to a subfolder named after the molecule.
+
+name: format_dataset
+on:
+  push:
+    paths:
+      - 'test/testfiles/**'
+  workflow_dispatch:
+
+jobs:
+  molecule_subdirectories:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: move files
+        run: |
+          shopt -s extglob # enables use of patterns when stripping `moldata` to obtain `molname`
+          shopt -s nullglob # don't execute loop in case there's no matching `moldata`
+
+          cd test/testfiles
+          for moldata in  ./*.mol ./*_metadata.txt ./*_drawing.jpeg; do
+            molname=${moldata%@(.mol|_metadata.txt|_drawing.jpeg)}
+            if [ ! -d "$molname" ]; then
+              echo "Making ${molname} directory."
+              mkdir "${molname}"
+            fi
+            mv "$moldata" "${molname}"
+          done
+
+      - name: push changes
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
+          git add .
+          git commit -m "Auto-formatted test dataset."
+          git push

@@ -16,7 +16,7 @@ Finally, a sub-directory can contain a molecular drawing called `<molecule-name>
 ## Directly from GitHub via the browser (requires account with write access)
 * In your browser go to the `test/testfiles` directory.
 * Click `Add file` -> `Upload file` in the upper right corner.
-* You can now drag-and-drop, or manually upload your files. Note that you cannot upload a sub-directory directly. A bot takes care of creating a sub-directory for your files and moving them there (TODO: implement GH Action for this using `format_testfiles_dir.sh`).
+* You can now drag-and-drop, or manually upload your files. Note that you cannot upload a sub-directory directly. A bot takes care of creating a sub-directory for your files and moving them there.
 * Optionally, you can write a commit message.
 * Finally, click the green `Commit changes` button on the lower left.
 

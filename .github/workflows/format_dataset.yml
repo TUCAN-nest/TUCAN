@@ -21,8 +21,8 @@ jobs:
           shopt -s nullglob # don't execute loop in case there's no matching `moldata`
 
           cd test/testfiles
-          for moldata in  ./*.mol ./*_metadata.txt ./*_drawing.jpeg; do
-            molname=${moldata%@(.mol|_metadata.txt|_drawing.jpeg)}
+          for moldata in  ./*.mol ./*_metadata.txt ./*_drawing.*; do
+            molname=${moldata%@(.mol|_metadata.txt|_drawing.*)}
             if [ ! -d "$molname" ]; then
               echo "Making ${molname} directory."
               mkdir "${molname}"

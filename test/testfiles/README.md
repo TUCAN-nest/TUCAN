@@ -4,12 +4,12 @@ This directory contains a molecule dataset for test purposes.
 
 Each molecule has it's own sub-directory, which is named `<molecule-name>` (omit `<` and `>`).
 
-Each sub-directory contains at minimium a molfile named `<molecule-name>.mol`.
+Each sub-directory contains at minimium a molfile named `<molecule-name>.mol`. (TODO: specifc molfile format: v2000 or v3000? Or XML?!?)
 
 Additionally, a sub-directory can contain metadata in a plain-text file. The metadata file
 should be named `<molecule-name>_metadata.txt` and can contain references etc.. (TODO: specify fields and format).
 
-Finally, a sub-directory can contain a molecular drawing called `<molecule-name>_drawing.jpeg` (TODO: specify file format?).
+Finally, a sub-directory can contain a molecular drawing called `<molecule-name>_drawing.*` with either *.cdx (ChemDraw) or *.jpg (JPG picture) (TODO: specify file format?).
 
 # Adding molecules
 

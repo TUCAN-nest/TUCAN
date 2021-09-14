@@ -1,243 +1,247 @@
 # (c) CC BY-SA | Ulrich Schatzschneider | Universität Würzburg | NFDI4Chem | v1.4 | 06.06.2021
 
-def read_molfile(filename)
-  raise "#{filename} doesn't exist." unless File.exist?(filename)
+module Inchi
 
-  molfile = File.read(filename) # reads entire file and closes it
-  molfile.split("\n")
-end
+  def read_molfile(filename)
+    raise "#{filename} doesn't exist." unless File.exist?(filename)
 
-def create_molecule_array(molfile_lines, periodic_table_elements)
-  # Represent molecule as list with each entry representing one element and its
-  # linked elements in the format: [[index, atomic mass], [index, ..., index]].
-  atom_count, edge_count = molfile_lines[3].scan(/\d+/).map(&:to_i) # on 4th  line, 1st number is number of atoms, 2nd number is number of bonds.
-  element_array = create_element_array(molfile_lines, atom_count, periodic_table_elements)
-  edge_array = create_edge_array(molfile_lines, edge_count, atom_count)
-  element_array.zip(edge_array)
-end
-
-def canonicalize_molecule(molecule)
-  puts "\nInitial molecule:"
-  print_molecule(molecule)
-
-  sorted_molecule = sort_elements_by_atomic_mass(molecule)
-  puts "\nMolecule with elements sorted by atomic mass (increasing):"
-  print_molecule(sorted_molecule)
-
-  sorted_molecule = sort_elements_by_number_of_edges(sorted_molecule)
-  puts "\nMolecule with elements of same kind sorted by number of edges (increasing):"
-  print_molecule(sorted_molecule)
-
-  sorted_molecule = update_molecule_indices(sorted_molecule)
-  puts "\nMolecule with updated indices after sorting:"
-  print_molecule(sorted_molecule)
-
-  *previous_molecule_states, sorted_molecule = sort_elements_by_index_of_edges(sorted_molecule)
-  puts "\nMolecule with elements of same kind and same number of edges sorted by indices of edges (increasing):"
-  print_molecule(sorted_molecule)
-
-  inspect_molecule_states(previous_molecule_states, sorted_molecule)
-
-  sorted_molecule
-end
-
-def write_ninchi_string(molecule, periodic_table_elements)
-  sum_formula = write_sum_formula_string(molecule, periodic_table_elements)
-  serialized_molecule = serialize_molecule(molecule)
-  "nInChI=1S/#{sum_formula}/c#{serialized_molecule}"
-end
-
-def write_dot_file(molecule, periodic_table_elements, periodic_table_colors)
-  dotfile = "graph test\n{\n  bgcolor=grey\n"
-  molecule.each_with_index do |atom, i|
-    symbol = periodic_table_elements[atom[0][1]]
-    color = periodic_table_colors.fetch(symbol, 'lightgrey')
-    dotfile += "  #{i} [label=\"#{symbol} #{i}\" color=#{color},style=filled,shape=circle,fontname=Calibri];\n"
+    molfile = File.read(filename) # reads entire file and closes it
+    molfile.split("\n")
   end
-  graph = compute_graph(molecule)
-  graph.each { |line| dotfile += "  #{line[0]} -- #{line[1]} [color=black,style=bold];\n" if line[0] != line[1] }
-  dotfile += "}\n"
-end
 
-# Helper methods ###################################################################################
-private
-
-def serialize_molecule(molecule)
-  graph = compute_graph(molecule)
-  inchi_string = ''
-  graph.each do |line|
-    inchi_string += "(#{line[0]}-#{line[1]})" if line[0] != line[1]
+  def create_molecule_array(molfile_lines, periodic_table_elements)
+    # Represent molecule as list with each entry representing one element and its
+    # linked elements in the format: [[index, atomic mass], [index, ..., index]].
+    atom_count, edge_count = molfile_lines[3].scan(/\d+/).map(&:to_i) # on 4th  line, 1st number is number of atoms, 2nd number is number of bonds.
+    element_array = create_element_array(molfile_lines, atom_count, periodic_table_elements)
+    edge_array = create_edge_array(molfile_lines, edge_count, atom_count)
+    element_array.zip(edge_array)
   end
-  inchi_string
-end
 
-def compute_graph(molecule)
-  graph = []
-  molecule.each do |atom|
-    element, edges = atom
-    edges.each do |edge|
-      graph.push([element[0], edge].sort)
+  def canonicalize_molecule(molecule)
+    puts "\nInitial molecule:"
+    print_molecule(molecule)
+
+    sorted_molecule = sort_elements_by_atomic_mass(molecule)
+    puts "\nMolecule with elements sorted by atomic mass (increasing):"
+    print_molecule(sorted_molecule)
+
+    sorted_molecule = sort_elements_by_number_of_edges(sorted_molecule)
+    puts "\nMolecule with elements of same kind sorted by number of edges (increasing):"
+    print_molecule(sorted_molecule)
+
+    sorted_molecule = update_molecule_indices(sorted_molecule)
+    puts "\nMolecule with updated indices after sorting:"
+    print_molecule(sorted_molecule)
+
+    *previous_molecule_states, sorted_molecule = sort_elements_by_index_of_edges(sorted_molecule)
+    puts "\nMolecule with elements of same kind and same number of edges sorted by indices of edges (increasing):"
+    print_molecule(sorted_molecule)
+
+    inspect_molecule_states(previous_molecule_states, sorted_molecule)
+
+    sorted_molecule
+  end
+
+  def write_ninchi_string(molecule, periodic_table_elements)
+    sum_formula = write_sum_formula_string(molecule, periodic_table_elements)
+    serialized_molecule = serialize_molecule(molecule)
+    "nInChI=1S/#{sum_formula}/c#{serialized_molecule}"
+  end
+
+  def write_dot_file(molecule, periodic_table_elements, periodic_table_colors)
+    dotfile = "graph test\n{\n  bgcolor=grey\n"
+    molecule.each_with_index do |atom, i|
+      symbol = periodic_table_elements[atom[0][1]]
+      color = periodic_table_colors.fetch(symbol, 'lightgrey')
+      dotfile += "  #{i} [label=\"#{symbol} #{i}\" color=#{color},style=filled,shape=circle,fontname=Calibri];\n"
     end
+    graph = compute_graph(molecule)
+    graph.each { |line| dotfile += "  #{line[0]} -- #{line[1]} [color=black,style=bold];\n" if line[0] != line[1] }
+    dotfile += "}\n"
   end
-  graph.uniq.sort
-end
 
-def write_sum_formula_string(molecule, periodic_table_elements)
-  # Write sum formula in the order C > H > all other elements in alphabetic order.
-  element_counts = compute_element_counts(molecule, periodic_table_elements)
-  element_counts.transform_values! { |v| v > 1 ? v : '' } # remove 1s since counts of 1 are implicit in sum formula
-  sum_formula_string = ''
-  sum_formula_string += "C#{element_counts['C']}" if element_counts.key?('C')
-  sum_formula_string += "H#{element_counts['H']}" if element_counts.key?('H')
-  element_counts.sort.to_h.each do |element, count|
-    sum_formula_string += "#{element}#{count}" unless %w[C H].include?(element)
+  # Helper methods ###################################################################################
+  private
+
+  def serialize_molecule(molecule)
+    graph = compute_graph(molecule)
+    inchi_string = ''
+    graph.each do |line|
+      inchi_string += "(#{line[0]}-#{line[1]})" if line[0] != line[1]
+    end
+    inchi_string
   end
-  sum_formula_string
-end
 
-def compute_element_counts(molecule, periodic_table_elements)
-  # Compute hash table mapping element symbols to stoichiometric counts.
-  unique_elements = molecule.map { |atom| atom[0][1] }.uniq
-  initial_counts = Array.new(unique_elements.length, 0)
-  element_counts = unique_elements.zip(initial_counts).to_h
-  molecule.each { |atom| element_counts[atom[0][1]] += 1 }
-  element_counts.transform_keys! { |k| periodic_table_elements[k] } # change atomic mass to element symbol
-end
-
-def sort_elements_by_index_of_edges(molecule)
-  # Replicates original sorting logic.
-  # Cannot use built-in sort since indices have to be updated after every swap,
-  # rather than once after sorting is done (like with the other sorting steps).
-  # This is because we sort by indices.
-  # Sorting is resumed at index 0 after every swap.
-  molecule = sort_edges_by_index(molecule)
-  n_iterations = molecule.size - 2
-  previous_molecule_states = [Marshal.load(Marshal.dump(molecule))]
-  sorted = false
-  until sorted
-
-    for i in 0..n_iterations
-      atom_a = molecule[i]
-      atom_b = molecule[i + 1]
-      mass_a, mass_b = atom_a[0][1], atom_b[0][1]
-      edge_indices_a = atom_a[1]
-      edge_indices_b = atom_b[1]
-
-      # Swap A and B (i.e., bubble up A) if ...
-      if (mass_a == mass_b) && # A and B are the same element ...
-        (edge_indices_a.length == edge_indices_b.length) && # with the same number of edges ...
-        (edge_indices_a <=> edge_indices_b) == 1 # and A is connected to larger indices than B.
-        # Spaceship operator (<=>) compares arrays pairwise element-by-element.
-        # I.e., first compare the two elements at index 0, etc.. Result is determined by first unequal element pair.
-        # The operator returns 1 if A > B, -1 if A < B, and 0 if A == B.
-        molecule[i], molecule[i + 1] = molecule[i + 1], molecule[i]
-        molecule = update_molecule_indices(molecule)
-        molecule = sort_edges_by_index(molecule)
-        break
+  def compute_graph(molecule)
+    graph = []
+    molecule.each do |atom|
+      element, edges = atom
+      edges.each do |edge|
+        graph.push([element[0], edge].sort)
       end
     end
-    sorted = previous_molecule_states.include?(molecule) ? true : false
-
-    previous_molecule_states.push(Marshal.load(Marshal.dump(molecule)))
+    graph.uniq.sort
   end
-  previous_molecule_states
-end
 
-def sort_edges_by_index(molecule)
-  # Sort edges by index (decreasing order).
-  # Note that the index of an edge corresponds to its atomic mass if the
-  # entire molecule is sorted by atomic mass. Therefore, if the entire molecule
-  # is sorted by atomic mass, this method sorts the edges by atomic mass as well
-  # as by index.
-  molecule.map do |atom|
-    element, edges = atom
-    [element, edges.sort.reverse]
+  def write_sum_formula_string(molecule, periodic_table_elements)
+    # Write sum formula in the order C > H > all other elements in alphabetic order.
+    element_counts = compute_element_counts(molecule, periodic_table_elements)
+    element_counts.transform_values! { |v| v > 1 ? v : '' } # remove 1s since counts of 1 are implicit in sum formula
+    sum_formula_string = ''
+    sum_formula_string += "C#{element_counts['C']}" if element_counts.key?('C')
+    sum_formula_string += "H#{element_counts['H']}" if element_counts.key?('H')
+    element_counts.sort.to_h.each do |element, count|
+      sum_formula_string += "#{element}#{count}" unless %w[C H].include?(element)
+    end
+    sum_formula_string
   end
-end
 
-def sort_elements_by_number_of_edges(molecule)
-  molecule.sort do |atom_a, atom_b|
-    mass_a = atom_a[0][1]
-    mass_b = atom_b[0][1]
-    edge_indices_a = atom_a[1]
-    edge_indices_b = atom_b[1]
-    mass_a == mass_b ? edge_indices_a.length <=> edge_indices_b.length : 0
+  def compute_element_counts(molecule, periodic_table_elements)
+    # Compute hash table mapping element symbols to stoichiometric counts.
+    unique_elements = molecule.map { |atom| atom[0][1] }.uniq
+    initial_counts = Array.new(unique_elements.length, 0)
+    element_counts = unique_elements.zip(initial_counts).to_h
+    molecule.each { |atom| element_counts[atom[0][1]] += 1 }
+    element_counts.transform_keys! { |k| periodic_table_elements[k] } # change atomic mass to element symbol
   end
-end
 
-def sort_elements_by_atomic_mass(molecule)
-  molecule.sort { |a, b| a[0][1] <=> b[0][1] }
-end
+  def sort_elements_by_index_of_edges(molecule)
+    # Replicates original sorting logic.
+    # Cannot use built-in sort since indices have to be updated after every swap,
+    # rather than once after sorting is done (like with the other sorting steps).
+    # This is because we sort by indices.
+    # Sorting is resumed at index 0 after every swap.
+    molecule = sort_edges_by_index(molecule)
+    n_iterations = molecule.size - 2
+    previous_molecule_states = [Marshal.load(Marshal.dump(molecule))]
+    sorted = false
+    until sorted
 
-def update_molecule_indices(molecule)
-  index_updates = compute_index_updates(molecule)
-  updated_molecule = []
-  molecule.each do |atom|
-    element, edges = atom
-    updated_element = update_element_index(element, index_updates)
-    updated_edges = update_edge_indices(edges, index_updates)
-    updated_molecule.push([updated_element, updated_edges])
+      for i in 0..n_iterations
+        atom_a = molecule[i]
+        atom_b = molecule[i + 1]
+        mass_a, mass_b = atom_a[0][1], atom_b[0][1]
+        edge_indices_a = atom_a[1]
+        edge_indices_b = atom_b[1]
+
+        # Swap A and B (i.e., bubble up A) if ...
+        if (mass_a == mass_b) && # A and B are the same element ...
+          (edge_indices_a.length == edge_indices_b.length) && # with the same number of edges ...
+          (edge_indices_a <=> edge_indices_b) == 1 # and A is connected to larger indices than B.
+          # Spaceship operator (<=>) compares arrays pairwise element-by-element.
+          # I.e., first compare the two elements at index 0, etc.. Result is determined by first unequal element pair.
+          # The operator returns 1 if A > B, -1 if A < B, and 0 if A == B.
+          molecule[i], molecule[i + 1] = molecule[i + 1], molecule[i]
+          molecule = update_molecule_indices(molecule)
+          molecule = sort_edges_by_index(molecule)
+          break
+        end
+      end
+      sorted = previous_molecule_states.include?(molecule) ? true : false
+
+      previous_molecule_states.push(Marshal.load(Marshal.dump(molecule)))
+    end
+    previous_molecule_states
   end
-  updated_molecule
-end
 
-def update_element_index(element, index_updates)
-  element[0] = index_updates[element[0]] if index_updates.key?(element[0])
-  element
-end
-
-def update_edge_indices(edges, index_updates)
-  edges.map do |edge|
-    index_updates.key?(edge) ? index_updates[edge] : edge
+  def sort_edges_by_index(molecule)
+    # Sort edges by index (decreasing order).
+    # Note that the index of an edge corresponds to its atomic mass if the
+    # entire molecule is sorted by atomic mass. Therefore, if the entire molecule
+    # is sorted by atomic mass, this method sorts the edges by atomic mass as well
+    # as by index.
+    molecule.map do |atom|
+      element, edges = atom
+      [element, edges.sort.reverse]
+    end
   end
-end
 
-def compute_index_updates(molecule)
-  index_updates = {}
-  molecule.each_with_index do |atom, i|
-    element, * = atom
-    index_updates[element[0]] = i if element[0] != i
+  def sort_elements_by_number_of_edges(molecule)
+    molecule.sort do |atom_a, atom_b|
+      mass_a = atom_a[0][1]
+      mass_b = atom_b[0][1]
+      edge_indices_a = atom_a[1]
+      edge_indices_b = atom_b[1]
+      mass_a == mass_b ? edge_indices_a.length <=> edge_indices_b.length : 0
+    end
   end
-  index_updates
-end
 
-def create_element_array(molfile_lines, atom_count, periodic_table_elements)
-  elements = []
-  (4..atom_count + 3).each_with_index do |atom_index, i|
-    atom = molfile_lines[atom_index].split(' ')[3]
-    elements.push([i, periodic_table_elements.index(atom)])
+  def sort_elements_by_atomic_mass(molecule)
+    molecule.sort { |a, b| a[0][1] <=> b[0][1] }
   end
-  elements
-end
 
-def create_edge_array(molfile_lines, edge_count, atom_count)
-  edges = Array.new(atom_count).map(&:to_a)
-  (0..edge_count - 1).each do |edge_index|
-    vertex1, vertex2 = parse_edge(molfile_lines[edge_index + 4 + atom_count])
-    edges[vertex1].push(vertex2)    # add to the first atom of a bond
-    edges[vertex2].push(vertex1)    # and to the second atom of the bond
+  def update_molecule_indices(molecule)
+    index_updates = compute_index_updates(molecule)
+    updated_molecule = []
+    molecule.each do |atom|
+      element, edges = atom
+      updated_element = update_element_index(element, index_updates)
+      updated_edges = update_edge_indices(edges, index_updates)
+      updated_molecule.push([updated_element, updated_edges])
+    end
+    updated_molecule
   end
-  edges
-end
 
-def parse_edge(molfile_line)
-  vertex1, vertex2, * = molfile_line.split(' ').map { |i| i.to_i - 1 }
-  vertex1, vertex2 = vertex2, vertex1 if vertex1 > vertex2    # make sure first atom always has lower (not: higher?) index
-  [vertex1, vertex2]
-end
-
-def print_molecule(molecule)
-  puts "\nindex\tmass\tindices of connected atoms"
-  puts "-----\t----\t--------------------------"
-  molecule.each { |atom| puts "#{atom[0][0]}\t#{atom[0][1] + 1}\t#{atom[1]}" }
-end
-
-def inspect_molecule_states(previous_states, final_state)
-  puts "\nPrinting all molecule states that occured during sorting by indices of edges..."
-  previous_states.each_with_index do |state, i|
-    puts "\nIteration #{i} yielded the following state:"
-    print_molecule(state)
+  def update_element_index(element, index_updates)
+    element[0] = index_updates[element[0]] if index_updates.key?(element[0])
+    element
   end
-  puts "\nSorting converged in iteration #{previous_states.size} with re-occurence of state at iteration #{previous_states.index(final_state)}:"
-  print_molecule(final_state)
+
+  def update_edge_indices(edges, index_updates)
+    edges.map do |edge|
+      index_updates.key?(edge) ? index_updates[edge] : edge
+    end
+  end
+
+  def compute_index_updates(molecule)
+    index_updates = {}
+    molecule.each_with_index do |atom, i|
+      element, * = atom
+      index_updates[element[0]] = i if element[0] != i
+    end
+    index_updates
+  end
+
+  def create_element_array(molfile_lines, atom_count, periodic_table_elements)
+    elements = []
+    (4..atom_count + 3).each_with_index do |atom_index, i|
+      atom = molfile_lines[atom_index].split(' ')[3]
+      elements.push([i, periodic_table_elements.index(atom)])
+    end
+    elements
+  end
+
+  def create_edge_array(molfile_lines, edge_count, atom_count)
+    edges = Array.new(atom_count).map(&:to_a)
+    (0..edge_count - 1).each do |edge_index|
+      vertex1, vertex2 = parse_edge(molfile_lines[edge_index + 4 + atom_count])
+      edges[vertex1].push(vertex2)    # add to the first atom of a bond
+      edges[vertex2].push(vertex1)    # and to the second atom of the bond
+    end
+    edges
+  end
+
+  def parse_edge(molfile_line)
+    vertex1, vertex2, * = molfile_line.split(' ').map { |i| i.to_i - 1 }
+    vertex1, vertex2 = vertex2, vertex1 if vertex1 > vertex2    # make sure first atom always has lower (not: higher?) index
+    [vertex1, vertex2]
+  end
+
+  def print_molecule(molecule)
+    puts "\nindex\tmass\tindices of connected atoms"
+    puts "-----\t----\t--------------------------"
+    molecule.each { |atom| puts "#{atom[0][0]}\t#{atom[0][1] + 1}\t#{atom[1]}" }
+  end
+
+  def inspect_molecule_states(previous_states, final_state)
+    puts "\nPrinting all molecule states that occured during sorting by indices of edges..."
+    previous_states.each_with_index do |state, i|
+      puts "\nIteration #{i} yielded the following state:"
+      print_molecule(state)
+    end
+    puts "\nSorting converged in iteration #{previous_states.size} with re-occurence of state at iteration #{previous_states.index(final_state)}:"
+    print_molecule(final_state)
+  end
+
 end

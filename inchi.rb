@@ -171,8 +171,8 @@ module Inchi
     molecule.sort { |a, b| a[0][1] <=> b[0][1] }
   end
 
-  def update_molecule_indices(molecule)
-    index_updates = compute_index_updates(molecule)
+  def update_molecule_indices(molecule, random_indices=false)
+    index_updates = compute_index_updates(molecule, random_indices)
     updated_molecule = []
     molecule.each do |atom|
       element, edges = atom
@@ -184,23 +184,20 @@ module Inchi
   end
 
   def update_element_index(element, index_updates)
-    element[0] = index_updates[element[0]] if index_updates.key?(element[0])
-    element
+    [index_updates[element[0]], element[1]]
   end
 
   def update_edge_indices(edges, index_updates)
     edges.map do |edge|
-      index_updates.key?(edge) ? index_updates[edge] : edge
+      index_updates[edge]
     end
   end
 
-  def compute_index_updates(molecule)
-    index_updates = {}
-    molecule.each_with_index do |atom, i|
-      element, * = atom
-      index_updates[element[0]] = i if element[0] != i
-    end
-    index_updates
+  def compute_index_updates(molecule, random_indices)
+    current_indices = molecule.map { |atom| atom[0][0] }
+    updated_indices = (0..molecule.length - 1).to_a
+    updated_indices.shuffle! if random_indices
+    current_indices.zip(updated_indices).to_h
   end
 
   def create_element_array(molfile_lines, atom_count, periodic_table_elements)

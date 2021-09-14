@@ -107,11 +107,9 @@ module Inchi
   end
 
   def sort_elements_by_index_of_edges(molecule)
-    # Replicates original sorting logic.
     # Cannot use built-in sort since indices have to be updated after every swap,
     # rather than once after sorting is done (like with the other sorting steps).
     # This is because we sort by indices.
-    # Sorting is resumed at index 0 after every swap.
     molecule = sort_edges_by_index(molecule)
     n_iterations = molecule.size - 2
     previous_molecule_states = [Marshal.load(Marshal.dump(molecule))]
@@ -135,7 +133,6 @@ module Inchi
           molecule[i], molecule[i + 1] = molecule[i + 1], molecule[i]
           molecule = update_molecule_indices(molecule)
           molecule = sort_edges_by_index(molecule)
-          break
         end
       end
       sorted = previous_molecule_states.include?(molecule) ? true : false

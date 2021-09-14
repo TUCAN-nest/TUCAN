@@ -2,7 +2,6 @@ require 'minitest/autorun'
 require './inchi'
 require './periodic_table'
 
-
 class Molecule
   include Inchi
   include PeriodicTable
@@ -12,11 +11,15 @@ class Molecule
     @reference_ninchi_string = ninchi_string
     molfile = read_molfile("test/testfiles/#{name}/#{name}.mol")
     @molecule_array = create_molecule_array(molfile, PeriodicTable::ELEMENTS)
-    @canonicalized_molecule = canonicalize_molecule(@molecule_array)
   end
 
-  def ninchi_string
-    write_ninchi_string(@canonicalized_molecule, PeriodicTable::ELEMENTS)
+  def ninchi_string_original_input
+    write_ninchi_string(canonicalize_molecule(@molecule_array), PeriodicTable::ELEMENTS)
+  end
+
+  def ninchi_string_permuted_input
+    permuted_molecule_array = update_molecule_indices(@molecule_array, random_indices: true)
+    write_ninchi_string(canonicalize_molecule(permuted_molecule_array), PeriodicTable::ELEMENTS)
   end
 end
 
@@ -47,8 +50,13 @@ class TestSuite < Minitest::Test
   # Metaprogramming shenanigans for test parameterization (as in pytest)
   # inspired by https://stackoverflow.com/questions/18770988/.
   MoleculeCollection.new.molecules.each do |molecule|
-    define_method("test_ninchi_string_#{molecule}") do
-      assert_equal molecule.reference_ninchi_string, molecule.ninchi_string
+    define_method("test_ninchi_string_original_input_#{molecule}") do
+      assert_equal molecule.reference_ninchi_string, molecule.ninchi_string_original_input
+    end
+
+    # Test a random permutation of the molecule indices (generates different permutation on each run).
+    define_method("test_ninchi_string_permuted_input_#{molecule}") do
+      assert_equal molecule.reference_ninchi_string, molecule.ninchi_string_permuted_input
     end
   end
 end

@@ -52,8 +52,9 @@ module Inchi
     "nInChI=1S/#{sum_formula}/c#{serialized_molecule}"
   end
 
-  def write_dot_file(molecule, periodic_table_elements, periodic_table_colors)
-    dotfile = "graph test\n{\n  bgcolor=grey\n"
+  def write_dot_file(molecule, filename, periodic_table_elements, periodic_table_colors)
+    filename = File.basename(filename, '.mol')
+    dotfile = "graph "+filename+"\n{\n  bgcolor=grey\n"
     molecule.each_with_index do |atom, i|
       symbol = periodic_table_elements[atom[0][1]]
       color = periodic_table_colors.fetch(symbol, 'lightgrey')

@@ -19,27 +19,29 @@ module Inchi
     element_array.zip(edge_array)
   end
 
-  def canonicalize_molecule(molecule)
-    puts "\nInitial molecule:"
-    print_molecule(molecule)
+  def canonicalize_molecule(molecule, filename)
+    filename = File.basename(filename, '.mol')
+
+    print_molecule(molecule,
+      "\nInitial data structure of #{filename}:")
 
     sorted_molecule = sort_elements_by_atomic_mass(molecule)
-    puts "\nMolecule with elements sorted by atomic mass (increasing):"
-    print_molecule(sorted_molecule)
+    print_molecule(sorted_molecule,
+      "\n#{filename} with atoms sorted by atomic mass (increasing):")
 
     sorted_molecule = sort_elements_by_number_of_edges(sorted_molecule)
-    puts "\nMolecule with elements of same kind sorted by number of edges (increasing):"
-    print_molecule(sorted_molecule)
+    print_molecule(sorted_molecule,
+      "\n#{filename} with atoms of same kind sorted by number of edges (increasing):")
 
     sorted_molecule = update_molecule_indices(sorted_molecule)
-    puts "\nMolecule with updated indices after sorting:"
-    print_molecule(sorted_molecule)
+    print_molecule(sorted_molecule,
+      "\n#{filename} with updated indices after sorting:")
 
     *previous_molecule_states, sorted_molecule = sort_elements_by_index_of_edges(sorted_molecule)
-    puts "\nMolecule with elements of same kind and same number of edges sorted by indices of edges (increasing):"
-    print_molecule(sorted_molecule)
+    print_molecule(sorted_molecule,
+      "\n#{filename} with atoms of same kind and same number of edges sorted by indices of edges (increasing):")
 
-    inspect_molecule_states(previous_molecule_states, sorted_molecule)
+    inspect_molecule_states(previous_molecule_states, sorted_molecule, filename)
 
     sorted_molecule
   end
@@ -223,20 +225,21 @@ module Inchi
     [vertex1, vertex2]
   end
 
-  def print_molecule(molecule)
+  def print_molecule(molecule, caption)
+    puts caption
     puts "\nindex\tmass\tindices of connected atoms"
     puts "-----\t----\t--------------------------"
     molecule.each { |atom| puts "#{atom[0][0]}\t#{atom[0][1] + 1}\t#{atom[1]}" }
   end
 
-  def inspect_molecule_states(previous_states, final_state)
-    puts "\nPrinting all molecule states that occured during sorting by indices of edges..."
+  def inspect_molecule_states(previous_states, final_state, filename)
+    puts "\nPrinting all molecule states of #{filename} that occured during sorting by indices of edges..."
     previous_states.each_with_index do |state, i|
-      puts "\nIteration #{i} yielded the following state:"
-      print_molecule(state)
+      print_molecule(state,
+        "\nIteration #{i} yielded the following state:")
     end
-    puts "\nSorting converged in iteration #{previous_states.size} with re-occurence of state at iteration #{previous_states.index(final_state)}:"
-    print_molecule(final_state)
+    print_molecule(final_state,
+      "\nSorting converged in iteration #{previous_states.size} with re-occurence of state at iteration #{previous_states.index(final_state)}:")
   end
 
 end

@@ -29,10 +29,10 @@ class CommandLineInterface
 
     molecule = create_molecule_array(molfile_data, PeriodicTable::ELEMENTS)
     molecule = update_molecule_indices(molecule, random_indices: true) if @permute
-    canonicalized_molecule = canonicalize_molecule(molecule)
-    puts "\n#{write_ninchi_string(canonicalized_molecule, PeriodicTable::ELEMENTS)}"
-    puts "\n#{write_dot_file(canonicalized_molecule, PeriodicTable::ELEMENTS, PeriodicTable::ELEMENT_COLORS)}"
-    puts 'Output format: DOT file - to display go to https://dreampuf.github.io/GraphvizOnline/#'
+    canonicalized_molecule = canonicalize_molecule(molecule, @filename)
+    puts "\nnInChI string for #{File.basename(@filename, '.mol')}:\n#{write_ninchi_string(canonicalized_molecule, PeriodicTable::ELEMENTS)}"
+    puts "\nDOT file for #{File.basename(@filename, '.mol')} (display graph at https://dreampuf.github.io/GraphvizOnline/#):\n#{write_dot_file(canonicalized_molecule, PeriodicTable::ELEMENTS, PeriodicTable::ELEMENT_COLORS)}"
+    puts "#{'-' * 100}\n#{'-' * 100}"
   end
 end
 

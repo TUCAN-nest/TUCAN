@@ -8,18 +8,19 @@ class Molecule
   attr_reader :reference_ninchi_string
 
   def initialize(name, ninchi_string)
+    @name = name
     @reference_ninchi_string = ninchi_string
     molfile = read_molfile("test/testfiles/#{name}/#{name}.mol")
     @molecule_array = create_molecule_array(molfile, PeriodicTable::ELEMENTS)
   end
 
   def ninchi_string_original_input
-    write_ninchi_string(canonicalize_molecule(@molecule_array), PeriodicTable::ELEMENTS)
+    write_ninchi_string(canonicalize_molecule(@molecule_array, @name), PeriodicTable::ELEMENTS)
   end
 
   def ninchi_string_permuted_input
     permuted_molecule_array = update_molecule_indices(@molecule_array, random_indices: true)
-    write_ninchi_string(canonicalize_molecule(permuted_molecule_array), PeriodicTable::ELEMENTS)
+    write_ninchi_string(canonicalize_molecule(permuted_molecule_array, @name), PeriodicTable::ELEMENTS)
   end
 end
 

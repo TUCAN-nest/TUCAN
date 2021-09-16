@@ -7,19 +7,17 @@
 
 name: Ruby
 
-on:
-  push:
-    branches: [ refactor_sorting ]
-  pull_request:
-    branches: [ refactor_sorting ]
+on: [push, pull_request]
 
 jobs:
   test:
 
-    runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
+        os: [ubuntu-latest, windows-latest]
         ruby-version: ['2.6', '2.7', '3.0']
+    runs-on: ${{ matrix.os }}
 
     steps:
     - uses: actions/checkout@v2

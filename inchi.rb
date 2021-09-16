@@ -159,17 +159,36 @@ module Inchi
   end
 
   def sort_elements_by_number_of_edges(molecule)
-    molecule.sort do |atom_a, atom_b|
+    # Note that `each_with_index` returns position of atom in molecule array,
+    # not atom ID (i.e., atom[0][0]).
+    molecule.each_with_index.sort { |(atom_a, idx_a), (atom_b, idx_b)|
+
       mass_a = atom_a[0][1]
       mass_b = atom_b[0][1]
       edge_indices_a = atom_a[1]
       edge_indices_b = atom_b[1]
-      mass_a == mass_b ? edge_indices_a.length <=> edge_indices_b.length : 0
-    end
+
+      order = 0 # assume unequal masses and hence no swap; note that sort is not stable if order = 0
+      order = edge_indices_a.length <=> edge_indices_b.length if mass_a == mass_b # sort by vertex degree in case of equal masses
+      order = idx_a <=> idx_b if order.zero? # sort by index in case of a) unequal masses or b) equal masses and equal vertex degree; this ensures stable sort
+      order
+
+    }.map(&:first) # discard index (second element)
   end
 
   def sort_elements_by_atomic_mass(molecule)
-    molecule.sort { |a, b| a[0][1] <=> b[0][1] }
+    # Note that `each_with_index` returns position of atom in molecule array,
+    # not atom ID (i.e., atom[0][0]).
+    molecule.each_with_index.sort { |(atom_a, idx_a), (atom_b, idx_b)|
+
+      mass_a = atom_a[0][1]
+      mass_b = atom_b[0][1]
+
+      order = mass_a <=> mass_b
+      order = idx_a <=> idx_b if order.zero? # sort by index in case of equal masses (i.e., order = 0); this ensures stable sort
+      order
+
+    }.map(&:first) # discard index (second element)
   end
 
   def update_molecule_indices(molecule, random_indices=false)

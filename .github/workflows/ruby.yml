@@ -17,6 +17,10 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
         ruby-version: ['2.6', '2.7', '3.0']
+        exclude:
+          # Ruby 3.0 doesn't seem available on windows-latest
+          - os: windows-latest
+            ruby-version: '3.0'
     runs-on: ${{ matrix.os }}
 
     steps:

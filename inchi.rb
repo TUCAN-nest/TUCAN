@@ -24,9 +24,15 @@ end
 module Inchi
 
   def read_molfile(filename)
-    raise "Please provide a filename." if filename.nil?
-    raise "File `#{filename}` doesn't exist." unless File.exist?(filename)
-
+    if(filename.nil?)
+      print "\nPlease provide a filename.\n"
+      exit(false)
+    end
+    unless File.exist?(filename)
+      print "\n#{filename} doesn't exist.\n"
+      exit(false)
+    end
+    
     molfile = File.read(filename) # reads entire file and closes it
     molfile.split("\n")
   end

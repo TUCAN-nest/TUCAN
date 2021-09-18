@@ -1,13 +1,11 @@
 require './inchi'
 require 'optparse'
-require './periodic_table'
 
 # run as `ruby cli_app.rb --molfile=<path/to/molefile>`
 # run with `--permute-input` flag in order to randomly permute the atom indices
 
 class CommandLineInterface
   include Inchi
-  include PeriodicTable
 
   def initialize
     options = {}
@@ -27,11 +25,11 @@ class CommandLineInterface
     puts "\nPrinting molfile: #{@filename}. First 4 lines contain header."
     molfile_data.each { |line| puts line }
 
-    molecule = create_molecule_array(molfile_data, PeriodicTable::ELEMENTS)
+    molecule = create_molecule_array(molfile_data)
     molecule = update_molecule_indices(molecule, random_indices: true) if @permute
     canonicalized_molecule = canonicalize_molecule(molecule, @filename)
-    puts "\nnInChI string for #{File.basename(@filename, '.mol')}:\n#{write_ninchi_string(canonicalized_molecule, PeriodicTable::ELEMENTS)}"
-    puts "\nDOT file for #{File.basename(@filename, '.mol')} (display graph at https://dreampuf.github.io/GraphvizOnline/#):\n#{write_dot_file(canonicalized_molecule, @filename, PeriodicTable::ELEMENTS, PeriodicTable::ELEMENT_COLORS)}"
+    puts "\nnInChI string for #{File.basename(@filename, '.mol')}:\n#{write_ninchi_string(canonicalized_molecule)}"
+    puts "\nDOT file for #{File.basename(@filename, '.mol')} (display graph at https://dreampuf.github.io/GraphvizOnline/#):\n#{write_dot_file(canonicalized_molecule, @filename)}"
     puts "#{'-' * 100}\n#{'-' * 100}"
   end
 end

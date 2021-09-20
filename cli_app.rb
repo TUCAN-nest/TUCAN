@@ -9,11 +9,18 @@ class CommandLineInterface
 
   def initialize
     options = {}
-    OptionParser.new do |opt|
-      opt.on('--molfile MOLFILE') { |o| options[:molfile] = o }
-      opt.on('--permute-input') { |o| options[:permute] = o }
+    begin
+    OptionParser.new do |opts|
+      opts.on('--molfile MOLFILE') { |o| options[:molfile] = o }
+      opts.on('--permute-input') { |o| options[:permute] = o }
     end.parse!
+    rescue OptionParser::InvalidOption => e
+      abort("#{e}")
+    end
+
     @filename = options[:molfile]
+    abort('Please provide a filename.') if @filename.nil?
+    abort("File `#{@filename}` doesn't exist.") unless File.exist?(@filename)
     @permute = options[:permute] || false
   end
 

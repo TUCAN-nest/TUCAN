@@ -1,3 +1,5 @@
+# (c) CC BY-SA | Jan C. Brammer, RWTH Aachen and Ulrich Schatzschneider, Universität Würzburg | NFDI4Chem | v2.1 | 18.09.2021
+
 require './inchi'
 require 'optparse'
 
@@ -13,6 +15,7 @@ class CommandLineInterface
     OptionParser.new do |opts|
       opts.on('--molfile MOLFILE') { |o| options[:molfile] = o }
       opts.on('--permute-input') { |o| options[:permute] = o }
+      opts.on('--dot-file') { |o| options[:dot_file] = o }
     end.parse!
     rescue OptionParser::InvalidOption => e
       abort("#{e}")
@@ -22,22 +25,29 @@ class CommandLineInterface
     abort('Please provide a filename.') if @filename.nil?
     abort("File `#{@filename}` doesn't exist.") unless File.exist?(@filename)
     @permute = options[:permute] || false
+    @print_dot_file = options[:dot_file] || false
   end
 
   def run
-    puts "\nA new International Chemical Identifier (nInChI)"
-    puts 'CC BY-SA | Ulrich Schatzschneider | Universität Würzburg | NFDI4Chem | v1.4 | 06/2021'
-
+    puts "#{'-' * 100}\n"
+    puts "\nA new International Chemical Identifier (nInChI) v2.1\n"
+    puts "\nJan Brammer (RWTH Aachen) and Ulrich Schatzschneider (Universität Würzburg) within NFDI4Chem\n"
+    puts "\nCC BY-SA 09/2021\n"
+    puts "\n#{'-' * 100}\n"
     molfile_data = read_molfile(@filename)
     puts "\nPrinting molfile: #{@filename}. First 4 lines contain header."
+    puts "\n#{'-' * 75}\n"
     molfile_data.each { |line| puts line }
-
-    molecule = create_molecule_array(molfile_data)
-    molecule = update_molecule_indices(molecule, random_indices: true) if @permute
-    canonicalized_molecule = canonicalize_molecule(molecule, @filename)
-    puts "\nnInChI string for #{File.basename(@filename, '.mol')}:\n#{write_ninchi_string(canonicalized_molecule)}"
-    puts "\nDOT file for #{File.basename(@filename, '.mol')} (display graph at https://dreampuf.github.io/GraphvizOnline/#):\n#{write_dot_file(canonicalized_molecule, @filename)}"
-    puts "#{'-' * 100}\n#{'-' * 100}"
+    puts "\n#{'-' * 75}\n"
+    molecule = create_molecule_array(molfile_data, PeriodicTable::ELEMENTS)
+    adjacency_matrix, atom_list = create_adjacency_matrix(molecule)
+    adjacency_matrix, atom_list = sort_adjacency_matrix(adjacency_matrix, atom_list)
+    print "\nFINAL STAGE \n"
+    print_adjacency_matrix(adjacency_matrix, atom_list)
+    puts "\n#{write_ninchi_string(molecule,adjacency_matrix, PeriodicTable::ELEMENTS)}"
+    puts "\n#{write_dot_file(adjacency_matrix, atom_list, @filename, PeriodicTable::ELEMENTS, PeriodicTable::ELEMENT_COLORS)}" if @print_dot_file
+    puts "\nOutput format: DOT file - to display go to https://dreampuf.github.io/GraphvizOnline/#" if @print_dot_file
+    puts "\n#{'-' * 100}\n"
   end
 end
 

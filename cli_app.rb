@@ -12,11 +12,11 @@ class CommandLineInterface
   def initialize
     options = {}
     begin
-    OptionParser.new do |opts|
-      opts.on('--molfile MOLFILE') { |o| options[:molfile] = o }
-      opts.on('--permute-input') { |o| options[:permute] = o }
-      opts.on('--dot-file') { |o| options[:dot_file] = o }
-    end.parse!
+      OptionParser.new do |opts|
+        opts.on('--molfile MOLFILE') { |o| options[:molfile] = o }
+        opts.on('--permute-input') { |o| options[:permute] = o }
+        opts.on('--dot-file') { |o| options[:dot_file] = o }
+      end.parse!
     rescue OptionParser::InvalidOption => e
       abort("#{e}")
     end
@@ -44,8 +44,9 @@ class CommandLineInterface
     adjacency_matrix, atom_list = sort_adjacency_matrix(adjacency_matrix, atom_list)
     print "\nFINAL STAGE \n"
     print_adjacency_matrix(adjacency_matrix, atom_list)
-    puts "\n#{write_ninchi_string(molecule,adjacency_matrix, PeriodicTable::ELEMENTS)}"
-    puts "\n#{write_dot_file(adjacency_matrix, atom_list, @filename, PeriodicTable::ELEMENTS, PeriodicTable::ELEMENT_COLORS)}" if @print_dot_file
+    puts "\n#{write_ninchi_string(molecule, adjacency_matrix, PeriodicTable::ELEMENTS)}"
+    puts "\n#{write_dot_file(adjacency_matrix, atom_list, @filename, PeriodicTable::ELEMENTS,
+                             PeriodicTable::ELEMENT_COLORS)}" if @print_dot_file
     puts "\nOutput format: DOT file - to display go to https://dreampuf.github.io/GraphvizOnline/#" if @print_dot_file
     puts "\n#{'-' * 100}\n"
   end

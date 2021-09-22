@@ -51,7 +51,7 @@ module Inchi
         end
       end
     end
-    [adjacency_matrix, atom_list] # better also directly calculate and return "neighbour list" here, as needed in the 3rd sorting cycle
+    [adjacency_matrix, atom_list] # better also directly calculate and return "neighbour list" here, as needed in the 3rd sorting step
   end
 
   def swap_adjacency_matrix_elements(adjacency_matrix, atom_list, i, j)
@@ -76,7 +76,7 @@ module Inchi
   end
 
   def sort_adjacency_matrix(adjacency_matrix, atom_list)
-    cycle = 1
+    iteration = 1
     converged = false
     print "\nNow sorting adjacency matrix\n"
     print_adjacency_matrix(adjacency_matrix, atom_list)
@@ -84,7 +84,7 @@ module Inchi
     print "\nNumber of atoms: #{atom_count}\n"
     previous_molecule_states = [Marshal.load(Marshal.dump(adjacency_matrix))]
     until converged == true
-      print "\nCycle ##{cycle}\n"
+      print "\nIteration ##{iteration}\n"
 
       #
       # sort by atomic mass
@@ -143,12 +143,12 @@ module Inchi
 
       if (previous_molecule_states.include?(adjacency_matrix))
         converged = true
-        print "\nOptimitation has converged\n"
+        print "\nSorting has converged.\n"
       end
 
       previous_molecule_states.push(Marshal.load(Marshal.dump(adjacency_matrix)))
 
-      cycle += 1
+      iteration += 1
       print_adjacency_matrix(adjacency_matrix, atom_list)
     end
     [adjacency_matrix, atom_list]

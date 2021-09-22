@@ -4,14 +4,6 @@ require './periodic_table'
 
 module Inchi
   def read_molfile(filename)
-    if (filename.nil?)
-      print "\nPlease provide a filename.\n"
-      exit(false)
-    end
-    unless File.exist?(filename)
-      print "\n#{filename} doesn't exist.\n"
-      exit(false)
-    end
     molfile = File.read(filename) # reads entire file and closes it
     molfile.split("\n")
   end

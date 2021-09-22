@@ -10,13 +10,12 @@ class Molecule
     @name = name
     @reference_ninchi_string = ninchi_string
     molfile = read_molfile("test/testfiles/#{name}/#{name}.mol")
-    @molecule = create_molecule_array(molfile, PeriodicTable::ELEMENTS)
-    @adjacency_matrix, @atom_list = create_adjacency_matrix(@molecule)
+    @adjacency_matrix, @atom_list = create_adjacency_matrix(molfile, PeriodicTable::ELEMENTS)
   end
 
   def ninchi_string_original_input
     adjacency_matrix, atom_list = sort_adjacency_matrix(@adjacency_matrix, @atom_list)
-    write_ninchi_string(@molecule, adjacency_matrix, PeriodicTable::ELEMENTS)
+    write_ninchi_string(adjacency_matrix, atom_list, PeriodicTable::ELEMENTS)
   end
 
 end

@@ -39,12 +39,11 @@ class CommandLineInterface
     puts "\n#{'-' * 75}\n"
     molfile_data.each { |line| puts line }
     puts "\n#{'-' * 75}\n"
-    molecule = create_molecule_array(molfile_data, PeriodicTable::ELEMENTS)
-    adjacency_matrix, atom_list = create_adjacency_matrix(molecule)
+    adjacency_matrix, atom_list = create_adjacency_matrix(molfile_data, PeriodicTable::ELEMENTS)
     adjacency_matrix, atom_list = sort_adjacency_matrix(adjacency_matrix, atom_list)
     print "\nFINAL STAGE \n"
     print_adjacency_matrix(adjacency_matrix, atom_list)
-    puts "\n#{write_ninchi_string(molecule, adjacency_matrix, PeriodicTable::ELEMENTS)}"
+    puts "\n#{write_ninchi_string(adjacency_matrix, atom_list, PeriodicTable::ELEMENTS)}"
     puts "\n#{write_dot_file(adjacency_matrix, atom_list, @filename, PeriodicTable::ELEMENTS,
                              PeriodicTable::ELEMENT_COLORS)}" if @print_dot_file
     puts "\nOutput format: DOT file - to display go to https://dreampuf.github.io/GraphvizOnline/#" if @print_dot_file

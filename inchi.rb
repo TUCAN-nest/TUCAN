@@ -8,25 +8,16 @@ module Inchi
     molfile.split("\n")
   end
 
-  def create_molecule_array(molfile_lines, periodic_table_elements)
-    # Represent molecule as list with each entry representing one element and its
-    # linked elements in the format: [[index, atomic mass], [index, ..., index]].
-    atom_count, edge_count = molfile_lines[3].scan(/\d+/).map(&:to_i) # on 4th  line, 1st number is number of atoms, 2nd number is number of bonds.
-    element_array = create_element_array(molfile_lines, atom_count, periodic_table_elements)
-    edge_array = create_edge_array(molfile_lines, edge_count, atom_count)
-    element_array.zip(edge_array)
-  end
-
-  def create_element_array(molfile_lines, atom_count, periodic_table_elements)
+  def create_atom_list(molfile_lines, atom_count, periodic_table_elements)
     elements = []
     (4..atom_count + 3).each_with_index do |atom_index, i|
       atom = molfile_lines[atom_index].split(' ')[3]
-      elements.push([i, periodic_table_elements.index(atom)])
+      elements.push(periodic_table_elements.index(atom) + 1)
     end
     elements
   end
 
-  def create_edge_array(molfile_lines, edge_count, atom_count)
+  def create_edge_list(molfile_lines, edge_count, atom_count)
     edges = Array.new(atom_count).map(&:to_a)
     (0..edge_count - 1).each do |edge_index|
       vertex1, vertex2 = parse_edge(molfile_lines[edge_index + 4 + atom_count])
@@ -42,23 +33,23 @@ module Inchi
     [vertex1, vertex2]
   end
 
-  def create_adjacency_matrix(molecule)
-    n = molecule.length
-    rows, columns, default_value = n, n, 0
+  def create_adjacency_matrix(molfile_lines, periodic_table_elements)
+    atom_count, edge_count = molfile_lines[3].scan(/\d+/).map(&:to_i) # on 4th  line, 1st number is number of atoms, 2nd number is number of bonds.
+    atom_list = create_atom_list(molfile_lines, atom_count, periodic_table_elements)
+    edge_list = create_edge_list(molfile_lines, edge_count, atom_count)
+    rows, columns, default_value = atom_count, atom_count, 0
     adjacency_matrix = Array.new(rows) { Array.new(columns, default_value) }
-    atom_list = Array.new(columns)
     # in general, further "atom property lists" could be added here e.g. for isotopes, stereochemistry, ...
-    print "\nAdjacency matrix is #{n} x #{n}\n"
-    (0..n - 1).each do |row|
-      line = molecule[row][1]
-      (0..n - 1).each do |column|
+    print "\nAdjacency matrix is #{atom_count} x #{atom_count}\n"
+    (0..atom_count - 1).each do |row|
+      line = edge_list[row]
+      (0..atom_count - 1).each do |column|
         line.each do |entry|
           if (entry == column)
             adjacency_matrix[row][column] = 1 # here, in general, the edges (=bonds) could also be assigned additional properties by setting a value larger than 1, such as bond type/bond order (or a "bit field" or a another list/array)
           end
         end
       end
-      atom_list[row] = molecule[row][0][1] + 1 # copy atomic mass number from molecule array and add 1 since ELEMENTS array index starts at zero
     end
     [adjacency_matrix, atom_list] # better also directly calculate and return "neighbour list" here, as needed in the 3rd sorting cycle
   end
@@ -190,8 +181,8 @@ module Inchi
     end
   end
 
-  def write_ninchi_string(molecule, adjacency_matrix, periodic_table_elements)
-    sum_formula = write_sum_formula_string(molecule, periodic_table_elements)
+  def write_ninchi_string(adjacency_matrix, atom_list, periodic_table_elements)
+    sum_formula = write_sum_formula_string(atom_list, periodic_table_elements)
     serialized_molecule = serialize_molecule(adjacency_matrix)
     "nInChI=1S/#{sum_formula}/c#{serialized_molecule}"
   end
@@ -253,9 +244,9 @@ module Inchi
     inchi_string
   end
 
-  def write_sum_formula_string(molecule, periodic_table_elements)
+  def write_sum_formula_string(atom_list, periodic_table_elements)
     # Write sum formula in the order C > H > all other elements in alphabetic order.
-    element_counts = compute_element_counts(molecule, periodic_table_elements)
+    element_counts = compute_element_counts(atom_list, periodic_table_elements)
     element_counts.transform_values! { |v| v > 1 ? v : '' } # remove 1s since counts of 1 are implicit in sum formula
     sum_formula_string = ''
     sum_formula_string += "C#{element_counts['C']}" if element_counts.key?('C')
@@ -266,12 +257,12 @@ module Inchi
     sum_formula_string
   end
 
-  def compute_element_counts(molecule, periodic_table_elements)
+  def compute_element_counts(atom_list, periodic_table_elements)
     # Compute hash table mapping element symbols to stoichiometric counts.
-    unique_elements = molecule.map { |atom| atom[0][1] }.uniq
+    unique_elements = atom_list.uniq
     initial_counts = Array.new(unique_elements.length, 0)
     element_counts = unique_elements.zip(initial_counts).to_h
-    molecule.each { |atom| element_counts[atom[0][1]] += 1 }
-    element_counts.transform_keys! { |k| periodic_table_elements[k] } # change atomic mass to element symbol
+    atom_list.each { |atom| element_counts[atom] += 1 }
+    element_counts.transform_keys! { |k| periodic_table_elements[k - 1] } # change atomic mass to element symbol; k - 1; convert from mass back to index
   end
 end

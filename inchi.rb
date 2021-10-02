@@ -54,12 +54,12 @@ module Inchi
     [adjacency_matrix, atom_list] # better also directly calculate and return "neighbour list" here, as needed in the 3rd sorting step
   end
 
-  def swap_adjacency_matrix_elements(adjacency_matrix, atom_list, i, j)
-    atom_a = atom_list[i]
-    atom_b = atom_list[j]
-    atom_list[i] = atom_b
-    atom_list[j] = atom_a
-    atom_count = atom_list.length - 1
+  def swap_adjacency_matrix_elements(adjacency_matrix, node_features_matrix, i, j)
+    atom_a = node_features_matrix[i]
+    atom_b = node_features_matrix[j]
+    node_features_matrix[i] = atom_b
+    node_features_matrix[j] = atom_a
+    atom_count = node_features_matrix.length - 1
     for column in 0..atom_count
       atom_a = adjacency_matrix[i][column]
       atom_b = adjacency_matrix[j][column]
@@ -72,15 +72,15 @@ module Inchi
       adjacency_matrix[row][i] = atom_b
       adjacency_matrix[row][j] = atom_a
     end
-    [adjacency_matrix, atom_list]
+    [adjacency_matrix, node_features_matrix]
   end
 
-  def sort_adjacency_matrix(adjacency_matrix, atom_list)
+  def sort_adjacency_matrix(adjacency_matrix, node_features_matrix)
     iteration = 1
     converged = false
     print "\nNow sorting adjacency matrix\n"
-    print_adjacency_matrix(adjacency_matrix, atom_list)
-    atom_count = atom_list.length
+    print_adjacency_matrix(adjacency_matrix, node_features_matrix)
+    atom_count = node_features_matrix.length
     print "\nNumber of atoms: #{atom_count}\n"
     previous_molecule_states = [Marshal.load(Marshal.dump(adjacency_matrix))]
     until converged == true
@@ -91,8 +91,8 @@ module Inchi
       #
 
       for row in 0..atom_count - 2
-        if (atom_list[row] > atom_list[row + 1])
-          adjacency_matrix, atom_list = swap_adjacency_matrix_elements(adjacency_matrix, atom_list, row, row + 1)
+        if (node_features_matrix[row] > node_features_matrix[row + 1])
+          adjacency_matrix, node_features_matrix = swap_adjacency_matrix_elements(adjacency_matrix, node_features_matrix, row, row + 1)
           # break
         end
       end
@@ -112,8 +112,8 @@ module Inchi
             edge_count_B += 1
           end
         end
-        if ((atom_list[row] == atom_list[row + 1]) && (edge_count_A > edge_count_B))
-          adjacency_matrix, atom_list = swap_adjacency_matrix_elements(adjacency_matrix, atom_list, row, row + 1)
+        if ((node_features_matrix[row] == node_features_matrix[row + 1]) && (edge_count_A > edge_count_B))
+          adjacency_matrix, node_features_matrix = swap_adjacency_matrix_elements(adjacency_matrix, node_features_matrix, row, row + 1)
         end
       end
 
@@ -136,8 +136,8 @@ module Inchi
             connectivity_index_B = connectivity_index_B + adjacency_matrix[row + 1][column] * (column + 1) # column index number * matrix element (0 or 1)
           end
         end
-        if ((atom_list[row] == atom_list[row + 1]) && (edge_count_A == edge_count_B) && (connectivity_index_B < connectivity_index_A))
-          adjacency_matrix, atom_list = swap_adjacency_matrix_elements(adjacency_matrix, atom_list, row, row + 1)
+        if ((node_features_matrix[row] == node_features_matrix[row + 1]) && (edge_count_A == edge_count_B) && (connectivity_index_B < connectivity_index_A))
+          adjacency_matrix, node_features_matrix = swap_adjacency_matrix_elements(adjacency_matrix, node_features_matrix, row, row + 1)
         end
       end
 
@@ -149,12 +149,12 @@ module Inchi
       previous_molecule_states.push(Marshal.load(Marshal.dump(adjacency_matrix)))
 
       iteration += 1
-      print_adjacency_matrix(adjacency_matrix, atom_list)
+      print_adjacency_matrix(adjacency_matrix, node_features_matrix)
     end
-    [adjacency_matrix, atom_list]
+    [adjacency_matrix, node_features_matrix]
   end
 
-  def print_adjacency_matrix(adjacency_matrix, atom_list)
+  def print_adjacency_matrix(adjacency_matrix, node_features_matrix)
     i = 0
     n = adjacency_matrix.length
     (0..n - 1).each do |row|
@@ -176,23 +176,23 @@ module Inchi
         end
       end
       neighbours.chop!
-      print " [#{atom_list[i]}] [#{edge_count}] [#{connectivity_index}] [#{neighbours}]\n"
+      print " [#{node_features_matrix[i]}] [#{edge_count}] [#{connectivity_index}] [#{neighbours}]\n"
       i = i + 1
     end
   end
 
-  def write_ninchi_string(adjacency_matrix, atom_list, periodic_table_elements)
-    sum_formula = write_sum_formula_string(atom_list, periodic_table_elements)
+  def write_ninchi_string(adjacency_matrix, node_features_matrix, periodic_table_elements)
+    sum_formula = write_sum_formula_string(node_features_matrix, periodic_table_elements)
     serialized_molecule = serialize_molecule(adjacency_matrix)
     "nInChI=1S/#{sum_formula}/c#{serialized_molecule}"
   end
 
-  def write_dot_file(adjacency_matrix, atom_list, filename, periodic_table_elements, periodic_table_colors)
+  def write_dot_file(adjacency_matrix, node_features_matrix, filename, periodic_table_elements, periodic_table_colors)
     filename = File.basename(filename, '.mol')
     dotfile = "graph #{filename}\n{\n  bgcolor=grey\n"
     n = adjacency_matrix.length
     (0..n - 1).each do |i|
-      symbol = periodic_table_elements[atom_list[i] - 1]
+      symbol = periodic_table_elements[node_features_matrix[i] - 1]
       color = periodic_table_colors.fetch(symbol, 'lightgrey')
       dotfile += "  #{i} [label=\"#{symbol} #{i}\" color=#{color},style=filled,shape=circle,fontname=Calibri];\n"
     end
@@ -244,9 +244,9 @@ module Inchi
     inchi_string
   end
 
-  def write_sum_formula_string(atom_list, periodic_table_elements)
+  def write_sum_formula_string(node_features_matrix, periodic_table_elements)
     # Write sum formula in the order C > H > all other elements in alphabetic order.
-    element_counts = compute_element_counts(atom_list, periodic_table_elements)
+    element_counts = compute_element_counts(node_features_matrix, periodic_table_elements)
     element_counts.transform_values! { |v| v > 1 ? v : '' } # remove 1s since counts of 1 are implicit in sum formula
     sum_formula_string = ''
     sum_formula_string += "C#{element_counts['C']}" if element_counts.key?('C')
@@ -257,12 +257,12 @@ module Inchi
     sum_formula_string
   end
 
-  def compute_element_counts(atom_list, periodic_table_elements)
+  def compute_element_counts(node_features_matrix, periodic_table_elements)
     # Compute hash table mapping element symbols to stoichiometric counts.
-    unique_elements = atom_list.uniq
+    unique_elements = node_features_matrix.uniq
     initial_counts = Array.new(unique_elements.length, 0)
     element_counts = unique_elements.zip(initial_counts).to_h
-    atom_list.each { |atom| element_counts[atom] += 1 }
+    node_features_matrix.each { |atom| element_counts[atom] += 1 }
     element_counts.transform_keys! { |k| periodic_table_elements[k - 1] } # change atomic mass to element symbol; k - 1; convert from mass back to index
   end
 end

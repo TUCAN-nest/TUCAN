@@ -75,48 +75,49 @@ module Inchi
     [adjacency_matrix, node_features_matrix]
   end
 
+  def sort_by_element(adjacency_matrix, node_features_matrix) # sort by atomic mass
+    atom_count = node_features_matrix.length
+    for row in 0..atom_count-2
+      if(node_features_matrix[row] > node_features_matrix[row+1])
+        adjacency_matrix, node_features_matrix = swap_adjacency_matrix_elements(adjacency_matrix, node_features_matrix, row, row+1)
+      end
+    end
+    [adjacency_matrix, node_features_matrix]
+  end
+
+def sort_by_connectivity(adjacency_matrix, node_features_matrix) # sort by connectivity
+    atom_count = node_features_matrix.length
+    for row in 0..atom_count-2
+      edge_count_A = 0
+      edge_count_B = 0
+      for column in 0..atom_count-1
+        if(adjacency_matrix[row][column] == 1)
+          edge_count_A += 1
+        end
+        if(adjacency_matrix[row+1][column] == 1)
+          edge_count_B += 1
+        end
+      end
+      if((node_features_matrix[row] == node_features_matrix[row+1]) && (edge_count_A > edge_count_B))
+        adjacency_matrix, node_features_matrix = swap_adjacency_matrix_elements(adjacency_matrix, node_features_matrix, row, row+1)
+      end
+    end
+    [adjacency_matrix, node_features_matrix]
+  end
+  
   def sort_adjacency_matrix(adjacency_matrix, node_features_matrix)
-    iteration = 1
-    converged = false
     print "\nNow sorting adjacency matrix\n"
     print_adjacency_matrix(adjacency_matrix, node_features_matrix)
     atom_count = node_features_matrix.length
     print "\nNumber of atoms: #{atom_count}\n"
+    iteration = 1
+    converged = false
+    adjacency_matrix, node_features_matrix = sort_by_element(adjacency_matrix, node_features_matrix)
+    adjacency_matrix, node_features_matrix = sort_by_connectivity(adjacency_matrix, node_features_matrix)
     previous_molecule_states = [Marshal.load(Marshal.dump(adjacency_matrix))]
     until converged == true
       print "\nIteration ##{iteration}\n"
-
-      #
-      # sort by atomic mass
-      #
-
-      for row in 0..atom_count - 2
-        if (node_features_matrix[row] > node_features_matrix[row + 1])
-          adjacency_matrix, node_features_matrix = swap_adjacency_matrix_elements(adjacency_matrix, node_features_matrix, row, row + 1)
-          # break
-        end
-      end
-
-      #
-      # sort by connectivity
-      #
-
-      for row in 0..atom_count - 2
-        edge_count_A = 0
-        edge_count_B = 0
-        for column in 0..atom_count - 1
-          if (adjacency_matrix[row][column] == 1)
-            edge_count_A += 1
-          end
-          if (adjacency_matrix[row + 1][column] == 1)
-            edge_count_B += 1
-          end
-        end
-        if ((node_features_matrix[row] == node_features_matrix[row + 1]) && (edge_count_A > edge_count_B))
-          adjacency_matrix, node_features_matrix = swap_adjacency_matrix_elements(adjacency_matrix, node_features_matrix, row, row + 1)
-        end
-      end
-
+  
       #
       # sort by connectivity_index
       #

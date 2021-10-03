@@ -10,7 +10,7 @@ module Inchi
 
   def create_atom_list(molfile_lines, atom_count, periodic_table_elements)
     elements = []
-    (4..atom_count + 3).each_with_index do |atom_index, i|
+    (4..atom_count + 3).each_with_index do |atom_index|
       atom = molfile_lines[atom_index].split(' ')[3]
       elements.push(periodic_table_elements.index(atom) + 1)
     end

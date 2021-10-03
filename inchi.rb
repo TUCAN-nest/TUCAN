@@ -89,23 +89,27 @@ end
 
 def sort_by_connectivity(adjacency_matrix, node_features_matrix) # sort by connectivity
     atom_count = node_features_matrix.length
-    for row in 0..atom_count-2
-      edge_count_A = 0
-      edge_count_B = 0
-      for column in 0..atom_count-1
-        if(adjacency_matrix[row][column] == 1)
-          edge_count_A += 1
+    for i in (atom_count).downto(2)
+      for j in 0..(atom_count-2)
+        for row in 0..atom_count-2
+          edge_count_A = 0
+          edge_count_B = 0
+          for column in 0..atom_count-1
+            if(adjacency_matrix[row][column] == 1)
+              edge_count_A += 1
+            end
+            if(adjacency_matrix[row+1][column] == 1)
+              edge_count_B += 1
+            end
+          end
+          if((node_features_matrix[row] == node_features_matrix[row+1]) && (edge_count_A > edge_count_B))
+            adjacency_matrix, node_features_matrix = swap_adjacency_matrix_elements(adjacency_matrix, node_features_matrix, row, row+1)
+          end
         end
-        if(adjacency_matrix[row+1][column] == 1)
-          edge_count_B += 1
-        end
-      end
-      if((node_features_matrix[row] == node_features_matrix[row+1]) && (edge_count_A > edge_count_B))
-        adjacency_matrix, node_features_matrix = swap_adjacency_matrix_elements(adjacency_matrix, node_features_matrix, row, row+1)
       end
     end
     [adjacency_matrix, node_features_matrix]
-  end
+end
   
   def sort_adjacency_matrix(adjacency_matrix, node_features_matrix)
     print "\nNow sorting adjacency matrix\n"

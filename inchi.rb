@@ -75,15 +75,17 @@ module Inchi
     [adjacency_matrix, node_features_matrix]
   end
 
-  def sort_by_element(adjacency_matrix, node_features_matrix) # sort by atomic mass
+def sort_by_element(adjacency_matrix, node_features_matrix) # sort by atomic mass
     atom_count = node_features_matrix.length
-    for row in 0..atom_count-2
-      if(node_features_matrix[row] > node_features_matrix[row+1])
-        adjacency_matrix, node_features_matrix = swap_adjacency_matrix_elements(adjacency_matrix, node_features_matrix, row, row+1)
+    for i in (atom_count).downto(2)
+      for j in 0..(atom_count-2)
+        if(node_features_matrix[j] > node_features_matrix[j+1])
+          adjacency_matrix, node_features_matrix = swap_adjacency_matrix_elements(adjacency_matrix, node_features_matrix, j, j+1)
+        end
       end
     end
     [adjacency_matrix, node_features_matrix]
-  end
+end
 
 def sort_by_connectivity(adjacency_matrix, node_features_matrix) # sort by connectivity
     atom_count = node_features_matrix.length

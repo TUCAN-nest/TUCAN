@@ -110,7 +110,47 @@ def sort_by_connectivity(adjacency_matrix, node_features_matrix) # sort by conne
     end
     [adjacency_matrix, node_features_matrix]
 end
-  
+
+def sort_by_connectivity_index(adjacency_matrix, node_features_matrix) # sort by connectivity index
+    iteration = 1
+    converged = false
+   atom_count = node_features_matrix.length
+    previous_molecule_states = [Marshal.load(Marshal.dump(adjacency_matrix))]
+    until converged == true
+      print "\nCycle ##{iteration}\n"
+      for row in 0..atom_count-2
+        connectivity_index_A = 0
+        connectivity_index_B = 0
+        edge_count_A = 0
+        edge_count_B = 0
+       for column in 0..atom_count-1
+          if(adjacency_matrix[row][column] == 1)
+            edge_count_A += 1
+            connectivity_index_A = connectivity_index_A+adjacency_matrix[row][column]*(column+1) # column index number * matrix element (0 or 1)
+          end
+          if(adjacency_matrix[row+1][column] == 1)
+            edge_count_B += 1
+            connectivity_index_B = connectivity_index_B+adjacency_matrix[row+1][column]*(column+1) # column index number * matrix element (0 or 1)
+          end
+        end
+        if((node_features_matrix[row] == node_features_matrix[row+1]) && (edge_count_A == edge_count_B) && (connectivity_index_B < connectivity_index_A))
+          adjacency_matrix, node_features_matrix = swap_adjacency_matrix_elements(adjacency_matrix, node_features_matrix, row, row+1)
+        end
+      end
+
+      if(previous_molecule_states.include?(adjacency_matrix))
+        converged = true
+        print "\nOptimitation has converged\n"
+      end
+
+      previous_molecule_states.push(Marshal.load(Marshal.dump(adjacency_matrix)))
+
+      iteration += 1
+      print_adjacency_matrix(adjacency_matrix, node_features_matrix)
+    end
+    [adjacency_matrix, node_features_matrix]
+  end
+
   def sort_adjacency_matrix(adjacency_matrix, node_features_matrix)
     print "\nNow sorting adjacency matrix\n"
     print_adjacency_matrix(adjacency_matrix, node_features_matrix)
@@ -120,44 +160,7 @@ end
     converged = false
     adjacency_matrix, node_features_matrix = sort_by_element(adjacency_matrix, node_features_matrix)
     adjacency_matrix, node_features_matrix = sort_by_connectivity(adjacency_matrix, node_features_matrix)
-    previous_molecule_states = [Marshal.load(Marshal.dump(adjacency_matrix))]
-    until converged == true
-      print "\nIteration ##{iteration}\n"
-  
-      #
-      # sort by connectivity_index
-      #
-
-      for row in 0..atom_count - 2
-        connectivity_index_A = 0
-        connectivity_index_B = 0
-        edge_count_A = 0
-        edge_count_B = 0
-        for column in 0..atom_count - 1
-          if (adjacency_matrix[row][column] == 1)
-            edge_count_A += 1
-            connectivity_index_A = connectivity_index_A + adjacency_matrix[row][column] * (column + 1) # column index number * matrix element (0 or 1)
-          end
-          if (adjacency_matrix[row + 1][column] == 1)
-            edge_count_B += 1
-            connectivity_index_B = connectivity_index_B + adjacency_matrix[row + 1][column] * (column + 1) # column index number * matrix element (0 or 1)
-          end
-        end
-        if ((node_features_matrix[row] == node_features_matrix[row + 1]) && (edge_count_A == edge_count_B) && (connectivity_index_B < connectivity_index_A))
-          adjacency_matrix, node_features_matrix = swap_adjacency_matrix_elements(adjacency_matrix, node_features_matrix, row, row + 1)
-        end
-      end
-
-      if (previous_molecule_states.include?(adjacency_matrix))
-        converged = true
-        print "\nSorting has converged.\n"
-      end
-
-      previous_molecule_states.push(Marshal.load(Marshal.dump(adjacency_matrix)))
-
-      iteration += 1
-      print_adjacency_matrix(adjacency_matrix, node_features_matrix)
-    end
+    adjacency_matrix, node_features_matrix = sort_by_connectivity_index(adjacency_matrix, node_features_matrix)
     [adjacency_matrix, node_features_matrix]
   end
 

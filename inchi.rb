@@ -114,7 +114,7 @@ end
 def sort_by_connectivity_index(adjacency_matrix, node_features_matrix) # sort by connectivity index
     iteration = 1
     converged = false
-   atom_count = node_features_matrix.length
+    atom_count = node_features_matrix.length
     previous_molecule_states = [Marshal.load(Marshal.dump(adjacency_matrix))]
     until converged == true
       print "\nCycle ##{iteration}\n"
@@ -152,12 +152,10 @@ def sort_by_connectivity_index(adjacency_matrix, node_features_matrix) # sort by
   end
 
   def sort_adjacency_matrix(adjacency_matrix, node_features_matrix)
+    atom_count = node_features_matrix.length
     print "\nNow sorting adjacency matrix\n"
     print_adjacency_matrix(adjacency_matrix, node_features_matrix)
-    atom_count = node_features_matrix.length
     print "\nNumber of atoms: #{atom_count}\n"
-    iteration = 1
-    converged = false
     adjacency_matrix, node_features_matrix = sort_by_element(adjacency_matrix, node_features_matrix)
     adjacency_matrix, node_features_matrix = sort_by_connectivity(adjacency_matrix, node_features_matrix)
     adjacency_matrix, node_features_matrix = sort_by_connectivity_index(adjacency_matrix, node_features_matrix)

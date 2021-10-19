@@ -39,12 +39,12 @@ class CommandLineInterface
     puts "\n#{'-' * 75}\n"
     molfile_data.each { |line| puts line }
     puts "\n#{'-' * 75}\n"
-    adjacency_matrix, atom_list = create_adjacency_matrix(molfile_data, PeriodicTable::ELEMENTS)
-    adjacency_matrix, atom_list = sort_adjacency_matrix(adjacency_matrix, atom_list)
+    adjacency_matrix, node_features_matrix = create_adjacency_matrix(molfile_data, PeriodicTable::ELEMENTS)
+    adjacency_matrix, node_features_matrix = sort_adjacency_matrix(adjacency_matrix, node_features_matrix)
     print "\nFINAL STAGE \n"
-    print_adjacency_matrix(adjacency_matrix, atom_list)
-    puts "\n#{write_ninchi_string(adjacency_matrix, atom_list, PeriodicTable::ELEMENTS)}"
-    puts "\n#{write_dot_file(adjacency_matrix, atom_list, @filename, PeriodicTable::ELEMENTS,
+    print_adjacency_matrix(adjacency_matrix, node_features_matrix)
+    puts "\n#{write_ninchi_string(adjacency_matrix, node_features_matrix, PeriodicTable::ELEMENTS)}"
+    puts "\n#{write_dot_file(adjacency_matrix, node_features_matrix, @filename, PeriodicTable::ELEMENTS,
                              PeriodicTable::ELEMENT_COLORS)}" if @print_dot_file
     puts "\nOutput format: DOT file - to display go to https://dreampuf.github.io/GraphvizOnline/#" if @print_dot_file
     puts "\n#{'-' * 100}\n"

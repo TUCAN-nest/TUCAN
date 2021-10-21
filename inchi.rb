@@ -9,22 +9,22 @@ module Inchi
   end
 
   def create_node_features_matrix(molfile_lines, atom_count, periodic_table_elements)
-    elements = []
+    node_features_matrix = []
     (4..atom_count + 3).each_with_index do |atom_index|
       atom = molfile_lines[atom_index].split(' ')[3]
-      elements.push(periodic_table_elements.index(atom) + 1)
+      node_features_matrix.push(periodic_table_elements.index(atom) + 1)
     end
-    elements
+    node_features_matrix
   end
 
   def create_edge_features_matrix(molfile_lines, edge_count, atom_count)
-    edges = Array.new(atom_count).map(&:to_a)
+    edge_features_matrix = Array.new(atom_count).map(&:to_a)
     (0..edge_count - 1).each do |edge_index|
       vertex1, vertex2 = parse_edge(molfile_lines[edge_index + 4 + atom_count])
-      edges[vertex1].push(vertex2)    # add to the first atom of a bond
-      edges[vertex2].push(vertex1)    # and to the second atom of the bond
+      edge_features_matrix[vertex1].push(vertex2)    # add to the first atom of a bond
+      edge_features_matrix[vertex2].push(vertex1)    # and to the second atom of the bond
     end
-    edges
+    edge_features_matrix
   end
 
   def parse_edge(molfile_line)

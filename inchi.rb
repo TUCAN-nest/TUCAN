@@ -8,7 +8,7 @@ module Inchi
     molfile.split("\n")
   end
 
-  def create_atom_list(molfile_lines, atom_count, periodic_table_elements)
+  def create_node_features_matrix(molfile_lines, atom_count, periodic_table_elements)
     elements = []
     (4..atom_count + 3).each_with_index do |atom_index|
       atom = molfile_lines[atom_index].split(' ')[3]
@@ -17,7 +17,7 @@ module Inchi
     elements
   end
 
-  def create_edge_list(molfile_lines, edge_count, atom_count)
+  def create_edge_features_matrix(molfile_lines, edge_count, atom_count)
     edges = Array.new(atom_count).map(&:to_a)
     (0..edge_count - 1).each do |edge_index|
       vertex1, vertex2 = parse_edge(molfile_lines[edge_index + 4 + atom_count])
@@ -35,14 +35,14 @@ module Inchi
 
   def create_adjacency_matrix(molfile_lines, periodic_table_elements)
     atom_count, edge_count = molfile_lines[3].scan(/\d+/).map(&:to_i) # on 4th  line, 1st number is number of atoms, 2nd number is number of bonds.
-    atom_list = create_atom_list(molfile_lines, atom_count, periodic_table_elements)
-    edge_list = create_edge_list(molfile_lines, edge_count, atom_count)
+    node_features_matrix = create_node_features_matrix(molfile_lines, atom_count, periodic_table_elements)
+    edge_features_matrix = create_edge_features_matrix(molfile_lines, edge_count, atom_count)
     rows, columns, default_value = atom_count, atom_count, 0
     adjacency_matrix = Array.new(rows) { Array.new(columns, default_value) }
     # in general, further "atom property lists" could be added here e.g. for isotopes, stereochemistry, ...
     print "\nAdjacency matrix is #{atom_count} x #{atom_count}\n"
     (0..atom_count - 1).each do |row|
-      line = edge_list[row]
+      line = edge_features_matrix[row]
       (0..atom_count - 1).each do |column|
         line.each do |entry|
           if (entry == column)
@@ -51,7 +51,7 @@ module Inchi
         end
       end
     end
-    [adjacency_matrix, atom_list] # better also directly calculate and return "neighbour list" here, as needed in the 3rd sorting step
+    [adjacency_matrix, node_features_matrix] # better also directly calculate and return "neighbour list" here, as needed in the 3rd sorting step
   end
 
   def swap_adjacency_matrix_elements(adjacency_matrix, node_features_matrix, i, j)

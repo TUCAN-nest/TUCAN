@@ -193,7 +193,7 @@ def sort_by_connectivity_index(adjacency_matrix, node_features_matrix) # sort by
 
   def write_ninchi_string(adjacency_matrix, node_features_matrix, periodic_table_elements)
     sum_formula = write_sum_formula_string(node_features_matrix, periodic_table_elements)
-    serialized_molecule = serialize_molecule(adjacency_matrix)
+    serialized_molecule = serialize_molecule(adjacency_matrix, node_features_matrix)
     "nInChI=1S/#{sum_formula}/c#{serialized_molecule}"
   end
 
@@ -218,7 +218,29 @@ def sort_by_connectivity_index(adjacency_matrix, node_features_matrix) # sort by
     dotfile += "}\n"
   end
 
-  def serialize_molecule(adjacency_matrix)
+  def standard_inchi(adjacency_matrix, node_features_matrix)
+    inchi_string = '/c'
+    inchi_string_H = ''
+    n = adjacency_matrix.length
+    (0..n-1).each do |row|
+     (0..n-1).each do |column|
+        if((adjacency_matrix[row][column] == 1) && (row < column))
+          if(node_features_matrix[row] != 1)
+            inchi_string += '('+row.to_s+'-'+column.to_s+')'
+          end
+          if(node_features_matrix[row] == 1)
+            inchi_string_H += '('+row.to_s+'-'+column.to_s+')'
+          end
+        end
+      end
+    end
+    if(inchi_string_H != '')
+      inchi_string = inchi_string + '/h' + inchi_string_H
+    end
+    inchi_string
+  end
+  
+  def serialize_molecule(adjacency_matrix, node_features_matrix)
     #
     # inchi_string[0] -> "2-tuple format" (0-2)(1-2)
     # inchi_string[1] -> "n-tuple format" (2:0,1)
@@ -227,8 +249,9 @@ def sort_by_connectivity_index(adjacency_matrix, node_features_matrix) # sort by
     # inchi_string[4] -> decimal format of binary inchi_string[3]
     # inchi_string[5] -> hexadecimal format of binary inchi_string[3]
     # inchi_string[6] -> base32 encoding of binary inchi_string[3]
+    # inchi_string[7] -> attempt to "InChI-sytle" separate output of heavy vs. hydrogen atoms
     #
-    inchi_string = Array.new(7, '')
+    inchi_string = Array.new(8, '')
     n = adjacency_matrix.length
     (0..n - 1).each do |row|
       inchi_string[1] += '(' + row.to_s + ':'
@@ -251,6 +274,7 @@ def sort_by_connectivity_index(adjacency_matrix, node_features_matrix) # sort by
     inchi_string[4] = inchi_string[3].to_i(2)
     inchi_string[5] = 'hex:' + inchi_string[4].to_s(base = 16)
     inchi_string[6] = 'base32:' + inchi_string[4].to_s(base = 32)
+    inchi_string[7]=standard_inchi(adjacency_matrix, node_features_matrix)
     inchi_string
   end
 

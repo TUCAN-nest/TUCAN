@@ -10,7 +10,7 @@ module Inchi
 
   def create_node_features_matrix(molfile_lines, atom_count, periodic_table_elements)
     node_features_matrix = []
-    (4..atom_count + 3).each_with_index do |atom_index|
+    (7..atom_count + 6).each_with_index do |atom_index|
       atom = molfile_lines[atom_index].split(' ')[3]
       node_features_matrix.push(periodic_table_elements.index(atom) + 1)
     end
@@ -20,7 +20,7 @@ module Inchi
   def create_edge_features_matrix(molfile_lines, edge_count, atom_count)
     edge_features_matrix = Array.new(atom_count).map(&:to_a)
     (0..edge_count - 1).each do |edge_index|
-      vertex1, vertex2 = parse_edge(molfile_lines[edge_index + 4 + atom_count])
+      vertex1, vertex2 = parse_edge(molfile_lines[edge_index + 9 + atom_count])
       edge_features_matrix[vertex1].push(vertex2)    # add to the first atom of a bond
       edge_features_matrix[vertex2].push(vertex1)    # and to the second atom of the bond
     end
@@ -28,13 +28,15 @@ module Inchi
   end
 
   def parse_edge(molfile_line)
-    vertex1, vertex2, * = molfile_line.split(' ').map { |i| i.to_i - 1 }
+    vertex1 = molfile_line.split(' ')[4].to_i - 1 # need to substract 1 since molfile index starts at one, not at zero
+    vertex2 = molfile_line.split(' ')[5].to_i - 1 # need to substract 1 since molfile index starts at one, not at zero
     vertex1, vertex2 = vertex2, vertex1 if vertex1 > vertex2 # make sure first atom always has lower (not: higher?) index
     [vertex1, vertex2]
   end
 
   def create_adjacency_matrix(molfile_lines, periodic_table_elements)
-    atom_count, edge_count = molfile_lines[3].scan(/\d+/).map(&:to_i) # on 4th  line, 1st number is number of atoms, 2nd number is number of bonds.
+    atom_count = molfile_lines[5].split(' ')[3].to_i # in molfile v3000, on 6th line, 1st number is number of atoms.
+    edge_count = molfile_lines[5].split(' ')[4].to_i # in molfile v3000, on 6th line, 2nd number is number of bonds.
     node_features_matrix = create_node_features_matrix(molfile_lines, atom_count, periodic_table_elements)
     edge_features_matrix = create_edge_features_matrix(molfile_lines, edge_count, atom_count)
     rows, columns, default_value = atom_count, atom_count, 0

@@ -10,7 +10,7 @@ module Inchi
 
   def create_node_features_matrix(molfile_lines, atom_count, periodic_table_elements)
     node_features_matrix = []
-    (4..atom_count + 3).each_with_index do |atom_index|
+    (7..atom_count + 6).each_with_index do |atom_index|
       atom = molfile_lines[atom_index].split(' ')[3]
       node_features_matrix.push(periodic_table_elements.index(atom) + 1)
     end
@@ -20,7 +20,7 @@ module Inchi
   def create_edge_features_matrix(molfile_lines, edge_count, atom_count)
     edge_features_matrix = Array.new(atom_count).map(&:to_a)
     (0..edge_count - 1).each do |edge_index|
-      vertex1, vertex2 = parse_edge(molfile_lines[edge_index + 4 + atom_count])
+      vertex1, vertex2 = parse_edge(molfile_lines[edge_index + 9 + atom_count])
       edge_features_matrix[vertex1].push(vertex2)    # add to the first atom of a bond
       edge_features_matrix[vertex2].push(vertex1)    # and to the second atom of the bond
     end
@@ -28,13 +28,15 @@ module Inchi
   end
 
   def parse_edge(molfile_line)
-    vertex1, vertex2, * = molfile_line.split(' ').map { |i| i.to_i - 1 }
+    vertex1 = molfile_line.split(' ')[4].to_i - 1 # need to substract 1 since molfile index starts at one, not at zero
+    vertex2 = molfile_line.split(' ')[5].to_i - 1 # need to substract 1 since molfile index starts at one, not at zero
     vertex1, vertex2 = vertex2, vertex1 if vertex1 > vertex2 # make sure first atom always has lower (not: higher?) index
     [vertex1, vertex2]
   end
 
   def create_adjacency_matrix(molfile_lines, periodic_table_elements)
-    atom_count, edge_count = molfile_lines[3].scan(/\d+/).map(&:to_i) # on 4th  line, 1st number is number of atoms, 2nd number is number of bonds.
+    atom_count = molfile_lines[5].split(' ')[3].to_i # in molfile v3000, on 6th line, 1st number is number of atoms.
+    edge_count = molfile_lines[5].split(' ')[4].to_i # in molfile v3000, on 6th line, 2nd number is number of bonds.
     node_features_matrix = create_node_features_matrix(molfile_lines, atom_count, periodic_table_elements)
     edge_features_matrix = create_edge_features_matrix(molfile_lines, edge_count, atom_count)
     rows, columns, default_value = atom_count, atom_count, 0
@@ -191,7 +193,7 @@ def sort_by_connectivity_index(adjacency_matrix, node_features_matrix) # sort by
 
   def write_ninchi_string(adjacency_matrix, node_features_matrix, periodic_table_elements)
     sum_formula = write_sum_formula_string(node_features_matrix, periodic_table_elements)
-    serialized_molecule = serialize_molecule(adjacency_matrix)
+    serialized_molecule = serialize_molecule(adjacency_matrix, node_features_matrix)
     "nInChI=1S/#{sum_formula}/c#{serialized_molecule}"
   end
 
@@ -216,7 +218,29 @@ def sort_by_connectivity_index(adjacency_matrix, node_features_matrix) # sort by
     dotfile += "}\n"
   end
 
-  def serialize_molecule(adjacency_matrix)
+  def standard_inchi(adjacency_matrix, node_features_matrix)
+    inchi_string = '/c'
+    inchi_string_H = ''
+    n = adjacency_matrix.length
+    (0..n-1).each do |row|
+     (0..n-1).each do |column|
+        if((adjacency_matrix[row][column] == 1) && (row < column))
+          if(node_features_matrix[row] != 1)
+            inchi_string += '('+row.to_s+'-'+column.to_s+')'
+          end
+          if(node_features_matrix[row] == 1)
+            inchi_string_H += '('+row.to_s+'-'+column.to_s+')'
+          end
+        end
+      end
+    end
+    if(inchi_string_H != '')
+      inchi_string = inchi_string + '/h' + inchi_string_H
+    end
+    inchi_string
+  end
+  
+  def serialize_molecule(adjacency_matrix, node_features_matrix)
     #
     # inchi_string[0] -> "2-tuple format" (0-2)(1-2)
     # inchi_string[1] -> "n-tuple format" (2:0,1)
@@ -225,8 +249,9 @@ def sort_by_connectivity_index(adjacency_matrix, node_features_matrix) # sort by
     # inchi_string[4] -> decimal format of binary inchi_string[3]
     # inchi_string[5] -> hexadecimal format of binary inchi_string[3]
     # inchi_string[6] -> base32 encoding of binary inchi_string[3]
+    # inchi_string[7] -> attempt to "InChI-sytle" separate output of heavy vs. hydrogen atoms
     #
-    inchi_string = Array.new(7, '')
+    inchi_string = Array.new(8, '')
     n = adjacency_matrix.length
     (0..n - 1).each do |row|
       inchi_string[1] += '(' + row.to_s + ':'
@@ -249,6 +274,7 @@ def sort_by_connectivity_index(adjacency_matrix, node_features_matrix) # sort by
     inchi_string[4] = inchi_string[3].to_i(2)
     inchi_string[5] = 'hex:' + inchi_string[4].to_s(base = 16)
     inchi_string[6] = 'base32:' + inchi_string[4].to_s(base = 32)
+    inchi_string[7]=standard_inchi(adjacency_matrix, node_features_matrix)
     inchi_string
   end
 

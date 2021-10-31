@@ -9,10 +9,14 @@ module Inchi
   end
 
   def create_node_features_matrix(molfile_lines, atom_count, periodic_table_elements)
-    node_features_matrix = []
+    rows, columns, default_value = atom_count, 3, 0
+    node_features_matrix = Array.new(rows) { Array.new(columns, default_value) }
+    node_index = 0
     (7..atom_count + 6).each_with_index do |atom_index|
       atom = molfile_lines[atom_index].split(' ')[3]
-      node_features_matrix.push(periodic_table_elements.index(atom) + 1)
+      # node_features_matrix.push(periodic_table_elements.index(atom) + 1)
+      node_features_matrix[node_index][0] = periodic_table_elements.index(atom) + 1
+      node_index += 1
     end
     node_features_matrix
   end
@@ -81,7 +85,7 @@ def sort_by_element(adjacency_matrix, node_features_matrix) # sort by atomic mas
     atom_count = node_features_matrix.length
     for i in (atom_count).downto(2)
       for j in 0..(atom_count-2)
-        if(node_features_matrix[j] > node_features_matrix[j+1])
+        if(node_features_matrix[j][0] > node_features_matrix[j+1][0])
           adjacency_matrix, node_features_matrix = swap_adjacency_matrix_elements(adjacency_matrix, node_features_matrix, j, j+1)
         end
       end
@@ -104,7 +108,7 @@ def sort_by_connectivity(adjacency_matrix, node_features_matrix) # sort by conne
               edge_count_B += 1
             end
           end
-          if((node_features_matrix[row] == node_features_matrix[row+1]) && (edge_count_A > edge_count_B))
+          if((node_features_matrix[row][0] == node_features_matrix[row+1][0]) && (edge_count_A > edge_count_B))
             adjacency_matrix, node_features_matrix = swap_adjacency_matrix_elements(adjacency_matrix, node_features_matrix, row, row+1)
           end
         end
@@ -135,7 +139,7 @@ def sort_by_connectivity_index(adjacency_matrix, node_features_matrix) # sort by
             connectivity_index_B = connectivity_index_B+adjacency_matrix[row+1][column]*(column+1) # column index number * matrix element (0 or 1)
           end
         end
-        if((node_features_matrix[row] == node_features_matrix[row+1]) && (edge_count_A == edge_count_B) && (connectivity_index_B < connectivity_index_A))
+        if((node_features_matrix[row][0] == node_features_matrix[row+1][0}) && (edge_count_A == edge_count_B) && (connectivity_index_B < connectivity_index_A))
           adjacency_matrix, node_features_matrix = swap_adjacency_matrix_elements(adjacency_matrix, node_features_matrix, row, row+1)
         end
       end
@@ -186,7 +190,8 @@ def sort_by_connectivity_index(adjacency_matrix, node_features_matrix) # sort by
         end
       end
       neighbours.chop!
-      print " [#{node_features_matrix[i]}] [#{edge_count}] [#{connectivity_index}] [#{neighbours}]\n"
+      print " ",node_features_matrix[row]
+      print " [#{node_features_matrix[i][0]}] [#{edge_count}] [#{connectivity_index}] [#{neighbours}]\n"
       i = i + 1
     end
   end
@@ -202,7 +207,7 @@ def sort_by_connectivity_index(adjacency_matrix, node_features_matrix) # sort by
     dotfile = "graph #{filename}\n{\n  bgcolor=grey\n"
     n = adjacency_matrix.length
     (0..n - 1).each do |i|
-      symbol = periodic_table_elements[node_features_matrix[i] - 1]
+      symbol = periodic_table_elements[node_features_matrix[i][0] - 1]
       color = periodic_table_colors.fetch(symbol, 'lightgrey')
       dotfile += "  #{i} [label=\"#{symbol} #{i}\" color=#{color},style=filled,shape=circle,fontname=Calibri];\n"
     end
@@ -225,10 +230,10 @@ def sort_by_connectivity_index(adjacency_matrix, node_features_matrix) # sort by
     (0..n-1).each do |row|
      (0..n-1).each do |column|
         if((adjacency_matrix[row][column] == 1) && (row < column))
-          if(node_features_matrix[row] != 1)
+          if(node_features_matrix[row][0] != 1)
             inchi_string += '('+row.to_s+'-'+column.to_s+')'
           end
-          if(node_features_matrix[row] == 1)
+          if(node_features_matrix[row][0] == 1)
             inchi_string_H += '('+row.to_s+'-'+column.to_s+')'
           end
         end
@@ -293,10 +298,12 @@ def sort_by_connectivity_index(adjacency_matrix, node_features_matrix) # sort by
 
   def compute_element_counts(node_features_matrix, periodic_table_elements)
     # Compute hash table mapping element symbols to stoichiometric counts.
-    unique_elements = node_features_matrix.uniq
+    atom_list = []
+    node_features_matrix.each { |atom| atom_list.push(atom[0]) }
+    unique_elements = atom_list.uniq
     initial_counts = Array.new(unique_elements.length, 0)
     element_counts = unique_elements.zip(initial_counts).to_h
-    node_features_matrix.each { |atom| element_counts[atom] += 1 }
+    atom_list.each { |atom| element_counts[atom] += 1 }
     element_counts.transform_keys! { |k| periodic_table_elements[k - 1] } # change atomic mass to element symbol; k - 1; convert from mass back to index
   end
 end

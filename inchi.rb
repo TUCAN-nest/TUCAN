@@ -99,17 +99,7 @@ def sort_by_connectivity(adjacency_matrix, node_features_matrix) # sort by conne
     for i in (atom_count).downto(2)
       for j in 0..(atom_count-2)
         for row in 0..atom_count-2
-          edge_count_A = 0
-          edge_count_B = 0
-          for column in 0..atom_count-1
-            if(adjacency_matrix[row][column] == 1)
-              edge_count_A += 1
-            end
-            if(adjacency_matrix[row+1][column] == 1)
-              edge_count_B += 1
-            end
-          end
-          if((node_features_matrix[row][0] == node_features_matrix[row+1][0]) && (edge_count_A > edge_count_B))
+          if((node_features_matrix[row][0] == node_features_matrix[row+1][0]) && (node_features_matrix[row][1] > node_features_matrix[row+1][0]))
             adjacency_matrix, node_features_matrix = swap_adjacency_matrix_elements(adjacency_matrix, node_features_matrix, row, row+1)
           end
         end
@@ -174,7 +164,6 @@ def sort_by_connectivity_index(adjacency_matrix, node_features_matrix) # sort by
     n = adjacency_matrix.length
     (0..n - 1).each do |row|
       connectivity_index = 0 # need to set back to zero for each new row
-      edge_count = 0
       neighbours = ''
       print "\n["
       (0..n - 1).each do |column|
@@ -187,12 +176,11 @@ def sort_by_connectivity_index(adjacency_matrix, node_features_matrix) # sort by
         connectivity_index = connectivity_index + adjacency_matrix[row][column] * (column + 1) # column index number * matrix element (0 or 1)
         if (adjacency_matrix[row][column] == 1)
           neighbours = neighbours + column.to_s + ","
-          edge_count += 1
         end
       end
       neighbours.chop!
       print " ",node_features_matrix[row]
-      print " [#{node_features_matrix[i][0]}] [#{edge_count}] [#{connectivity_index}] [#{neighbours}]\n"
+      print " {#{connectivity_index}} {#{neighbours}}\n"
       i = i + 1
     end
   end

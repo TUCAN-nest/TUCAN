@@ -161,7 +161,6 @@ def sort_by_connectivity_index(adjacency_matrix, node_features_matrix) # sort by
       print " ",adjacency_matrix[row]," ",node_features_matrix[row]
       connectivity_index = 0 # need to set back to zero for each new row
       neighbours = ''
-      print "\n["
       (0..n - 1).each do |column|
         connectivity_index = connectivity_index + adjacency_matrix[row][column] * (column + 1) # column index number * matrix element (0 or 1)
         if (adjacency_matrix[row][column] == 1)

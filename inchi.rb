@@ -120,10 +120,10 @@ def sort_by_connectivity_index(adjacency_matrix, node_features_matrix) # sort by
         connectivity_index_B = 0
         for column in 0..atom_count-1
           if(adjacency_matrix[row][column] == 1)
-            connectivity_index_A = connectivity_index_A+adjacency_matrix[row][column]*(column+1) # column index number * matrix element (0 or 1)
+            connectivity_index_A = connectivity_index_A+adjacency_matrix[row][column]*(column+1)*node_features_matrix[column][0]
           end
           if(adjacency_matrix[row+1][column] == 1)
-            connectivity_index_B = connectivity_index_B+adjacency_matrix[row+1][column]*(column+1) # column index number * matrix element (0 or 1)
+            connectivity_index_B = connectivity_index_B+adjacency_matrix[row+1][column]*(column+1)*node_features_matrix[column][0]
           end
         end
         if((node_features_matrix[row][0] == node_features_matrix[row+1][0]) && (node_features_matrix[row][1] == node_features_matrix[row+1][1]) && (connectivity_index_B < connectivity_index_A))
@@ -162,7 +162,7 @@ def sort_by_connectivity_index(adjacency_matrix, node_features_matrix) # sort by
       connectivity_index = 0 # need to set back to zero for each new row
       neighbours = ''
       (0..n - 1).each do |column|
-        connectivity_index = connectivity_index + adjacency_matrix[row][column] * (column + 1) # column index number * matrix element (0 or 1)
+        connectivity_index = connectivity_index + adjacency_matrix[row][column] * (column + 1) * node_features_matrix[column][0]
         if (adjacency_matrix[row][column] == 1)
           neighbours = neighbours + column.to_s + ","
         end

@@ -118,19 +118,15 @@ def sort_by_connectivity_index(adjacency_matrix, node_features_matrix) # sort by
       for row in 0..atom_count-2
         connectivity_index_A = 0
         connectivity_index_B = 0
-        edge_count_A = 0
-        edge_count_B = 0
-       for column in 0..atom_count-1
+        for column in 0..atom_count-1
           if(adjacency_matrix[row][column] == 1)
-            edge_count_A += 1
             connectivity_index_A = connectivity_index_A+adjacency_matrix[row][column]*(column+1) # column index number * matrix element (0 or 1)
           end
           if(adjacency_matrix[row+1][column] == 1)
-            edge_count_B += 1
             connectivity_index_B = connectivity_index_B+adjacency_matrix[row+1][column]*(column+1) # column index number * matrix element (0 or 1)
           end
         end
-        if((node_features_matrix[row][0] == node_features_matrix[row+1][0}) && (edge_count_A == edge_count_B) && (connectivity_index_B < connectivity_index_A))
+        if((node_features_matrix[row][0] == node_features_matrix[row+1][0]) && (node_features_matrix[row][1] == node_features_matrix[row+1][0]) && (connectivity_index_B < connectivity_index_A))
           adjacency_matrix, node_features_matrix = swap_adjacency_matrix_elements(adjacency_matrix, node_features_matrix, row, row+1)
         end
       end

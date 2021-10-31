@@ -199,6 +199,43 @@ def sort_by_connectivity_index(adjacency_matrix, node_features_matrix) # sort by
     dotfile += "}\n"
   end
 
+  
+  def write_molfile(adjacency_matrix, node_features_matrix, periodic_table_elements)
+    molfile = "test.mol\n"
+    molfile += "nInChI v2.4\n"
+    molfile += "\n"
+    molfile += "  0  0  0     0  0              0 V3000\n"
+    molfile += "M  V30 BEGIN CTAB\n"
+    atom_count = node_features_matrix.length
+    bond_count = 0
+    (0..atom_count - 1).each do |row|
+      bond_count += node_features_matrix[row][1].to_i
+    end
+    bond_count = bond_count/2 # divide by two since each bond is present twice in the node_features_matrix, for both A and B of an A-B bond
+    molfile += "M  V30 COUNTS "+atom_count.to_s+" "+bond_count.to_s+" 0 0 1\n"
+    molfile += "M  V30 BEGIN ATOM\n"
+    (0..atom_count-1).each do |i|
+      symbol = periodic_table_elements[node_features_matrix[i][0]-1]
+      molfile += "M  V30 "+(i+1).to_s+" "+symbol+" 0.0 0.0 0.0 0\n"
+    end
+    molfile += "M  V30 END ATOM\n"
+    molfile += "M  V30 BEGIN BOND\n"
+    # print bond block
+    bond_count = 0
+    bond_order = 1
+    (0..atom_count - 1).each do |row|
+      (0..atom_count - 1).each do |column|
+        if ((row < column) && (adjacency_matrix[row][column] == 1))
+          molfile += "M  V30 "+(bond_count+1).to_s+" "+bond_order.to_s+" "+(row+1).to_s+" "+(column+1).to_s+" 0 0 0 0\n"
+          bond_count += 1
+        end
+      end
+    end
+    molfile += "M  V30 END BOND\n"
+    molfile += "M  V30 END CTAB\n"
+    molfile += "M  END\n"
+  end
+  
   def standard_inchi(adjacency_matrix, node_features_matrix)
     inchi_string = '/c'
     inchi_string_H = ''

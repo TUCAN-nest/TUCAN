@@ -53,6 +53,7 @@ module Inchi
         line.each do |entry|
           if (entry == column)
             adjacency_matrix[row][column] = 1 # here, in general, the edges (=bonds) could also be assigned additional properties by setting a value larger than 1, such as bond type/bond order (or a "bit field" or a another list/array)
+            node_features_matrix[row][1] += 1
           end
         end
       end

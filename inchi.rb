@@ -133,7 +133,7 @@ def sort_by_connectivity_index(adjacency_matrix, node_features_matrix) # sort by
 
       if(previous_molecule_states.include?(adjacency_matrix))
         converged = true
-        print "\nOptimitation has converged\n"
+        print "\nOptimization has converged\n"
       end
 
       previous_molecule_states.push(Marshal.load(Marshal.dump(adjacency_matrix)))
@@ -156,28 +156,20 @@ def sort_by_connectivity_index(adjacency_matrix, node_features_matrix) # sort by
   end
 
   def print_adjacency_matrix(adjacency_matrix, node_features_matrix)
-    i = 0
     n = adjacency_matrix.length
     (0..n - 1).each do |row|
+      print " ",adjacency_matrix[row]," ",node_features_matrix[row]
       connectivity_index = 0 # need to set back to zero for each new row
       neighbours = ''
       print "\n["
       (0..n - 1).each do |column|
-        print adjacency_matrix[row][column]
-        if (column < n - 1)
-          print ', '
-        else
-          print ']'
-        end
         connectivity_index = connectivity_index + adjacency_matrix[row][column] * (column + 1) # column index number * matrix element (0 or 1)
         if (adjacency_matrix[row][column] == 1)
           neighbours = neighbours + column.to_s + ","
         end
       end
       neighbours.chop!
-      print " ",node_features_matrix[row]
       print " {#{connectivity_index}} {#{neighbours}}\n"
-      i = i + 1
     end
   end
 

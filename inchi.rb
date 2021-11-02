@@ -9,10 +9,14 @@ module Inchi
   end
 
   def create_node_features_matrix(molfile_lines, atom_count, periodic_table_elements)
-    node_features_matrix = []
+    rows, columns, default_value = atom_count, 3, 0
+    node_features_matrix = Array.new(rows) { Array.new(columns, default_value) }
+    node_index = 0
     (7..atom_count + 6).each_with_index do |atom_index|
       atom = molfile_lines[atom_index].split(' ')[3]
-      node_features_matrix.push(periodic_table_elements.index(atom) + 1)
+      # node_features_matrix.push(periodic_table_elements.index(atom) + 1)
+      node_features_matrix[node_index][0] = periodic_table_elements.index(atom) + 1
+      node_index += 1
     end
     node_features_matrix
   end
@@ -49,6 +53,7 @@ module Inchi
         line.each do |entry|
           if (entry == column)
             adjacency_matrix[row][column] = 1 # here, in general, the edges (=bonds) could also be assigned additional properties by setting a value larger than 1, such as bond type/bond order (or a "bit field" or a another list/array)
+            node_features_matrix[row][1] += 1
           end
         end
       end
@@ -81,7 +86,7 @@ def sort_by_element(adjacency_matrix, node_features_matrix) # sort by atomic mas
     atom_count = node_features_matrix.length
     for i in (atom_count).downto(2)
       for j in 0..(atom_count-2)
-        if(node_features_matrix[j] > node_features_matrix[j+1])
+        if(node_features_matrix[j][0] > node_features_matrix[j+1][0])
           adjacency_matrix, node_features_matrix = swap_adjacency_matrix_elements(adjacency_matrix, node_features_matrix, j, j+1)
         end
       end
@@ -94,17 +99,7 @@ def sort_by_connectivity(adjacency_matrix, node_features_matrix) # sort by conne
     for i in (atom_count).downto(2)
       for j in 0..(atom_count-2)
         for row in 0..atom_count-2
-          edge_count_A = 0
-          edge_count_B = 0
-          for column in 0..atom_count-1
-            if(adjacency_matrix[row][column] == 1)
-              edge_count_A += 1
-            end
-            if(adjacency_matrix[row+1][column] == 1)
-              edge_count_B += 1
-            end
-          end
-          if((node_features_matrix[row] == node_features_matrix[row+1]) && (edge_count_A > edge_count_B))
+          if((node_features_matrix[row][0] == node_features_matrix[row+1][0]) && (node_features_matrix[row][1] > node_features_matrix[row+1][1]))
             adjacency_matrix, node_features_matrix = swap_adjacency_matrix_elements(adjacency_matrix, node_features_matrix, row, row+1)
           end
         end
@@ -123,26 +118,18 @@ def sort_by_connectivity_index(adjacency_matrix, node_features_matrix) # sort by
       for row in 0..atom_count-2
         connectivity_index_A = 0
         connectivity_index_B = 0
-        edge_count_A = 0
-        edge_count_B = 0
-       for column in 0..atom_count-1
-          if(adjacency_matrix[row][column] == 1)
-            edge_count_A += 1
-            connectivity_index_A = connectivity_index_A+adjacency_matrix[row][column]*(column+1) # column index number * matrix element (0 or 1)
-          end
-          if(adjacency_matrix[row+1][column] == 1)
-            edge_count_B += 1
-            connectivity_index_B = connectivity_index_B+adjacency_matrix[row+1][column]*(column+1) # column index number * matrix element (0 or 1)
-          end
+        for column in 0..atom_count-1
+          connectivity_index_A = connectivity_index_A+adjacency_matrix[row][column]*(column+1)*node_features_matrix[column][0]
+          connectivity_index_B = connectivity_index_B+adjacency_matrix[row+1][column]*(column+1)*node_features_matrix[column][0]
         end
-        if((node_features_matrix[row] == node_features_matrix[row+1]) && (edge_count_A == edge_count_B) && (connectivity_index_B < connectivity_index_A))
+        if((node_features_matrix[row][0] == node_features_matrix[row+1][0]) && (node_features_matrix[row][1] == node_features_matrix[row+1][1]) && (connectivity_index_B < connectivity_index_A))
           adjacency_matrix, node_features_matrix = swap_adjacency_matrix_elements(adjacency_matrix, node_features_matrix, row, row+1)
         end
       end
 
       if(previous_molecule_states.include?(adjacency_matrix))
         converged = true
-        print "\nOptimitation has converged\n"
+        print "\nOptimization has converged\n"
       end
 
       previous_molecule_states.push(Marshal.load(Marshal.dump(adjacency_matrix)))
@@ -165,29 +152,19 @@ def sort_by_connectivity_index(adjacency_matrix, node_features_matrix) # sort by
   end
 
   def print_adjacency_matrix(adjacency_matrix, node_features_matrix)
-    i = 0
     n = adjacency_matrix.length
     (0..n - 1).each do |row|
+      print " ",adjacency_matrix[row]," ",node_features_matrix[row]
       connectivity_index = 0 # need to set back to zero for each new row
-      edge_count = 0
       neighbours = ''
-      print "\n["
       (0..n - 1).each do |column|
-        print adjacency_matrix[row][column]
-        if (column < n - 1)
-          print ', '
-        else
-          print ']'
-        end
-        connectivity_index = connectivity_index + adjacency_matrix[row][column] * (column + 1) # column index number * matrix element (0 or 1)
+        connectivity_index = connectivity_index + adjacency_matrix[row][column] * (column + 1) * node_features_matrix[column][0]
         if (adjacency_matrix[row][column] == 1)
           neighbours = neighbours + column.to_s + ","
-          edge_count += 1
         end
       end
       neighbours.chop!
-      print " [#{node_features_matrix[i]}] [#{edge_count}] [#{connectivity_index}] [#{neighbours}]\n"
-      i = i + 1
+      print " {#{connectivity_index}} {#{neighbours}}\n"
     end
   end
 
@@ -202,7 +179,7 @@ def sort_by_connectivity_index(adjacency_matrix, node_features_matrix) # sort by
     dotfile = "graph #{filename}\n{\n  bgcolor=grey\n"
     n = adjacency_matrix.length
     (0..n - 1).each do |i|
-      symbol = periodic_table_elements[node_features_matrix[i] - 1]
+      symbol = periodic_table_elements[node_features_matrix[i][0] - 1]
       color = periodic_table_colors.fetch(symbol, 'lightgrey')
       dotfile += "  #{i} [label=\"#{symbol} #{i}\" color=#{color},style=filled,shape=circle,fontname=Calibri];\n"
     end
@@ -218,6 +195,43 @@ def sort_by_connectivity_index(adjacency_matrix, node_features_matrix) # sort by
     dotfile += "}\n"
   end
 
+  
+  def write_molfile(adjacency_matrix, node_features_matrix, periodic_table_elements)
+    molfile = "test.mol\n"
+    molfile += "nInChI v2.4\n"
+    molfile += "\n"
+    molfile += "  0  0  0     0  0              0 V3000\n"
+    molfile += "M  V30 BEGIN CTAB\n"
+    atom_count = node_features_matrix.length
+    bond_count = 0
+    (0..atom_count - 1).each do |row|
+      bond_count += node_features_matrix[row][1].to_i
+    end
+    bond_count = bond_count/2 # divide by two since each bond is present twice in the node_features_matrix, for both A and B of an A-B bond
+    molfile += "M  V30 COUNTS "+atom_count.to_s+" "+bond_count.to_s+" 0 0 1\n"
+    molfile += "M  V30 BEGIN ATOM\n"
+    (0..atom_count-1).each do |i|
+      symbol = periodic_table_elements[node_features_matrix[i][0]-1]
+      molfile += "M  V30 "+(i+1).to_s+" "+symbol+" 0.0 0.0 0.0 0\n"
+    end
+    molfile += "M  V30 END ATOM\n"
+    molfile += "M  V30 BEGIN BOND\n"
+    # print bond block
+    bond_count = 0
+    bond_order = 1
+    (0..atom_count - 1).each do |row|
+      (0..atom_count - 1).each do |column|
+        if ((row < column) && (adjacency_matrix[row][column] == 1))
+          molfile += "M  V30 "+(bond_count+1).to_s+" "+bond_order.to_s+" "+(row+1).to_s+" "+(column+1).to_s+" 0 0 0 0\n"
+          bond_count += 1
+        end
+      end
+    end
+    molfile += "M  V30 END BOND\n"
+    molfile += "M  V30 END CTAB\n"
+    molfile += "M  END\n"
+  end
+  
   def standard_inchi(adjacency_matrix, node_features_matrix)
     inchi_string = '/c'
     inchi_string_H = ''
@@ -225,10 +239,10 @@ def sort_by_connectivity_index(adjacency_matrix, node_features_matrix) # sort by
     (0..n-1).each do |row|
      (0..n-1).each do |column|
         if((adjacency_matrix[row][column] == 1) && (row < column))
-          if(node_features_matrix[row] != 1)
+          if(node_features_matrix[row][0] != 1)
             inchi_string += '('+row.to_s+'-'+column.to_s+')'
           end
-          if(node_features_matrix[row] == 1)
+          if(node_features_matrix[row][0] == 1)
             inchi_string_H += '('+row.to_s+'-'+column.to_s+')'
           end
         end
@@ -293,10 +307,12 @@ def sort_by_connectivity_index(adjacency_matrix, node_features_matrix) # sort by
 
   def compute_element_counts(node_features_matrix, periodic_table_elements)
     # Compute hash table mapping element symbols to stoichiometric counts.
-    unique_elements = node_features_matrix.uniq
+    atom_list = []
+    node_features_matrix.each { |atom| atom_list.push(atom[0]) }
+    unique_elements = atom_list.uniq
     initial_counts = Array.new(unique_elements.length, 0)
     element_counts = unique_elements.zip(initial_counts).to_h
-    node_features_matrix.each { |atom| element_counts[atom] += 1 }
+    atom_list.each { |atom| element_counts[atom] += 1 }
     element_counts.transform_keys! { |k| periodic_table_elements[k - 1] } # change atomic mass to element symbol; k - 1; convert from mass back to index
   end
 end

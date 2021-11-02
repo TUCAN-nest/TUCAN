@@ -16,6 +16,7 @@ class CommandLineInterface
         opts.on('--molfile MOLFILE') { |o| options[:molfile] = o }
         opts.on('--permute-input') { |o| options[:permute] = o }
         opts.on('--dot-file') { |o| options[:dot_file] = o }
+        opts.on('--print-molfile') { |o| options[:print_molfile] = o }
       end.parse!
     rescue OptionParser::InvalidOption => e
       abort("#{e}")
@@ -26,13 +27,14 @@ class CommandLineInterface
     abort("File `#{@filename}` doesn't exist.") unless File.exist?(@filename)
     @permute = options[:permute] || false
     @print_dot_file = options[:dot_file] || false
+    @print_molfile = options[:print_molfile] || false
   end
 
   def run
     puts "#{'-' * 100}\n"
-    puts "\nA new International Chemical Identifier (nInChI) v2.1\n"
+    puts "\nA new International Chemical Identifier (nInChI) v2.4\n"
     puts "\nJan Brammer (RWTH Aachen) and Ulrich Schatzschneider (Universität Würzburg) within NFDI4Chem\n"
-    puts "\nCC BY-SA 09/2021\n"
+    puts "\nCC BY-SA 10/2021\n"
     puts "\n#{'-' * 100}\n"
     molfile_data = read_molfile(@filename)
     puts "\nPrinting molfile: #{@filename}. First 4 lines contain header."
@@ -44,6 +46,7 @@ class CommandLineInterface
     print "\nFINAL STAGE \n"
     print_adjacency_matrix(adjacency_matrix, node_features_matrix)
     puts "\n#{write_ninchi_string(adjacency_matrix, node_features_matrix, PeriodicTable::ELEMENTS)}"
+    puts "\n#{write_molfile(adjacency_matrix, node_features_matrix, PeriodicTable::ELEMENTS)}" if @print_molfile
     puts "\n#{write_dot_file(adjacency_matrix, node_features_matrix, @filename, PeriodicTable::ELEMENTS,
                              PeriodicTable::ELEMENT_COLORS)}" if @print_dot_file
     puts "\nOutput format: DOT file - to display go to https://dreampuf.github.io/GraphvizOnline/#" if @print_dot_file

@@ -9,8 +9,8 @@ class Molecule
   def initialize(name, ninchi_string)
     @name = name
     @reference_ninchi_string = ninchi_string
-    molfile_data = read_molfile("test/testfiles/#{name}/#{name}.mol")
-    @adjacency_matrix, @node_features_matrix = create_adjacency_matrix(molfile_data, PeriodicTable::ELEMENTS)
+    atom_block, edge_block = read_molfile("test/testfiles/#{name}/#{name}.mol")
+    @adjacency_matrix, @node_features_matrix = create_adjacency_matrix(atom_block, edge_block, PeriodicTable::ELEMENTS)
   end
 
   def ninchi_string_original_input

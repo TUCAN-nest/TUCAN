@@ -36,12 +36,12 @@ class CommandLineInterface
     puts "\nJan Brammer (RWTH Aachen) and Ulrich Schatzschneider (Universität Würzburg) within NFDI4Chem\n"
     puts "\nCC BY-SA 10/2021\n"
     puts "\n#{'-' * 100}\n"
-    molfile_data = read_molfile(@filename)
+    atom_block, edge_block, molfile_data = read_molfile(@filename)
     puts "\nPrinting molfile: #{@filename}. First 4 lines contain header."
     puts "\n#{'-' * 75}\n"
     molfile_data.each { |line| puts line }
     puts "\n#{'-' * 75}\n"
-    adjacency_matrix, node_features_matrix = create_adjacency_matrix(molfile_data, PeriodicTable::ELEMENTS)
+    adjacency_matrix, node_features_matrix = create_adjacency_matrix(atom_block, edge_block, PeriodicTable::ELEMENTS)
     adjacency_matrix, node_features_matrix = sort_adjacency_matrix(adjacency_matrix, node_features_matrix)
     print "\nFINAL STAGE \n"
     print_adjacency_matrix(adjacency_matrix, node_features_matrix)

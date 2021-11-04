@@ -4,27 +4,31 @@ require './periodic_table'
 
 module Inchi
   def read_molfile(filename)
-    molfile = File.read(filename) # reads entire file and closes it
-    molfile.split("\n")
+    molfile_lines = File.read(filename).split("\n") # reads entire file and closes it
+    atom_count = molfile_lines[5].split(' ')[3].to_i # in molfile v3000, on 6th line, 1st number is number of atoms.
+    edge_count = molfile_lines[5].split(' ')[4].to_i # in molfile v3000, on 6th line, 2nd number is number of bonds.
+    atom_block = (7..atom_count + 6).map { |i| molfile_lines[i] }
+    edge_block = (0..edge_count - 1).map { |i| molfile_lines[i + 9 + atom_count] }
+    [atom_block, edge_block, molfile_lines]
   end
 
-  def create_node_features_matrix(molfile_lines, atom_count, periodic_table_elements)
-    rows, columns, default_value = atom_count, 3, 0
+  def create_node_features_matrix(atom_block, periodic_table_elements)
+    rows, columns, default_value = atom_block.size, 3, 0
     node_features_matrix = Array.new(rows) { Array.new(columns, default_value) }
     node_index = 0
-    (7..atom_count + 6).each_with_index do |atom_index|
-      atom = molfile_lines[atom_index].split(' ')[3]
+    atom_block.each do |atom_line|
+      symbol = atom_line.split(' ')[3]
       # node_features_matrix.push(periodic_table_elements.index(atom) + 1)
-      node_features_matrix[node_index][0] = periodic_table_elements.index(atom) + 1
+      node_features_matrix[node_index][0] = periodic_table_elements.index(symbol) + 1
       node_index += 1
     end
     node_features_matrix
   end
 
-  def create_edge_features_matrix(molfile_lines, edge_count, atom_count)
+  def create_edge_features_matrix(edge_block, atom_count)
     edge_features_matrix = Array.new(atom_count).map(&:to_a)
-    (0..edge_count - 1).each do |edge_index|
-      vertex1, vertex2 = parse_edge(molfile_lines[edge_index + 9 + atom_count])
+    edge_block.each do |edge_line|
+      vertex1, vertex2 = parse_edge(edge_line)
       edge_features_matrix[vertex1].push(vertex2)    # add to the first atom of a bond
       edge_features_matrix[vertex2].push(vertex1)    # and to the second atom of the bond
     end
@@ -38,11 +42,10 @@ module Inchi
     [vertex1, vertex2]
   end
 
-  def create_adjacency_matrix(molfile_lines, periodic_table_elements)
-    atom_count = molfile_lines[5].split(' ')[3].to_i # in molfile v3000, on 6th line, 1st number is number of atoms.
-    edge_count = molfile_lines[5].split(' ')[4].to_i # in molfile v3000, on 6th line, 2nd number is number of bonds.
-    node_features_matrix = create_node_features_matrix(molfile_lines, atom_count, periodic_table_elements)
-    edge_features_matrix = create_edge_features_matrix(molfile_lines, edge_count, atom_count)
+  def create_adjacency_matrix(atom_block, edge_block, periodic_table_elements)
+    atom_count = atom_block.size
+    node_features_matrix = create_node_features_matrix(atom_block, periodic_table_elements)
+    edge_features_matrix = create_edge_features_matrix(edge_block, atom_count)
     rows, columns, default_value = atom_count, atom_count, 0
     adjacency_matrix = Array.new(rows) { Array.new(columns, default_value) }
     # in general, further "atom property lists" could be added here e.g. for isotopes, stereochemistry, ...

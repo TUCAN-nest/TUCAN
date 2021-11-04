@@ -4,7 +4,7 @@ require './periodic_table'
 
 class Molecule
   include Inchi
-  attr_reader :reference_ninchi_string
+  attr_reader :reference_ninchi_string, :name
 
   def initialize(name, ninchi_string)
     @name = name
@@ -47,7 +47,7 @@ class TestSuite < Minitest::Test
   # Metaprogramming shenanigans for test parameterization (as in pytest)
   # inspired by https://stackoverflow.com/questions/18770988/.
   MoleculeCollection.new.molecules.each do |molecule|
-    define_method("test_ninchi_string_original_input_#{molecule}") do
+    define_method("test_ninchi_string_original_input_#{molecule.name}") do
       assert_equal molecule.reference_ninchi_string, molecule.ninchi_string_original_input
     end
   end

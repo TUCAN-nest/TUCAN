@@ -19,7 +19,10 @@ module Inchi
     atom_block.each do |atom_line|
       symbol = atom_line.split(' ')[3]
       # node_features_matrix.push(periodic_table_elements.index(atom) + 1)
-      node_features_matrix[node_index][0] = periodic_table_elements.index(symbol) + 1
+      node_features_matrix[node_index][0] = periodic_table_elements.index(symbol) + 1 # atomic number (German: Ordnungszahl)
+      # node_features_matrix[node_index][1] is the connectivity, which is added later in create_adjacency_matrix()
+      # node_features_matrix[node_index][2] is the "connectivity_index" which is also added later in create_adjacency_matrix() and then updated in sort_by_connectivity_index()
+      # in general, further "node_features_matrix" elements starting from node_features_matrix[node_index][3] could be added here e.g. for isotopes, stereochemistry, ...
       node_index += 1
     end
     node_features_matrix
@@ -42,13 +45,20 @@ module Inchi
     [vertex1, vertex2]
   end
 
+  def calculate_connectivity_index(adjacency_matrix, node_features_matrix, atom_count, row)
+    connectivity_index = 0
+    for column in 0..atom_count-1
+      connectivity_index = connectivity_index+adjacency_matrix[row][column]*(column+1)*node_features_matrix[column][0]
+    end
+    connectivity_index
+  end
+  
   def create_adjacency_matrix(atom_block, edge_block, periodic_table_elements)
     atom_count = atom_block.size
     node_features_matrix = create_node_features_matrix(atom_block, periodic_table_elements)
     edge_features_matrix = create_edge_features_matrix(edge_block, atom_count)
     rows, columns, default_value = atom_count, atom_count, 0
     adjacency_matrix = Array.new(rows) { Array.new(columns, default_value) }
-    # in general, further "atom property lists" could be added here e.g. for isotopes, stereochemistry, ...
     print "\nAdjacency matrix is #{atom_count} x #{atom_count}\n"
     (0..atom_count - 1).each do |row|
       line = edge_features_matrix[row]
@@ -58,10 +68,11 @@ module Inchi
             adjacency_matrix[row][column] = 1 # here, in general, the edges (=bonds) could also be assigned additional properties by setting a value larger than 1, such as bond type/bond order (or a "bit field" or a another list/array)
             node_features_matrix[row][1] += 1
           end
+          node_features_matrix[row][2] = calculate_connectivity_index(adjacency_matrix, node_features_matrix, atom_count, row)
         end
       end
     end
-    [adjacency_matrix, node_features_matrix] # better also directly calculate and return "neighbour list" here, as needed in the 3rd sorting step
+    [adjacency_matrix, node_features_matrix] # better also directly calculate and return "neighbour list" here, as needed in the 3rd sorting step -> now implemented but not used due to issues
   end
 
   def swap_adjacency_matrix_elements(adjacency_matrix, node_features_matrix, i, j)
@@ -128,6 +139,8 @@ def sort_by_connectivity_index(adjacency_matrix, node_features_matrix) # sort by
         if((node_features_matrix[row][0] == node_features_matrix[row+1][0]) && (node_features_matrix[row][1] == node_features_matrix[row+1][1]) && (connectivity_index_B < connectivity_index_A))
           adjacency_matrix, node_features_matrix = swap_adjacency_matrix_elements(adjacency_matrix, node_features_matrix, row, row+1)
         end
+        node_features_matrix[row][2] = calculate_connectivity_index(adjacency_matrix, node_features_matrix, atom_count, row)
+        node_features_matrix[row+1][2] = calculate_connectivity_index(adjacency_matrix, node_features_matrix, atom_count, row+1)
       end
 
       if(previous_molecule_states.include?(adjacency_matrix))

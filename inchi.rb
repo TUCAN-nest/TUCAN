@@ -210,7 +210,6 @@ def sort_by_connectivity_index(adjacency_matrix, node_features_matrix) # sort by
     end
     dotfile += "}\n"
   end
-
   
   def write_molfile(adjacency_matrix, node_features_matrix, periodic_table_elements)
     molfile = "test.mol\n"
@@ -280,23 +279,29 @@ def sort_by_connectivity_index(adjacency_matrix, node_features_matrix) # sort by
     # inchi_string[5] -> hexadecimal format of binary inchi_string[3]
     # inchi_string[6] -> base32 encoding of binary inchi_string[3]
     # inchi_string[7] -> attempt to "InChI-sytle" separate output of heavy vs. hydrogen atoms
+    # inchi_string[8] -> sum of neighbour atom index numbers to detect degeneracy problem
     #
-    inchi_string = Array.new(8, '')
+    inchi_string = Array.new(9, '')
     n = adjacency_matrix.length
     (0..n - 1).each do |row|
       inchi_string[1] += '(' + row.to_s + ':'
+      inchi_string[8] += '('+node_features_matrix[row][0].to_s+"_"+row.to_s+':'
+      index_sum = 0
       (0..n - 1).each do |column|
         inchi_string[2] += adjacency_matrix[row][column].to_s
         if (adjacency_matrix[row][column] == 1)
           inchi_string[1] += column.to_s + ','
+          index_sum = index_sum + column
           if (row < column)
             inchi_string[0] += '(' + row.to_s + '-' + column.to_s + ')'
           end
         end
       end
+      inchi_string[8] += index_sum.to_s
       inchi_string[2] += '-'
       inchi_string[1].chop!
       inchi_string[1] += ')'
+      inchi_string[8] += ')'
     end
     inchi_string[2].chop!
     inchi_string[3] += '1' + inchi_string[2] # add a leading "1" to avoid numbers with leading zeroes to become equivalent

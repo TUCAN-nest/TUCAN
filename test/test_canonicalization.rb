@@ -19,6 +19,7 @@ class CanonicalizationValidationTests < Minitest::Test
       ninchi_string_original_molfile = molecule.ninchi_string(permute_molfile: false)
       ninchi_string_permuted_molfile = molecule.ninchi_string(permute_molfile: true, random_seed: 181)
       assert_equal(ninchi_string_original_molfile, ninchi_string_permuted_molfile)
+      print "\n Now working on: ",molecule.name,"\n\n"
     end
   end
 end

@@ -9,7 +9,11 @@ module Inchi
     edge_count = molfile_lines[5].split(' ')[4].to_i # in molfile v3000, on 6th line, 2nd number is number of bonds.
     atom_block = (7..atom_count + 6).map { |i| molfile_lines[i] }
     edge_block = (0..edge_count - 1).map { |i| molfile_lines[i + 9 + atom_count] }
-    [atom_block, edge_block, molfile_lines]
+    molfile_header = Array.new(6) # the molfile v3000 header is six lines long
+    (0..4).each do |line|
+      molfile_header[line] = molfile_lines[line]
+    end
+    [atom_block, edge_block, molfile_lines, molfile_header]
   end
 
   def create_node_features_matrix(atom_block, periodic_table_elements)
@@ -80,7 +84,7 @@ module Inchi
     [adjacency_matrix, node_features_matrix, distance_matrix, molfile_header]
   end
 
-  def swap_adjacency_matrix_elements(adjacency_matrix, node_features_matrix, i, j)
+  def swap_adjacency_matrix_elements(adjacency_matrix, node_features_matrix, distance_matrix, i, j)
     atom_a = node_features_matrix[i]
     atom_b = node_features_matrix[j]
     node_features_matrix[i] = atom_b
@@ -98,10 +102,10 @@ module Inchi
       adjacency_matrix[row][i] = atom_b
       adjacency_matrix[row][j] = atom_a
     end
-    [adjacency_matrix, node_features_matrix]
+    [adjacency_matrix, node_features_matrix, distance_matrix]
   end
 
-def sort_by_element(adjacency_matrix, node_features_matrix) # sort by atomic mass
+def sort_by_element(adjacency_matrix, node_features_matrix, distance_matrix) # sort by atomic mass
     atom_count = node_features_matrix.length
     for i in (atom_count).downto(2)
       for j in 0..(atom_count-2)
@@ -110,10 +114,10 @@ def sort_by_element(adjacency_matrix, node_features_matrix) # sort by atomic mas
         end
       end
     end
-    [adjacency_matrix, node_features_matrix]
+    [adjacency_matrix, node_features_matrix, distance_matrix]
 end
 
-def sort_by_connectivity(adjacency_matrix, node_features_matrix) # sort by connectivity
+def sort_by_connectivity(adjacency_matrix, node_features_matrix, distance_matrix) # sort by connectivity
     atom_count = node_features_matrix.length
     for i in (atom_count).downto(2)
       for j in 0..(atom_count-2)
@@ -124,10 +128,10 @@ def sort_by_connectivity(adjacency_matrix, node_features_matrix) # sort by conne
         end
       end
     end
-    [adjacency_matrix, node_features_matrix]
+    [adjacency_matrix, node_features_matrix, distance_matrix]
 end
 
-def sort_by_connectivity_index(adjacency_matrix, node_features_matrix) # sort by connectivity index
+def sort_by_connectivity_index(adjacency_matrix, node_features_matrix, distance_matrix) # sort by connectivity index
     iteration = 1
     converged = false
     atom_count = node_features_matrix.length
@@ -158,10 +162,10 @@ def sort_by_connectivity_index(adjacency_matrix, node_features_matrix) # sort by
       iteration += 1
       print_adjacency_matrix(adjacency_matrix, node_features_matrix)
     end
-    [adjacency_matrix, node_features_matrix]
+    [adjacency_matrix, node_features_matrix, distance_matrix]
   end
 
-  def sort_adjacency_matrix(adjacency_matrix, node_features_matrix)
+  def sort_adjacency_matrix(adjacency_matrix, node_features_matrix, distance_matrix)
     atom_count = node_features_matrix.length
     print "\nNow sorting adjacency matrix\n"
     print_adjacency_matrix(adjacency_matrix, node_features_matrix)
@@ -169,10 +173,10 @@ def sort_by_connectivity_index(adjacency_matrix, node_features_matrix) # sort by
     adjacency_matrix, node_features_matrix = sort_by_element(adjacency_matrix, node_features_matrix)
     adjacency_matrix, node_features_matrix = sort_by_connectivity(adjacency_matrix, node_features_matrix)
     adjacency_matrix, node_features_matrix = sort_by_connectivity_index(adjacency_matrix, node_features_matrix)
-    [adjacency_matrix, node_features_matrix]
+    [adjacency_matrix, node_features_matrix, distance_matrix]
   end
 
-  def print_adjacency_matrix(adjacency_matrix, node_features_matrix)
+  def print_adjacency_matrix(adjacency_matrix, node_features_matrix, distance_matrix)
     n = adjacency_matrix.length
     (0..n - 1).each do |row|
       print " ",adjacency_matrix[row]," ",node_features_matrix[row]

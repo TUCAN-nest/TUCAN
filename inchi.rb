@@ -1,4 +1,4 @@
-# (c) CC BY-SA | Jan C. Brammer, RWTH Aachen and Ulrich Schatzschneider, Universität Würzburg | NFDI4Chem | v2.4.3 | 11.11.2021
+# (c) CC BY-SA | Jan C. Brammer, RWTH Aachen and Ulrich Schatzschneider, Universität Würzburg | NFDI4Chem | v2.5 | 20.11.2021
 
 require './periodic_table'
 

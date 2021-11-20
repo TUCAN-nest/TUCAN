@@ -41,7 +41,7 @@ class CommandLineInterface
     puts "\n#{'-' * 75}\n"
     puts molfile_data
     puts "\n#{'-' * 75}\n"
-    adjacency_matrix, node_features_matrix, distance_matrix, molfile_header = initialize_matrix(atom_block, edge_block, PeriodicTable::ELEMENTS)
+    adjacency_matrix, node_features_matrix, distance_matrix, molfile_header = initialize_matrix(atom_block, edge_block, molfile_header, PeriodicTable::ELEMENTS)
     adjacency_matrix, node_features_matrix, distance_matrix = sort_adjacency_matrix(adjacency_matrix, node_features_matrix, distance_matrix)
     puts "\nFINAL STAGE\n"
     print_adjacency_matrix(adjacency_matrix, node_features_matrix, distance_matrix)

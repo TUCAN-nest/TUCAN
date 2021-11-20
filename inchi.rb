@@ -53,12 +53,17 @@ module Inchi
     connectivity_index
   end
   
-  def create_adjacency_matrix(atom_block, edge_block, periodic_table_elements)
+  def initialize_matrix(atom_block, edge_block, header_block, periodic_table_elements)
     atom_count = atom_block.size
-    node_features_matrix = create_node_features_matrix(atom_block, periodic_table_elements)
-    edge_features_matrix = create_edge_features_matrix(edge_block, atom_count)
     rows, columns, default_value = atom_count, atom_count, 0
     adjacency_matrix = Array.new(rows) { Array.new(columns, default_value) }
+    distance_matrix = Array.new(rows) { Array.new(columns, default_value) }
+    edge_features_matrix = create_edge_features_matrix(edge_block, atom_count)
+    node_features_matrix = create_node_features_matrix(atom_block, periodic_table_elements)
+    molfile_header = Array.new(6) # the molfile v3000 header is six lines long
+    (0..4).each do |line|
+      molfile_header[line] = header_block[line]
+    end
     print "\nAdjacency matrix is #{atom_count} x #{atom_count}\n"
     (0..atom_count - 1).each do |row|
       line = edge_features_matrix[row]
@@ -72,7 +77,7 @@ module Inchi
         end
       end
     end
-    [adjacency_matrix, node_features_matrix] # better also directly calculate and return "neighbour list" here, as needed in the 3rd sorting step -> now implemented but not used due to issues
+    [adjacency_matrix, node_features_matrix, distance_matrix, molfile_header]
   end
 
   def swap_adjacency_matrix_elements(adjacency_matrix, node_features_matrix, i, j)
@@ -211,12 +216,12 @@ def sort_by_connectivity_index(adjacency_matrix, node_features_matrix) # sort by
     dotfile += "}\n"
   end
   
-  def write_molfile(adjacency_matrix, node_features_matrix, periodic_table_elements)
-    molfile = "test.mol\n"
-    molfile += "nInChI v2.4\n"
-    molfile += "\n"
-    molfile += "  0  0  0     0  0              0 V3000\n"
-    molfile += "M  V30 BEGIN CTAB\n"
+  def write_molfile(adjacency_matrix, node_features_matrix, molfile_header, periodic_table_elements)
+    molfile = ''
+    molfile_header[1] = "nInChI v2.5"
+    (0..4).each do |line|
+      molfile += molfile_header[line]+"\n"
+    end
     atom_count = node_features_matrix.length
     bond_count = 0
     (0..atom_count - 1).each do |row|

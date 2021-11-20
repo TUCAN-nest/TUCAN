@@ -36,17 +36,17 @@ class CommandLineInterface
     puts "\nJan Brammer (RWTH Aachen) and Ulrich Schatzschneider (Universität Würzburg) within NFDI4Chem\n"
     puts "\nCC BY-SA 11/2021\n"
     puts "\n#{'-' * 100}\n"
-    atom_block, edge_block, molfile_data = read_molfile(@filename)
+    atom_block, edge_block, molfile_data, molfile_header = read_molfile(@filename)
     puts "\nPrinting molfile: #{@filename} First 6 lines contain header."
     puts "\n#{'-' * 75}\n"
     puts molfile_data
     puts "\n#{'-' * 75}\n"
-    adjacency_matrix, node_features_matrix = create_adjacency_matrix(atom_block, edge_block, PeriodicTable::ELEMENTS)
-    adjacency_matrix, node_features_matrix = sort_adjacency_matrix(adjacency_matrix, node_features_matrix)
+    adjacency_matrix, node_features_matrix, distance_matrix, molfile_header = initialize_matrix(atom_block, edge_block, PeriodicTable::ELEMENTS)
+    adjacency_matrix, node_features_matrix, distance_matrix = sort_adjacency_matrix(adjacency_matrix, node_features_matrix, distance_matrix)
     puts "\nFINAL STAGE\n"
-    print_adjacency_matrix(adjacency_matrix, node_features_matrix)
+    print_adjacency_matrix(adjacency_matrix, node_features_matrix, distance_matrix)
     puts "\n#{write_ninchi_string(adjacency_matrix, node_features_matrix, PeriodicTable::ELEMENTS)}"
-    puts "\n#{write_molfile(adjacency_matrix, node_features_matrix, PeriodicTable::ELEMENTS)}" if @print_molfile
+    puts "\n#{write_molfile(adjacency_matrix, node_features_matrix, molfile_header, PeriodicTable::ELEMENTS)}" if @print_molfile
     puts "\n#{write_dot_file(adjacency_matrix, node_features_matrix, @filename, PeriodicTable::ELEMENTS,
                              PeriodicTable::ELEMENT_COLORS)}" if @print_dotfile
     puts "\nOutput format: DOT file - to display go to https://dreampuf.github.io/GraphvizOnline/#" if @print_dotfile

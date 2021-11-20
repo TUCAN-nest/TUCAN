@@ -14,8 +14,8 @@ class CommandLineInterface
     begin
       OptionParser.new do |opts|
         opts.on('--molfile MOLFILE') { |o| options[:molfile] = o }
-        opts.on('--permute-input') { |o| options[:permute] = o }
-        opts.on('--dot-file') { |o| options[:dot_file] = o }
+        opts.on('--permute-input') { |o| options[:permute_input] = o }
+        opts.on('--print_dotfile') { |o| options[:print_dotfile] = o }
         opts.on('--print-molfile') { |o| options[:print_molfile] = o }
       end.parse!
     rescue OptionParser::InvalidOption => e
@@ -25,8 +25,8 @@ class CommandLineInterface
     @filename = options[:molfile]
     abort('Please provide a filename.') if @filename.nil?
     abort("File `#{@filename}` doesn't exist.") unless File.exist?(@filename)
-    @permute = options[:permute] || false
-    @print_dot_file = options[:dot_file] || false
+    @permute_input = options[:permute_input] || false
+    @print_dotfile = options[:print_dotfile] || false
     @print_molfile = options[:print_molfile] || false
   end
 
@@ -43,13 +43,13 @@ class CommandLineInterface
     puts "\n#{'-' * 75}\n"
     adjacency_matrix, node_features_matrix = create_adjacency_matrix(atom_block, edge_block, PeriodicTable::ELEMENTS)
     adjacency_matrix, node_features_matrix = sort_adjacency_matrix(adjacency_matrix, node_features_matrix)
-    print "\nFINAL STAGE \n"
+    puts "\nFINAL STAGE\n"
     print_adjacency_matrix(adjacency_matrix, node_features_matrix)
     puts "\n#{write_ninchi_string(adjacency_matrix, node_features_matrix, PeriodicTable::ELEMENTS)}"
     puts "\n#{write_molfile(adjacency_matrix, node_features_matrix, PeriodicTable::ELEMENTS)}" if @print_molfile
     puts "\n#{write_dot_file(adjacency_matrix, node_features_matrix, @filename, PeriodicTable::ELEMENTS,
-                             PeriodicTable::ELEMENT_COLORS)}" if @print_dot_file
-    puts "\nOutput format: DOT file - to display go to https://dreampuf.github.io/GraphvizOnline/#" if @print_dot_file
+                             PeriodicTable::ELEMENT_COLORS)}" if @print_dotfile
+    puts "\nOutput format: DOT file - to display go to https://dreampuf.github.io/GraphvizOnline/#" if @print_dotfile
     puts "\n#{'-' * 100}\n"
   end
 end

@@ -1,4 +1,4 @@
-# (c) CC BY-SA | Jan C. Brammer, RWTH Aachen and Ulrich Schatzschneider, Universität Würzburg | NFDI4Chem | v2.1 | 18.09.2021
+# (c) CC BY-SA | Jan C. Brammer, RWTH Aachen and Ulrich Schatzschneider, Universität Würzburg | NFDI4Chem | v2.5 | 20.11.2021
 
 require './inchi'
 require 'optparse'
@@ -32,14 +32,14 @@ class CommandLineInterface
 
   def run
     puts "#{'-' * 100}\n"
-    puts "\nA new International Chemical Identifier (nInChI) v2.4\n"
+    puts "\nA new International Chemical Identifier (nInChI) v2.5\n"
     puts "\nJan Brammer (RWTH Aachen) and Ulrich Schatzschneider (Universität Würzburg) within NFDI4Chem\n"
-    puts "\nCC BY-SA 10/2021\n"
+    puts "\nCC BY-SA 11/2021\n"
     puts "\n#{'-' * 100}\n"
     atom_block, edge_block, molfile_data = read_molfile(@filename)
     puts "\nPrinting molfile: #{@filename}. First 4 lines contain header."
     puts "\n#{'-' * 75}\n"
-    molfile_data.each { |line| puts line }
+    puts molfile_data
     puts "\n#{'-' * 75}\n"
     adjacency_matrix, node_features_matrix = create_adjacency_matrix(atom_block, edge_block, PeriodicTable::ELEMENTS)
     adjacency_matrix, node_features_matrix = sort_adjacency_matrix(adjacency_matrix, node_features_matrix)

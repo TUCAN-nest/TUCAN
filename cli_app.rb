@@ -37,7 +37,7 @@ class CommandLineInterface
     puts "\nCC BY-SA 11/2021\n"
     puts "\n#{'-' * 100}\n"
     atom_block, edge_block, molfile_data = read_molfile(@filename)
-    puts "\nPrinting molfile: #{@filename}. First 4 lines contain header."
+    puts "\nPrinting molfile: #{@filename} First 6 lines contain header."
     puts "\n#{'-' * 75}\n"
     puts molfile_data
     puts "\n#{'-' * 75}\n"

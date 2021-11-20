@@ -15,7 +15,7 @@ class CommandLineInterface
       OptionParser.new do |opts|
         opts.on('--molfile MOLFILE') { |o| options[:molfile] = o }
         opts.on('--permute-input') { |o| options[:permute_input] = o }
-        opts.on('--print_dotfile') { |o| options[:print_dotfile] = o }
+        opts.on('--print-dotfile') { |o| options[:print_dotfile] = o }
         opts.on('--print-molfile') { |o| options[:print_molfile] = o }
       end.parse!
     rescue OptionParser::InvalidOption => e

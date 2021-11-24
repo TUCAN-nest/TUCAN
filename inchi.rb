@@ -472,7 +472,7 @@ def serialize_molecule(adjacency_matrix, node_features_matrix)
   inchi_string[5] = 'hex:' + inchi_string[4].to_s(base = 16)
   inchi_string[6] = 'base32:' + inchi_string[4].to_s(base = 32)
   inchi_string[7] = standard_inchi(adjacency_matrix, node_features_matrix)
-  inchi_string
+  inchi_string[0] # only return tuples for now (makes reading output more informative)
 end
 
 def write_sum_formula_string(node_features_matrix, periodic_table_elements)

@@ -296,22 +296,24 @@ def sort_terminal_hydrogens(adjacency_matrix, node_features_matrix, distance_mat
     end
   end
   print "\nNumber of terminal H atoms: ",number_of_terminal_hydrogens,"\n"
-  for i in 0..number_of_terminal_hydrogens-1
-    print "\nIteration: ",i,"\n"
-    for row in 0..number_of_terminal_hydrogens-1
-      neighbour_A = 0
-      neighbour_B = 0
-      for column in 0..atom_count-1
-        if(adjacency_matrix[row][column] != 0)
-          neighbour_A = column
+  if(number_of_terminal_hydrogens < atom_count) # test required as otherwise program will crash for H2
+    for i in 0..number_of_terminal_hydrogens-1
+      print "\nIteration: ",i,"\n"
+      for row in 0..number_of_terminal_hydrogens-1
+        neighbour_A = 0
+        neighbour_B = 0
+        for column in 0..atom_count-1
+          if(adjacency_matrix[row][column] != 0)
+            neighbour_A = column
+          end
+          if(adjacency_matrix[row+1][column] != 0)
+            neighbour_B = column
+          end
         end
-        if(adjacency_matrix[row+1][column] != 0)
-          neighbour_B = column
+        print "(",neighbour_A,":",neighbour_B,") "
+        if(neighbour_A > neighbour_B)
+          adjacency_matrix, node_features_matrix, distance_matrix = swap_matrix_elements(adjacency_matrix, node_features_matrix, distance_matrix, row, row+1)
         end
-      end
-      print "(",neighbour_A,":",neighbour_B,") "
-      if(neighbour_A > neighbour_B)
-        adjacency_matrix, node_features_matrix, distance_matrix = swap_matrix_elements(adjacency_matrix, node_features_matrix, distance_matrix, row, row+1)
       end
     end
   end

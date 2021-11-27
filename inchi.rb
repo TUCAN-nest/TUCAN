@@ -284,7 +284,7 @@ def sort_by_distance_matrix(adjacency_matrix, node_features_matrix, distance_mat
                                                                                          node_features_matrix, distance_matrix, row, row + 1)
         end
       end
-    ed
+    end
   end
   [adjacency_matrix, node_features_matrix, distance_matrix]
 end

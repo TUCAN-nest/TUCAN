@@ -302,7 +302,7 @@ def sort_terminal_hydrogens(adjacency_matrix, node_features_matrix, distance_mat
   print "\nNumber of terminal H atoms: ",number_of_terminal_hydrogens,"\n"
   if(number_of_terminal_hydrogens < atom_count) # test required as otherwise program will crash for H2
     for i in 0..number_of_terminal_hydrogens-1
-      print "\nIteration: ",i,"\n"
+      print "\nIteration: ",i+1,"\n"
       for row in 0..number_of_terminal_hydrogens-1
         neighbour_A = 0
         neighbour_B = 0

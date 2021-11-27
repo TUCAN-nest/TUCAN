@@ -338,9 +338,8 @@ def sort_adjacency_matrix(adjacency_matrix, node_features_matrix, distance_matri
                                                                                              node_features_matrix, distance_matrix)
   adjacency_matrix, node_features_matrix, distance_matrix = sort_by_connectivity_index(adjacency_matrix, node_features_matrix, distance_matrix)
   
-  # adjacency_matrix, node_features_matrix, distance_matrix = sort_by_distance(adjacency_matrix, node_features_matrix, distance_matrix)
-  #adjacency_matrix, node_features_matrix, distance_matrix = sort_by_distance_matrix(adjacency_matrix,
-                                                                                    node_features_matrix, distance_matrix)
+  #adjacency_matrix, node_features_matrix, distance_matrix = sort_by_distance(adjacency_matrix, node_features_matrix, distance_matrix)
+  #adjacency_matrix, node_features_matrix, distance_matrix = sort_by_distance_matrix(adjacency_matrix, node_features_matrix, distance_matrix)
 
   adjacency_matrix, node_features_matrix, distance_matrix = sort_terminal_hydrogens(adjacency_matrix, node_features_matrix, distance_matrix)  
   [adjacency_matrix, node_features_matrix, distance_matrix]

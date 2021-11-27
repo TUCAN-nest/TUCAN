@@ -8,6 +8,7 @@ def read_molfile(filename)
 end
 
 def create_node_features_matrix(molfile_lines, atom_count, periodic_table_elements)
+  print "\nNow creating node_features_matrix ...\n"
   rows, columns, default_value = atom_count, 5, 0
   node_features_matrix = Array.new(rows) { Array.new(columns, default_value) }
   node_index = 0
@@ -32,6 +33,7 @@ def create_node_features_matrix(molfile_lines, atom_count, periodic_table_elemen
 end
 
 def create_edge_features_matrix(molfile_lines, edge_count, atom_count)
+  print "\nNow creating edge_features_matrix ...\n"
   edge_features_matrix = Array.new(atom_count).map(&:to_a)
   (0..edge_count - 1).each do |edge_index|
     vertex1, vertex2 = parse_edge(molfile_lines[edge_index + 9 + atom_count])
@@ -49,6 +51,7 @@ def parse_edge(molfile_line)
 end
 
 def create_distance_matrix(adjacency_matrix)
+  print "\nNow creating distance_matrix ...\n"
   n = adjacency_matrix.length
   rows, columns, default_value = n, n, 0
   distance_matrix = Array.new(rows) { Array.new(columns, default_value) }
@@ -106,15 +109,13 @@ def initialize_matrix(molfile_lines, periodic_table_elements)
   rows, columns, default_value = atom_count, atom_count, 0
   adjacency_matrix = Array.new(rows) { Array.new(columns, default_value) }
   distance_matrix = Array.new(rows) { Array.new(columns, default_value) }
-  print "\nNow creating edge_features_matrix\n"
   edge_features_matrix = create_edge_features_matrix(molfile_lines, edge_count, atom_count)
-  print "\nNow creating node_features_matrix\n"
   node_features_matrix = create_node_features_matrix(molfile_lines, atom_count, periodic_table_elements)
   molfile_header = Array.new(6) # the molfile v3000 header is six lines long
   (0..4).each do |line|
     molfile_header[line] = molfile_lines[line]
   end
-  print "\nAdjacency matrix is #{atom_count} x #{atom_count}\n"
+  print "\nNow creating #{atom_count} x #{atom_count} adjacency matrix ...\n"
   (0..atom_count - 1).each do |row|
     line = edge_features_matrix[row]
     (0..atom_count - 1).each do |column|
@@ -132,7 +133,6 @@ def initialize_matrix(molfile_lines, periodic_table_elements)
     end
     print " ", row, " "
   end
-  print "\nNow creating distance_matrix\n"
   distance_matrix = create_distance_matrix(adjacency_matrix)
   offset = 6 + atom_count + 2 + edge_count + 2 # header is six lines, atom_block and bond_block enclosed in two tag lines each, which additionally have to be substracted
   line_count = molfile_lines.length - offset # header is six lines, atom_block and bond_block enclosed in two tag lines each, which additionally have to be substracted
@@ -330,7 +330,7 @@ end
 
 def sort_adjacency_matrix(adjacency_matrix, node_features_matrix, distance_matrix)
   atom_count = node_features_matrix.length
-  print "\nNow sorting adjacency matrix\n\n"
+  print "\nNow sorting adjacency matrix ...\n\n"
   print_adjacency_matrix(adjacency_matrix, node_features_matrix, distance_matrix)
   print "\nNumber of atoms: #{atom_count}\n"
   adjacency_matrix, node_features_matrix, distance_matrix = sort_by_element_and_connectivity(adjacency_matrix, node_features_matrix, distance_matrix)

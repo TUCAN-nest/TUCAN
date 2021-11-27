@@ -204,7 +204,7 @@ def calculate_ac_index(node_features_matrix) # ac_index is a combination of atom
 end
 
 def sort_by_element_and_connectivity(adjacency_matrix, node_features_matrix, distance_matrix)
-  print "\nSort by atomic number and connectivity: \n"
+  print "\nNow sorting by atomic number and connectivity: \n"
   atom_count = node_features_matrix.length
   iteration = 1
   old_ac_index = 0
@@ -230,7 +230,7 @@ def sort_by_element_and_connectivity(adjacency_matrix, node_features_matrix, dis
 end
 
 def sort_by_connectivity_index(adjacency_matrix, node_features_matrix, distance_matrix) # sort by connectivity index
-  print "\nSort by atomic number and connectivity: \n"
+  print "\nNow sorting by connectivity index: \n"
   iteration = 1
   converged = false
   atom_count = node_features_matrix.length
@@ -291,7 +291,7 @@ def sort_by_distance_matrix(adjacency_matrix, node_features_matrix, distance_mat
 end
 
 def sort_terminal_hydrogens(adjacency_matrix, node_features_matrix, distance_matrix) # terminal hydrogen atom with highest index number to be attached to heavy atom with highest index number
-  print "\nSort terminal H atoms: \n"
+  print "\nNow sorting terminal H atoms: \n"
   atom_count = node_features_matrix.length
   number_of_terminal_hydrogens = 0
   for row in 0..atom_count-1

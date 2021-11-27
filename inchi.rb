@@ -300,10 +300,9 @@ def sort_terminal_hydrogens(adjacency_matrix, node_features_matrix, distance_mat
   print "\nNumber of terminal H atoms: ",number_of_terminal_hydrogens,"\n"
   for i in 0..number_of_terminal_hydrogens-1
     #print "\nIteration: ",i,"\n"
-    for row   .number_of_terminal_hydrogens-1
-      neighbou
-      r_A = 0
-      ei#ghbour_B = 0
+    for row in 0..number_of_terminal_hydrogens-1
+      neighbour_A = 0
+      neighbour_B = 0
       for column in 0..atom_count-1
         if(adjacency_matrix[row][column] != 0)
          adjacency_matrix, node_features_matrix, distance_matrix = sort_terminal_hydrogens(adjacency_matrix, node_features_matrix, distance_matrix)        

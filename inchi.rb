@@ -204,6 +204,7 @@ def calculate_ac_index(node_features_matrix) # ac_index is a combination of atom
 end
 
 def sort_by_element_and_connectivity(adjacency_matrix, node_features_matrix, distance_matrix)
+  print "\nSort by atomic number and connectivity: \n"
   atom_count = node_features_matrix.length
   iteration = 1
   old_ac_index = 0
@@ -218,22 +219,24 @@ def sort_by_element_and_connectivity(adjacency_matrix, node_features_matrix, dis
                                                                                        node_features_matrix, distance_matrix, row, row + 1)
       end
     end
-    # print_adjacency_matrix(adjacency_matrix, node_features_matrix, distance_matrix)
     old_ac_index = new_ac_index
     new_ac_index = calculate_ac_index(node_features_matrix)
     print "\nIteration ", iteration, ": ", old_ac_index, " -> ", new_ac_index, "\n"
     iteration += 1
   end
+  print "\n"
+  print_adjacency_matrix(adjacency_matrix, node_features_matrix, distance_matrix)
   [adjacency_matrix, node_features_matrix, distance_matrix]
 end
 
 def sort_by_connectivity_index(adjacency_matrix, node_features_matrix, distance_matrix) # sort by connectivity index
+  print "\nSort by atomic number and connectivity: \n"
   iteration = 1
   converged = false
   atom_count = node_features_matrix.length
   previous_molecule_states = [Marshal.load(Marshal.dump(adjacency_matrix))]
   until converged == true
-    print "\nCycle ##{iteration}\n"
+    print "\nIteration: #{iteration}\n"
     for row in 0..atom_count - 2
       for column in 0..atom_count - 1
         node_features_matrix[row][3] =
@@ -248,12 +251,12 @@ def sort_by_connectivity_index(adjacency_matrix, node_features_matrix, distance_
     end
     if (previous_molecule_states.include?(adjacency_matrix))
       converged = true
-      print "\nOptimization has converged\n\n"
     end
     previous_molecule_states.push(Marshal.load(Marshal.dump(adjacency_matrix)))
     iteration += 1
-    print_adjacency_matrix(adjacency_matrix, node_features_matrix, distance_matrix)
   end
+  print "\n"
+  print_adjacency_matrix(adjacency_matrix, node_features_matrix, distance_matrix)
   [adjacency_matrix, node_features_matrix, distance_matrix]
 end
 
@@ -288,6 +291,7 @@ def sort_by_distance_matrix(adjacency_matrix, node_features_matrix, distance_mat
 end
 
 def sort_terminal_hydrogens(adjacency_matrix, node_features_matrix, distance_matrix) # terminal hydrogen atom with highest index number to be attached to heavy atom with highest index number
+  print "\nSort terminal H atoms: \n"
   atom_count = node_features_matrix.length
   number_of_terminal_hydrogens = 0
   for row in 0..atom_count-1
@@ -310,7 +314,6 @@ def sort_terminal_hydrogens(adjacency_matrix, node_features_matrix, distance_mat
             neighbour_B = column
           end
         end
-        print "(",neighbour_A,":",neighbour_B,") "
         if(neighbour_A > neighbour_B)
           adjacency_matrix, node_features_matrix, distance_matrix = swap_matrix_elements(adjacency_matrix, node_features_matrix, distance_matrix, row, row+1)
         end
@@ -330,9 +333,8 @@ end
 
 def sort_adjacency_matrix(adjacency_matrix, node_features_matrix, distance_matrix)
   atom_count = node_features_matrix.length
-  print "\nNow sorting adjacency matrix ...\n\n"
+  print "\nNow sorting adjacency matrix: \n\n"
   print_adjacency_matrix(adjacency_matrix, node_features_matrix, distance_matrix)
-  print "\nNumber of atoms: #{atom_count}\n"
   adjacency_matrix, node_features_matrix, distance_matrix = sort_by_element_and_connectivity(adjacency_matrix, node_features_matrix, distance_matrix)
   adjacency_matrix, node_features_matrix, distance_matrix = sort_by_connectivity_index(adjacency_matrix, node_features_matrix, distance_matrix)
   

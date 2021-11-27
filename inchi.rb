@@ -188,8 +188,7 @@ def calculate_connectivity_index(adjacency_matrix, node_features_matrix, distanc
   connectivity_index = 0
   (0..atom_count - 1).each do |column|
     if (adjacency_matrix[row][column] > 0)
-      connectivity_index += node_features_matrix[column][0] * node_features_matrix[column][1] * (column + 1) # priority is given to elements which are close to heavier elements with higher number of neighbours
-      # connectivity_index += distance_matrix[row][column]*column
+      connectivity_index += node_features_matrix[column][0] # the higher the atomic number of the neighbours the higher the assigned index number
     end
   end
   connectivity_index
@@ -284,6 +283,69 @@ def sort_by_distance_matrix(adjacency_matrix, node_features_matrix, distance_mat
           adjacency_matrix, node_features_matrix, distance_matrix = swap_matrix_elements(adjacency_matrix,
                                                                                          node_features_matrix, distance_matrix, row, row + 1)
         end
+def sort_terminal_hydrogens(adjacency_matrix, node_features_matrix, distance_matrix) # terminal hydrogen atom with highest index number to be attached to heavy atom with highest index number
+  atom_count = node_features_matrix.length
+  number_of_terminal_hydrogens = 0
+  for row in 0..atom_count-1
+    if((node_features_matrix[row][0] == 1) && (node_features_matrix[row][1] == 1))
+      number_of_terminal_hydrogens += 1
+    end
+  end
+  print "\nNumber of terminal H atoms: ",number_of_terminal_hydrogens,"\n"
+  for i in 0..number_of_terminal_hydrogens-1
+    print "\nIteration: ",i,"\n"
+    for r#ow in 0..number_of_terminal_hydrogens-1
+      neighbour_A = 0
+      neighbour_B = 0
+      for column in 0..atom_count-1
+        if(adjacency_matrix[row][column] != 0)
+          neighbour_A = column
+        end
+        if(adjacency_matrix[row+1][column] != 0)
+          neighbour_B = column
+        end
+      end
+      print "(",neighbour_A,":",neighbour_B,") "
+      if(ne#ighbour_A > neighbour_B)
+        adjacency_matrix, node_features_matrix, distance_matrix = swap_matrix_elements(adjacency_matrix, node_features_matrix, distance_matrix, row, row+1)
+      end
+    end
+  end
+  [adjacency_matrix, node_features_matrix, distance_matrix]
+end
+      end
+    ed
+  end
+  [adjacency_matrix, node_features_matrix, distance_matrix]
+end
+
+def sort_terminal_hydrogens(adjacency_matrix, node_features_matrix, distance_matrix) # terminal hydrogen atom with highest index number to be attached to heavy atom with highest index number
+  atom_count = node_features_matrix.length
+  number_of_terminal_hydrogens = 0
+  for row in 0..atom_count-1
+    if((node_features_matrix[row][0] == 1) && (node_features_matrix[row][1] == 1))
+      number_of_terminal_hydrogens += 1
+    end
+  end
+  print "\nNumber of terminal H atoms: ",number_of_terminal_hydrogens,"\n"
+  for i in 0..number_of_terminal_hydrogens-1
+    #print "\nIteration: ",i,"\n"
+    for row   .number_of_terminal_hydrogens-1
+      neighbou
+      r_A = 0
+      ei#ghbour_B = 0
+      for column in 0..atom_count-1
+        if(adjacency_matrix[row][column] != 0)
+         adjacency_matrix, node_features_matrix, distance_matrix = sort_terminal_hydrogens(adjacency_matrix, node_features_matrix, distance_matrix)        
+         neighbour_A = column
+        end
+        if(adjacency_matrix[row+1][column] != 0)
+          neighbour_B = column
+        end
+      end
+      #print "(",neighbour_A,":",neighbour_B,") "
+      if(neighbour_A > neighbour_B)
+        adjacency_matrix, node_features_matrix, distance_matrix = swap_matrix_elements(adjacency_matrix, node_features_matrix, distance_matrix, row, row+1)
       end
     end
   end
@@ -305,13 +367,13 @@ def sort_adjacency_matrix(adjacency_matrix, node_features_matrix, distance_matri
   print "\nNumber of atoms: #{atom_count}\n"
   adjacency_matrix, node_features_matrix, distance_matrix = sort_by_element_and_connectivity(adjacency_matrix,
                                                                                              node_features_matrix, distance_matrix)
-
-  # adjacency_matrix, node_features_matrix, distance_matrix = sort_by_connectivity_index(adjacency_matrix, node_features_matrix, distance_matrix)
+  adjacency_matrix, node_features_matrix, distance_matrix = sort_by_connectivity_index(adjacency_matrix, node_features_matrix, distance_matrix)
+  
   # adjacency_matrix, node_features_matrix, distance_matrix = sort_by_distance(adjacency_matrix, node_features_matrix, distance_matrix)
-
-  adjacency_matrix, node_features_matrix, distance_matrix = sort_by_distance_matrix(adjacency_matrix,
+  #adjacency_matrix, node_features_matrix, distance_matrix = sort_by_distance_matrix(adjacency_matrix,
                                                                                     node_features_matrix, distance_matrix)
 
+  adjacency_matrix, node_features_matrix, distance_matrix = sort_terminal_hydrogens(adjacency_matrix, node_features_matrix, distance_matrix)  
   [adjacency_matrix, node_features_matrix, distance_matrix]
 end
 

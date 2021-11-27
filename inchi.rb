@@ -148,33 +148,33 @@ end
 #
 
 def swap_matrix_elements(adjacency_matrix, node_features_matrix, distance_matrix, i, j)
-  atom_count = node_features_matrix.length - 1
+  atom_count = node_features_matrix.length
   # swap rows of node_features_matrix
   atom_a = node_features_matrix[i]
   atom_b = node_features_matrix[j]
   node_features_matrix[i] = atom_b
   node_features_matrix[j] = atom_a
   # swap rows of adjacency_matrix
-  for column in 0..atom_count
+  for column in 0..atom_count-1
     atom_a = adjacency_matrix[i][column]
     atom_b = adjacency_matrix[j][column]
     adjacency_matrix[i][column] = atom_b
     adjacency_matrix[j][column] = atom_a
   end
-  for row in 0..atom_count
+  for row in 0..atom_count-1
     atom_a = adjacency_matrix[row][i]
     atom_b = adjacency_matrix[row][j]
     adjacency_matrix[row][i] = atom_b
     adjacency_matrix[row][j] = atom_a
   end
   # swap rows of distance_matrix
-  for column in 0..atom_count
+  for column in 0..atom_count-1
     atom_a = distance_matrix[i][column]
     atom_b = distance_matrix[j][column]
     distance_matrix[i][column] = atom_b
     distance_matrix[j][column] = atom_a
   end
-  for row in 0..atom_count
+  for row in 0..atom_count-1
     atom_a = distance_matrix[row][i]
     atom_b = distance_matrix[row][j]
     distance_matrix[row][i] = atom_b

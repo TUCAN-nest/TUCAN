@@ -262,13 +262,13 @@ end
 
 def sort_by_distance(adjacency_matrix, node_features_matrix, distance_matrix) # sort by distance to highest priority atom
   atom_count = node_features_matrix.length
-  for i in 0..atom_count - 1
-    for j in 0..(atom_count - 2)
-      for row in 0..atom_count - 2
-        distance_A = distance_matrix[row][atom_count - 1] * node_features_matrix[row][0]
-        distance_B = distance_matrix[row + 1][atom_count - 1] * node_features_matrix[row + 1][0]
-        if ((node_features_matrix[row][0] == node_features_matrix[row + 1][0]) && (node_features_matrix[row][2] == node_features_matrix[row + 1][2]) && (distance_A < distance_B))
-          adjacency_matrix, node_features_matrix, distance_matrix = swap_matrix_elements(adjacency_matrix,node_features_matrix, distance_matrix, row, row + 1)
+  for i in 0..atom_count-1
+    for j in 0..atom_count-2
+      for row in 0..atom_count-2
+        distance_A = distance_matrix[row][atom_count-1]
+        distance_B = distance_matrix[row+1][atom_count-1]
+        if((node_features_matrix[row][0] == node_features_matrix[row+1][0]) && (node_features_matrix[row][2] == node_features_matrix[row+1][2]) && (distance_A < distance_B))
+          adjacency_matrix, node_features_matrix, distance_matrix = swap_matrix_elements(adjacency_matrix, node_features_matrix, distance_matrix, row, row+1)
         end
       end
     end
@@ -337,8 +337,8 @@ def sort_adjacency_matrix(adjacency_matrix, node_features_matrix, distance_matri
   print_adjacency_matrix(adjacency_matrix, node_features_matrix, distance_matrix)
   adjacency_matrix, node_features_matrix, distance_matrix = sort_by_element_and_connectivity(adjacency_matrix, node_features_matrix, distance_matrix)
   adjacency_matrix, node_features_matrix, distance_matrix = sort_by_connectivity_index(adjacency_matrix, node_features_matrix, distance_matrix)
-  
-  #adjacency_matrix, node_features_matrix, distance_matrix = sort_by_distance(adjacency_matrix, node_features_matrix, distance_matrix)
+  adjacency_matrix, node_features_matrix, distance_matrix = sort_by_distance(adjacency_matrix, node_features_matrix, distance_matrix)
+
   #adjacency_matrix, node_features_matrix, distance_matrix = sort_by_distance_matrix(adjacency_matrix, node_features_matrix, distance_matrix)
 
   adjacency_matrix, node_features_matrix, distance_matrix = sort_terminal_hydrogens(adjacency_matrix, node_features_matrix, distance_matrix)  

@@ -1,5 +1,5 @@
 #
-# (c) CC BY-SA | Jan Brammer, RWTH Aachen and Ulrich Schatzschneider, Universität Würzburg | NFDI4Chem | v3.0.2 | 27.11.2021
+# (c) CC BY-SA | Jan Brammer, RWTH Aachen and Ulrich Schatzschneider, Universität Würzburg | NFDI4Chem | v3.0.3 | 05.12.2021
 #
 
 require 'optparse'
@@ -38,9 +38,9 @@ class CommandLineInterface
 
   def run
     puts "#{'-' * 100}\n"
-    puts "\nA new International Chemical Identifier (nInChI) v3.0.2\n"
+    puts "\nA new International Chemical Identifier (nInChI) v3.0.3\n"
     puts "\nJan Brammer (RWTH Aachen) and Ulrich Schatzschneider (Universität Würzburg) within NFDI4Chem\n"
-    puts "\nCC BY-SA 11/2021\n"
+    puts "\nCC BY-SA 12/2021\n"
     puts "\n#{'-' * 100}\n"
     molfile_data = read_molfile(@filename)
     puts "\nPrinting molfile: #{@filename} First 6 lines contain header."

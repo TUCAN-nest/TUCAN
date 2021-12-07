@@ -1,5 +1,5 @@
 #
-# (c) CC BY-SA | Jan Brammer, RWTH Aachen and Ulrich Schatzschneider, Universität Würzburg | NFDI4Chem | v3.0.3 | 05.12.2021
+# (c) CC BY-SA | Jan Brammer, RWTH Aachen and Ulrich Schatzschneider, Universität Würzburg | NFDI4Chem | v3.0.4 | 07.12.2021
 #
 
 require 'optparse'

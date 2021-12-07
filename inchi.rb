@@ -302,7 +302,7 @@ def sort_by_distance_index(adjacency_matrix, node_features_matrix, distance_matr
             distance_index_B += j
           end
         end
-        if((node_features_matrix[row][0] == node_features_matrix[row+1][0]) && (node_features_matrix[row][2] == node_features_matrix[row+1][2]) && (distance_A == distance_B) && (distance_index_A > distance_index_B))
+        if((node_features_matrix[row][0] == node_features_matrix[row+1][0]) && (node_features_matrix[row][2] == node_features_matrix[row+1][2]) && (distance_A == distance_B) && (distance_index_A >= distance_index_B))
           adjacency_matrix, node_features_matrix, distance_matrix = swap_matrix_elements(adjacency_matrix, node_features_matrix, distance_matrix, row, row+1)
           print "."
         end

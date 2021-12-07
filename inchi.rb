@@ -282,19 +282,37 @@ end
 def sort_by_distance_index(adjacency_matrix, node_features_matrix, distance_matrix) # sort by distance to highest priority atom
   print "\nNow sorting by distance index: \n"
   atom_count = node_features_matrix.length
-  for i in 0..atom_count
-    for row in 0..atom_count-2
-      for column in 0..atom_count-1
+  iteration = 1
+  converged = false
+  atom_count = node_features_matrix.length
+  previous_molecule_states = [Marshal.load(Marshal.dump(adjacency_matrix))]
+  until converged == true
+    print "\nIteration: #{iteration}\n"
+    for column in 0..atom_count-1
+      for row in 0..atom_count-2
         distance_A = distance_matrix[row][atom_count-1]
         distance_B = distance_matrix[row+1][atom_count-1]
-        distance_index_A = distance_matrix[row][column]*column
-        distance_index_B = distance_matrix[row+1][column]*column
+        distance_index_A = 0
+        distance_index_B = 0
+        (0..atom_count-1).each do |j|
+          if(adjacency_matrix[row][j] == 1)
+            distance_index_A += j
+          end
+          if(adjacency_matrix[row+1][j] == 1)
+            distance_index_B += j
+          end
+        end
         if((node_features_matrix[row][0] == node_features_matrix[row+1][0]) && (node_features_matrix[row][2] == node_features_matrix[row+1][2]) && (distance_A == distance_B) && (distance_index_A > distance_index_B))
           adjacency_matrix, node_features_matrix, distance_matrix = swap_matrix_elements(adjacency_matrix, node_features_matrix, distance_matrix, row, row+1)
           print "."
         end
       end
     end
+    if(previous_molecule_states.include?(adjacency_matrix))
+      converged = true
+    end
+    previous_molecule_states.push(Marshal.load(Marshal.dump(adjacency_matrix)))
+    iteration += 1
   end
   print "\n"
   [adjacency_matrix, node_features_matrix, distance_matrix]

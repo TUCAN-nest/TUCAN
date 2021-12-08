@@ -205,24 +205,22 @@ end
 
 def sort_by_element_and_connectivity(adjacency_matrix, node_features_matrix, distance_matrix)
   print "\nNow sorting by atomic number and connectivity: \n"
-  atom_count = node_features_matrix.length
-  iteration = 1
-  old_ac_index = 0
-  new_ac_index = calculate_ac_index(node_features_matrix)
-  while (old_ac_index < new_ac_index)
-    for row in 0..(atom_count-2)
-      a = convert_to_bin(node_features_matrix[row][0],8)+"-"+convert_to_bin(node_features_matrix[row][2],5)
-      b = convert_to_bin(node_features_matrix[row+1][0],8)+"-"+convert_to_bin(node_features_matrix[row+1][2],5)
-      print a,"\n"
-      print b,"\n"
-      if(a > b)
+  count = node_features_matrix.length
+  iteration = 0
+  loop do
+    swapped = false
+    for row in 0..(count-2)
+      atom_a = convert_to_bin(node_features_matrix[row][0],8)+"-"+convert_to_bin(node_features_matrix[row][2],5)
+      atom_b = convert_to_bin(node_features_matrix[row+1][0],8)+"-"+convert_to_bin(node_features_matrix[row+1][2],5)
+      if(atom_a > atom_b)
         adjacency_matrix, node_features_matrix, distance_matrix = swap_matrix_elements(adjacency_matrix, node_features_matrix, distance_matrix, row, row+1)
+        swapped = true
       end
     end
-    old_ac_index = new_ac_index
-    new_ac_index = calculate_ac_index(node_features_matrix)
-    print "\nIteration ",iteration,": ",old_ac_index," -> ",new_ac_index,"\n"
+    count -= 1
     iteration += 1
+    print "\nIteration ",iteration," \n"
+    break if (swapped == false)
   end
   print "\n"
   print_adjacency_matrix(adjacency_matrix, node_features_matrix, distance_matrix)

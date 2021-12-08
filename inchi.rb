@@ -236,12 +236,12 @@ def sort_by_connectivity_index(adjacency_matrix, node_features_matrix, distance_
   until converged == true
     print "\nIteration: #{iteration}\n"
     for row in 0..atom_count - 2
-      for column in 0..atom_count - 1
-        node_features_matrix[row][3] =
-          calculate_connectivity_index(adjacency_matrix, node_features_matrix, distance_matrix, row)
-        node_features_matrix[row + 1][3] =
-          calculate_connectivity_index(adjacency_matrix, node_features_matrix, distance_matrix, row + 1)
-      end
+      #for column in 0..atom_count - 1
+      #  node_features_matrix[row][3] =
+      #    calculate_connectivity_index(adjacency_matrix, node_features_matrix, distance_matrix, row)
+      #  node_features_matrix[row + 1][3] =
+      #    calculate_connectivity_index(adjacency_matrix, node_features_matrix, distance_matrix, row + 1)
+      #end
       if ((node_features_matrix[row][0] == node_features_matrix[row + 1][0]) && (node_features_matrix[row][1] == node_features_matrix[row + 1][1]) && (node_features_matrix[row][3] > node_features_matrix[row + 1][3]))
         adjacency_matrix, node_features_matrix, distance_matrix = swap_matrix_elements(adjacency_matrix,
                                                                                        node_features_matrix, distance_matrix, row, row + 1)

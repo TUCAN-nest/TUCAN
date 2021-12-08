@@ -205,23 +205,25 @@ end
 
 def sort_by_element_and_connectivity(adjacency_matrix, node_features_matrix, distance_matrix)
   print "\nNow sorting by atomic number and connectivity: \n"
-  atom_count = node_features_matrix.length
   iteration = 1
-  old_ac_index = 0
-  new_ac_index = calculate_ac_index(node_features_matrix)
-  while (old_ac_index < new_ac_index)
-    for row in 0..(atom_count - 2)
-      a = convert_to_bin(node_features_matrix[row][0], 8) + "-" + convert_to_bin(node_features_matrix[row][2], 5)
-      b = convert_to_bin(node_features_matrix[row + 1][0],
-                         8) + "-" + convert_to_bin(node_features_matrix[row + 1][2], 5)
-      if (a > b)
-        adjacency_matrix, node_features_matrix, distance_matrix = swap_matrix_elements(adjacency_matrix,
-                                                                                       node_features_matrix, distance_matrix, row, row + 1)
+  converged = false
+  atom_count = node_features_matrix.length
+  previous_molecule_states = [Marshal.load(Marshal.dump(adjacency_matrix))]
+  until converged == true
+    print "\nIteration: #{iteration}\n"
+    for row in 0..atom_count-2
+      for column in 0..atom_count-1
+         node_features_matrix[row][3] = calculate_connectivity_index(adjacency_matrix, node_features_matrix, distance_matrix, row)
+         node_features_matrix[row+1][3] = calculate_connectivity_index(adjacency_matrix, node_features_matrix, distance_matrix, row+1)
+      end
+      if((node_features_matrix[row][0] == node_features_matrix[row+1][0]) && (node_features_matrix[row][1] == node_features_matrix[row+1][1]) && (node_features_matrix[row][3] > node_features_matrix[row+1][3]))
+        adjacency_matrix, node_features_matrix, distance_matrix = swap_matrix_elements(adjacency_matrix, node_features_matrix, distance_matrix, row, row+1)
       end
     end
-    old_ac_index = new_ac_index
-    new_ac_index = calculate_ac_index(node_features_matrix)
-    print "\nIteration ", iteration, ": ", old_ac_index, " -> ", new_ac_index, "\n"
+    if(previous_molecule_states.include?(adjacency_matrix))
+      converged = true
+    end
+    previous_molecule_states.push(Marshal.load(Marshal.dump(adjacency_matrix)))
     iteration += 1
   end
   print "\n"

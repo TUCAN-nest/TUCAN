@@ -11,11 +11,11 @@ class MoleculeCollection
   end
 end
 
-class CanonicalizationValidationTests < Minitest::Test
+class TestInvarianceCanonicalization < Minitest::Test
   # Metaprogramming shenanigans for test parameterization (as in pytest)
   # inspired by https://stackoverflow.com/questions/18770988/.
   MoleculeCollection.new.molecules.each do |molecule|
-    define_method("test_canonicalization_#{molecule.name}") do
+    define_method("test_canonicalization_invariance_with_#{molecule.name}") do
       print "\n#{'-' * 75}\n"
       print "\nNow working on: ",molecule.name,"\n"
       print "\nProcessing original molfile\n"

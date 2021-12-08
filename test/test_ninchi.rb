@@ -22,11 +22,11 @@ class MoleculeCollection
   end
 end
 
-class SmokeTests < Minitest::Test
+class RegressionTests < Minitest::Test
   # Metaprogramming shenanigans for test parameterization (as in pytest)
   # inspired by https://stackoverflow.com/questions/18770988/.
   MoleculeCollection.new.molecules.each do |molecule|
-    define_method("test_ninchi_string_#{molecule.name}") do
+    define_method("test_regression_ninchi_string_with_#{molecule.name}") do
       assert_equal molecule.reference_ninchi_string, molecule.ninchi_string(permute_molfile: false)
     end
   end

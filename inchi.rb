@@ -256,7 +256,7 @@ def sort_by_distance(adjacency_matrix, node_features_matrix, distance_matrix) # 
       for row in 0..atom_count-2
         distance_A = distance_matrix[row][atom_count-1]
         distance_B = distance_matrix[row+1][atom_count-1]
-        if((node_features_matrix[row][0] == node_features_matrix[row+1][0]) && (node_features_matrix[row][2] == node_features_matrix[row+1][2]) && (distance_A < distance_B))
+        if((node_features_matrix[row][0] == node_features_matrix[row+1][0]) && (node_features_matrix[row][2] == node_features_matrix[row+1][2]) && (node_features_matrix[row][3] == node_features_matrix[row+1][3]) && (distance_A < distance_B))
           adjacency_matrix, node_features_matrix, distance_matrix = swap_matrix_elements(adjacency_matrix, node_features_matrix, distance_matrix, row, row+1)
           print "."
         end

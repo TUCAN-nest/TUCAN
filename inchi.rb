@@ -210,18 +210,18 @@ def sort_by_element_and_connectivity(adjacency_matrix, node_features_matrix, dis
   old_ac_index = 0
   new_ac_index = calculate_ac_index(node_features_matrix)
   while (old_ac_index < new_ac_index)
-    for row in 0..(atom_count - 2)
-      a = convert_to_bin(node_features_matrix[row][0], 8) + "-" + convert_to_bin(node_features_matrix[row][2], 5)
-      b = convert_to_bin(node_features_matrix[row + 1][0],
-                         8) + "-" + convert_to_bin(node_features_matrix[row + 1][2], 5)
-      if (a > b)
-        adjacency_matrix, node_features_matrix, distance_matrix = swap_matrix_elements(adjacency_matrix,
-                                                                                       node_features_matrix, distance_matrix, row, row + 1)
+    for row in 0..(atom_count-2)
+      a = convert_to_bin(node_features_matrix[row][0],8)+"-"+convert_to_bin(node_features_matrix[row][2],5)
+      b = convert_to_bin(node_features_matrix[row+1][0],8)+"-"+convert_to_bin(node_features_matrix[row+1][2],5)
+      print a,"\n"
+      print b,"\n"
+      if(a > b)
+        adjacency_matrix, node_features_matrix, distance_matrix = swap_matrix_elements(adjacency_matrix, node_features_matrix, distance_matrix, row, row+1)
       end
     end
     old_ac_index = new_ac_index
     new_ac_index = calculate_ac_index(node_features_matrix)
-    print "\nIteration ", iteration, ": ", old_ac_index, " -> ", new_ac_index, "\n"
+    print "\nIteration ",iteration,": ",old_ac_index," -> ",new_ac_index,"\n"
     iteration += 1
   end
   print "\n"

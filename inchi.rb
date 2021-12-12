@@ -288,7 +288,7 @@ def sort_by_distance_index(adjacency_matrix, node_features_matrix, distance_matr
             distance_index_A += column
             #distance_index_A += distance_matrix[row][column]*column
           end
-          if(adjacency_matrix[row+1][column] > 1)
+          if(adjacency_matrix[row+1][column] > 0)
             distance_index_B += column
             #distance_index_B += distance_matrix[row+1][column]*column
           end

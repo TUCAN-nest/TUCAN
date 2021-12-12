@@ -277,7 +277,7 @@ def sort_by_distance_index(adjacency_matrix, node_features_matrix, distance_matr
   previous_molecule_states = [Marshal.load(Marshal.dump(adjacency_matrix))]
   until converged == true
     print "\nIteration #{iteration}\n"
-    #for column in 0..atom_count-1
+    for column in 0..atom_count-1
       for row in 0..atom_count-2
         distance_A = distance_matrix[row][atom_count-1]
         distance_B = distance_matrix[row+1][atom_count-1]
@@ -298,7 +298,7 @@ def sort_by_distance_index(adjacency_matrix, node_features_matrix, distance_matr
           print "."
         end
       end
-    #end
+    end
     if(previous_molecule_states.include?(adjacency_matrix))
       converged = true
     end

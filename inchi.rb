@@ -285,12 +285,12 @@ def sort_by_distance_index(adjacency_matrix, node_features_matrix, distance_matr
         distance_index_B = 0
         (0..atom_count-1).each do |column|
           if(adjacency_matrix[row][column] > 0)
-            #distance_index_A += j
-            distance_index_A += distance_matrix[row][column]*column
+            distance_index_A += j
+            #distance_index_A += distance_matrix[row][column]*column
           end
           if(adjacency_matrix[row+1][column] > 1)
-            #distance_index_B += j
-            distance_index_B += distance_matrix[row+1][column]*column
+            distance_index_B += j
+            #distance_index_B += distance_matrix[row+1][column]*column
           end
         end
         if((node_features_matrix[row][0] == node_features_matrix[row+1][0]) && (node_features_matrix[row][2] == node_features_matrix[row+1][2]) && (distance_A == distance_B) && (distance_index_A >= distance_index_B))

@@ -264,6 +264,7 @@ def sort_by_distance(adjacency_matrix, node_features_matrix, distance_matrix) # 
     end
   end
   print "\n"
+  print_adjacency_matrix(adjacency_matrix, node_features_matrix, distance_matrix)
   [adjacency_matrix, node_features_matrix, distance_matrix]
 end
 
@@ -275,19 +276,21 @@ def sort_by_distance_index(adjacency_matrix, node_features_matrix, distance_matr
   atom_count = node_features_matrix.length
   previous_molecule_states = [Marshal.load(Marshal.dump(adjacency_matrix))]
   until converged == true
-    print "\nIteration: #{iteration}\n"
+    print "\nIteration #{iteration}\n"
     for column in 0..atom_count-1
       for row in 0..atom_count-2
         distance_A = distance_matrix[row][atom_count-1]
         distance_B = distance_matrix[row+1][atom_count-1]
         distance_index_A = 0
         distance_index_B = 0
-        (0..atom_count-1).each do |j|
-          if(adjacency_matrix[row][j] == 1)
-            distance_index_A += j
+        (0..atom_count-1).each do |column|
+          if(adjacency_matrix[row][column] > 0)
+            distance_index_A += column
+            #distance_index_A += distance_matrix[row][column]*column
           end
-          if(adjacency_matrix[row+1][j] == 1)
-            distance_index_B += j
+          if(adjacency_matrix[row+1][column] > 0)
+            distance_index_B += column
+            #distance_index_B += distance_matrix[row+1][column]*column
           end
         end
         if((node_features_matrix[row][0] == node_features_matrix[row+1][0]) && (node_features_matrix[row][2] == node_features_matrix[row+1][2]) && (distance_A == distance_B) && (distance_index_A >= distance_index_B))
@@ -302,7 +305,8 @@ def sort_by_distance_index(adjacency_matrix, node_features_matrix, distance_matr
     previous_molecule_states.push(Marshal.load(Marshal.dump(adjacency_matrix)))
     iteration += 1
   end
-  print "\n"
+  print "\n\n"
+  print_adjacency_matrix(adjacency_matrix, node_features_matrix, distance_matrix)
   [adjacency_matrix, node_features_matrix, distance_matrix]
 end
 

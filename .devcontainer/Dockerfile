@@ -1,12 +1,9 @@
-# See here for image contents: https://github.com/microsoft/vscode-dev-containers/tree/v0.187.0/containers/ruby/.devcontainer/base.Dockerfile
+FROM jupyter/minimal-notebook:latest
 
-# [Choice] Ruby version: 3, 3.0, 2, 2.7, 2.6
-ARG VARIANT="3.0"
-FROM mcr.microsoft.com/vscode/devcontainers/ruby:0-${VARIANT}
-
-# [Optional] Uncomment this section to install additional OS packages.
-# RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-#     && apt-get -y install --no-install-recommends <your-package-list-here>
-
-# [Optional] Uncomment this line to install additional gems.
+# Switch to root user in order to install Ruby.
+USER root
+RUN apt-get update
+RUN apt-get --yes install ruby-full
 RUN gem install rubocop
+# Switch back to original notebook user.
+USER $NB_UID

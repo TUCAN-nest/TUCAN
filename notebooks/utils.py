@@ -82,7 +82,7 @@ def _atomic_number_sequence(atom):
     atomic_nums_neighbors = sorted([n.GetAtomicNum() for n in atom.GetNeighbors()], reverse=True)
     return [atomic_num] + atomic_nums_neighbors
 
-def _partition_molecule_by_atomic_number(m):
+def partition_molecule_by_atomic_numbers(m):
     '''Mutates `m`'''
     for atom in m.GetAtoms():
         atom.SetIntProp("partition", 0) # initialize partitions
@@ -105,20 +105,19 @@ def sort_molecule_by_atomic_numbers(m):
     by the decreasing atomic numbers of their neighbors.
     '''
     atomic_numbers = [_atomic_number_sequence(atom) for atom in m.GetAtoms()]
-    m_sorted = _sort_molecule_by_property(m, atomic_numbers)
-    return _partition_molecule_by_atomic_number(m_sorted)
+    return _sort_molecule_by_property(m, atomic_numbers)
 
 def _partition_sequence(atom):
     partition = atom.GetIntProp("partition")
     partitions_neighbors = sorted([n.GetIntProp("partition") for n in atom.GetNeighbors()], reverse=True)
     return [partition] + partitions_neighbors
 
-def sort_molecule_by_partitions(m):
+def _sort_molecule_by_partitions(m):
     partitions = [_partition_sequence(atom) for atom in m.GetAtoms()]
     return _sort_molecule_by_property(m, partitions)
 
 def partition_molecule_recursively(m, show_steps=False):
-    m_sorted = sort_molecule_by_partitions(m)
+    m_sorted = _sort_molecule_by_partitions(m)
     if show_steps:
         print_molecule(m_sorted, "refined partitions")
     current_partitions = [a.GetIntProp("partition") for a in m.GetAtoms()]

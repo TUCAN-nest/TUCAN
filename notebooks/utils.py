@@ -17,8 +17,9 @@ def _draw_networkx_graph(m, ax, highlight):
     attribute = [a.GetIntProp("partition") if a.HasProp("partition") else 0 for a in m.GetAtoms()]
   nx.set_node_attributes(nx_graph, {i:p for i, p in enumerate(attribute)}, highlight)
   highlight_colors = list(nx.get_node_attributes(nx_graph, highlight).values())
-  nx.draw_kamada_kawai(nx_graph, node_color=highlight_colors, node_size=1000,
-                       cmap="plasma_r", alpha=.5, with_labels=True, font_weight="heavy", ax=ax)
+  node_size = 1 / nx_graph.order() * 10000
+  nx.draw_kamada_kawai(nx_graph, node_color=highlight_colors, node_size=node_size,
+                       cmap="rainbow", alpha=.5, with_labels=True, font_weight="heavy", ax=ax)
 
 def draw_molecules(m_list, caption_list, highlight="atomic_number"):
   """`highlight`: color atoms by "atomic_number" (default) or "partition"."""

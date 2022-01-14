@@ -1,5 +1,5 @@
 from rdkit import Chem
-from rdkit.Chem import RenumberAtoms, CanonicalRankAtoms
+from rdkit.Chem import RenumberAtoms, CanonicalRankAtoms, MolFromMolFile
 from rdkit.Chem.rdMolDescriptors import CalcMolFormula
 from tabulate import tabulate
 from collections import deque
@@ -154,3 +154,38 @@ def bfs_molecule(m):
             print(atom.GetIdx(), n.GetIdx())
             n.SetBoolProp("explored", True)
             atom_queue.append(n)
+
+def test_invariance(m, canonicalization_steps=[]):
+    """`canonicalization_steps`: list of functions that transform initial
+    molecule into canonicalized molecule. Functions are applied in the order in
+    which they appear in the list."""
+    m_permuted = permute_molecule(m)
+
+    for func in canonicalization_steps:
+      m = func(m)
+      m_permuted = func(m_permuted)
+
+    string_original = write_string_representation(m)
+    string_permuted = write_string_representation(m_permuted)
+
+    try:
+        assert string_original == string_permuted, f"{string_original}\ndoesn't match\n{string_permuted}."
+        print(f"{string_original}\nmatches\n{string_permuted}.")
+        return True
+    except AssertionError as e:
+        print(e)
+        return False
+
+def load_molfile(path):
+    m = MolFromMolFile(str(path), removeHs=False)
+    try:
+        # Unfortunately, RDKit exceptions cannot be caught. However, MolFromMolFile returns None if validation fails.
+        n_atoms = m.GetNumAtoms() # Raises AttributeError in case m_original is None.
+        if n_atoms < 1:
+            raise Exception(f"Molecule has < 1 ({n_atoms}) atoms")
+        return m
+    except Exception as e:
+#         print(f"Failed loading {str(molfile)}: {e}.")
+        return None
+
+

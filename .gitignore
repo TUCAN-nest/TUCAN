@@ -1,2 +1,3 @@
 /testfiles
 repl_tests.rb
+*.pyc

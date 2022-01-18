@@ -9,13 +9,20 @@ import matplotlib.pyplot as plt
 import networkx as nx
 
 
+def rdkit_to_nx(m):
+    """Convert an RDKit molecule to a NetworkX graph with node properties
+    "atomic_number" and "partition"."""
+    edges = [(b.GetBeginAtom().GetIdx(), b.GetEndAtom().GetIdx()) for b in m.GetBonds()]
+    nx_graph = nx.from_edgelist(edges)
+    atomic_numbers = [a.GetAtomicNum() for a in m.GetAtoms()]
+    nx.set_node_attributes(nx_graph, {i:p for i, p in enumerate(atomic_numbers)}, "atomic_number")
+    partitions = [a.GetIntProp("partition") if a.HasProp("partition") else 0 for a in m.GetAtoms()]
+    nx.set_node_attributes(nx_graph, {i:p for i, p in enumerate(partitions)}, "partition")
+    nx.set_node_attributes(nx_graph, False, "explored")
+    return nx_graph
+
 def _draw_networkx_graph(m, ax, highlight):
-  edges = [(b.GetBeginAtom().GetIdx(), b.GetEndAtom().GetIdx()) for b in m.GetBonds()]
-  nx_graph = nx.from_edgelist(edges)
-  attribute = [a.GetAtomicNum() for a in m.GetAtoms()]
-  if highlight == "partition":
-    attribute = [a.GetIntProp("partition") if a.HasProp("partition") else 0 for a in m.GetAtoms()]
-  nx.set_node_attributes(nx_graph, {i:p for i, p in enumerate(attribute)}, highlight)
+  nx_graph = rdkit_to_nx(m) if type(m) != nx.Graph else m
   highlight_colors = list(nx.get_node_attributes(nx_graph, highlight).values())
   node_size = 1 / nx_graph.order() * 10000
   nx.draw_kamada_kawai(nx_graph, node_color=highlight_colors, node_size=node_size,
@@ -136,23 +143,74 @@ def partition_molecule_recursively(m, show_steps=False):
         atom.SetIntProp("partition", updated_partitions[i])
     return partition_molecule_recursively(m_sorted, show_steps=show_steps)
 
-def bfs_molecule(m):
-    for a in m.GetAtoms():
-        a.SetBoolProp("explored", False)
-    root_atom = m.GetAtomWithIdx(0)
-    root_atom.SetBoolProp("explored", True)
-    atom_queue = deque([root_atom])
+def bfs_molecule(m, root_idx):
+    """Breadth-first search over atoms.
+    Note that NetworkX provides the same algorithm in `dfs_edges()`.
+    This (re-)implementation allows for controlling the branching behavior
+    during the molecule traversal.
+    m: NetworkX graph.
+    root_idx: atom at which to start traversal.
+    """
+    m.nodes[root_idx]["explored"] = True
+    atom_queue = deque([root_idx])
     while atom_queue:
-        atom = atom_queue.popleft()
-        for n in atom.GetNeighbors():
-            if n.GetBoolProp("explored"):
+        a = atom_queue.popleft()
+        for n in m.neighbors(a):
+            if m.nodes[n]["explored"]:
                 continue
-            n_neighbors = n.GetNeighbors()
-            if len([nn.GetIntProp("partition") for nn in n_neighbors]) != len(n_neighbors):
-                continue
-            print(atom.GetIdx(), n.GetIdx())
-            n.SetBoolProp("explored", True)
+            yield (a, n)
+            m.nodes[n]["explored"] = True
             atom_queue.append(n)
+
+def dfs_molecule(m, root_idx):
+    """Depth-first search over atoms.
+    Note that NetworkX provides the same algorithm in `bfs_edges()`.
+    This (re-)implementation allows for controlling the branching behavior
+    during the molecule traversal.
+    m: NetworkX graph.
+    root_idx: atom at which to start traversal.
+    """
+    m.nodes[root_idx]["explored"] = True
+    for n_idx in m.neighbors(root_idx):
+        if m.nodes[n_idx]["explored"]:
+            continue
+        yield (root_idx, n_idx)
+        yield from dfs_molecule(m, n_idx)
+
+def edge_dfs_molecule(m, root_idx):
+    """Depth-first search over edges.
+    Note that NetworkX provides the same algorithm in `edge_dfs ()`.
+    This (re-)implementation allows for controlling the branching behavior
+    during the molecule traversal.
+    m: NetworkX graph.
+    root_idx: atom at which to start traversal.
+    """
+    visited_edges = set()
+    visited_nodes = set()
+    edges = {}
+
+    nodes = list(m.nbunch_iter(root_idx))
+    for start_node in nodes:
+        stack = [start_node]
+        while stack:
+            current_node = stack[-1]
+            if current_node not in visited_nodes:
+                edges[current_node] = iter(m.edges(current_node))
+                visited_nodes.add(current_node)
+
+            try:
+                edge = next(edges[current_node])
+            except StopIteration:
+                # No more edges from the current node.
+                stack.pop()
+            else:
+                edgeid = (frozenset(edge[:2]),) + edge[2:]
+                if edgeid not in visited_edges:
+                    visited_edges.add(edgeid)
+                    # Mark the traversed "to" node as to-be-explored.
+                    stack.append(edge[1])
+                    yield edge
+
 
 def test_invariance(m, canonicalization_steps=[]):
     """`canonicalization_steps`: list of functions that transform initial
@@ -187,4 +245,7 @@ def load_molfile(path):
 #         print(f"Failed loading {str(molfile)}: {e}.")
         return None
 
-
+def partition_molecule(m):
+    m_sorted_by_atomic_numbers = sort_molecule_by_atomic_numbers(m)
+    m_partitioned_by_atomic_numbers = partition_molecule_by_atomic_numbers(m_sorted_by_atomic_numbers)
+    return partition_molecule_recursively(m_partitioned_by_atomic_numbers, show_steps=False)

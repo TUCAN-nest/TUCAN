@@ -3,6 +3,7 @@ from rdkit.Chem import RenumberAtoms, CanonicalRankAtoms, MolFromMolFile
 from rdkit.Chem.rdMolDescriptors import CalcMolFormula
 from tabulate import tabulate
 from collections import deque
+from operator import gt, lt, eq
 import random
 import re
 import matplotlib.pyplot as plt
@@ -249,3 +250,65 @@ def partition_molecule(m):
     m_sorted_by_atomic_numbers = sort_molecule_by_atomic_numbers(m)
     m_partitioned_by_atomic_numbers = partition_molecule_by_atomic_numbers(m_sorted_by_atomic_numbers)
     return partition_molecule_recursively(m_partitioned_by_atomic_numbers, show_steps=False)
+
+def create_partition_edge_lut(m):
+    """Create a look-up-table of all possible edges between partitions.
+
+    LUT is triple-nested dict ("dictionary of dictionaries of dictionaries"):
+
+    Outer dict: source partitions to sink partitions
+    Middle dict: sink partitions to atom indices
+    Inner dict: atom indices to frequency of remaining edges
+
+    The LUT facilitates queries of the form: "Starting from atom Ai (contained
+    in partition Pi), if I want to connect to atom Aj (contained in partition
+    Pj) what are the indices that I can connect to?"
+
+    E.g.:
+    {0: {2: {8: 1, 9: 1, 10: 1, 11: 1}},
+     1: {3: {12: 1, 13: 1, 14: 1, 15: 1}},
+     2: {0: {0: 1, 1: 1, 2: 1, 3: 1},
+         2: {8: 1, 9: 1, 10: 1, 11: 1},
+         3: {12: 1, 13: 1, 14: 1, 15: 1}},
+     3: {1: {4: 1, 5: 1, 6: 1, 7: 1},
+         2: {8: 1, 9: 1, 10: 1, 11: 1},
+         4: {16: 2, 17: 2}},
+     4: {3: {12: 1, 13: 1, 14: 1, 15: 1}, 4: {16: 1, 17: 1}}}
+    """
+    lut = {p:{} for p in set(sorted([p for a, p in m.nodes.data("partition")]))}
+    for a in m:
+        partition_a = m.nodes[a]["partition"]
+        for partition_n in set(sorted([m.nodes[n]["partition"] for n in m.neighbors(a)])):
+            lut[partition_a][partition_n] = {}
+    for a in m:
+        partition_a = m.nodes[a]["partition"]
+        for n in m.neighbors(a):
+            partition_n = m.nodes[n]["partition"]
+            if n in lut[partition_a][partition_n]:
+                lut[partition_a][partition_n][n] += 1
+            else:
+                lut[partition_a][partition_n][n] = 1
+    return lut
+
+def traverse_molecule(m, root_idx, traversal_priorities=[lt, gt, eq]):
+    partitions = m.nodes.data("partition")
+    # lut = create_partition_edge_lut(m)
+    atom_stack = [root_idx]
+
+    while atom_stack:
+        a = atom_stack.pop()
+        partition_root = partitions[a]
+        neighbors = list(m.neighbors(a))
+        neighbor_traversal_order = []
+        for priority in traversal_priorities:
+            neighbor_traversal_order.extend(sorted([n for n in neighbors if priority(partitions[n], partition_root)]))
+        m.nodes[a]["explored"] = True
+        for n in neighbor_traversal_order:
+            if m.nodes[n]["explored"]:
+                continue
+            # partition_n = partitions[n]
+            # n_updated = min([k for k, v in lut[partition_root][partition_n].items() if k != a and v > 0])
+            # lut[partition_root][partition_n][n_updated] -= 1
+            # lut[partition_n][partition_root][a] -= 1
+            yield (a, n)
+            atom_stack.append(n)

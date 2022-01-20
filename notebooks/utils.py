@@ -13,8 +13,10 @@ import networkx as nx
 def rdkit_to_nx(m):
     """Convert an RDKit molecule to a NetworkX graph with node properties
     "atomic_number" and "partition"."""
-    edges = [(b.GetBeginAtom().GetIdx(), b.GetEndAtom().GetIdx()) for b in m.GetBonds()]
-    nx_graph = nx.from_edgelist(edges)
+    nx_graph = nx.Graph()
+    nx_graph.add_nodes_from([a.GetIdx() for a in m.GetAtoms()])
+    for b in m.GetBonds():
+        nx_graph.add_edge(b.GetBeginAtom().GetIdx(), b.GetEndAtom().GetIdx())
     atomic_numbers = [a.GetAtomicNum() for a in m.GetAtoms()]
     nx.set_node_attributes(nx_graph, {i:p for i, p in enumerate(atomic_numbers)}, "atomic_number")
     partitions = [a.GetIntProp("partition") if a.HasProp("partition") else 0 for a in m.GetAtoms()]
@@ -29,13 +31,14 @@ def _draw_networkx_graph(m, ax, highlight):
   nx.draw_kamada_kawai(nx_graph, node_color=highlight_colors, node_size=node_size,
                        cmap="rainbow", alpha=.5, with_labels=True, font_weight="heavy", ax=ax)
 
-def draw_molecules(m_list, caption_list, highlight="atomic_number"):
+def draw_molecules(m_list, caption_list, highlight="atomic_number", title=""):
   """`highlight`: color atoms by "atomic_number" (default) or "partition"."""
   if highlight not in ["atomic_number", "partition"]:
     print("Please select one of {'partition', 'atomic_number'} for `highlight`.")
     return
   n_molecules = len(m_list)
   fig = plt.figure(figsize=(n_molecules * 6, 6))
+  fig.suptitle(title)
   for i, m in enumerate(m_list):
     ax = fig.add_subplot(1, n_molecules, i + 1, title=caption_list[i])
     _draw_networkx_graph(m, ax, highlight)
@@ -57,8 +60,9 @@ def build_molecule_from_string_representation(string_representation):
         em.AddBond(*t, Chem.BondType.SINGLE)
     return em.GetMol()
 
-def permute_molecule(m):
+def permute_molecule(m, random_seed=42):
     permuted_indices = list(range(m.GetNumAtoms()))
+    random.seed(random_seed)
     random.shuffle(permuted_indices)
     return RenumberAtoms(m, permuted_indices)
 
@@ -251,64 +255,44 @@ def partition_molecule(m):
     m_partitioned_by_atomic_numbers = partition_molecule_by_atomic_numbers(m_sorted_by_atomic_numbers)
     return partition_molecule_recursively(m_partitioned_by_atomic_numbers, show_steps=False)
 
-def create_partition_edge_lut(m):
-    """Create a look-up-table of all possible edges between partitions.
+def canonicalize_molecule(m, root_idx=0):
+    m_partitioned = partition_molecule(m)
+    m_partitioned = rdkit_to_nx(m_partitioned) if type(m) != nx.Graph else m
+    canonical_idcs = traverse_molecule(m_partitioned, root_idx)
+    return nx.relabel_nodes(m_partitioned, canonical_idcs, copy=True)
 
-    LUT is triple-nested dict ("dictionary of dictionaries of dictionaries"):
-
-    Outer dict: source partitions to sink partitions
-    Middle dict: sink partitions to atom indices
-    Inner dict: atom indices to frequency of remaining edges
-
-    The LUT facilitates queries of the form: "Starting from atom Ai (contained
-    in partition Pi), if I want to connect to atom Aj (contained in partition
-    Pj) what are the indices that I can connect to?"
-
-    E.g.:
-    {0: {2: {8: 1, 9: 1, 10: 1, 11: 1}},
-     1: {3: {12: 1, 13: 1, 14: 1, 15: 1}},
-     2: {0: {0: 1, 1: 1, 2: 1, 3: 1},
-         2: {8: 1, 9: 1, 10: 1, 11: 1},
-         3: {12: 1, 13: 1, 14: 1, 15: 1}},
-     3: {1: {4: 1, 5: 1, 6: 1, 7: 1},
-         2: {8: 1, 9: 1, 10: 1, 11: 1},
-         4: {16: 2, 17: 2}},
-     4: {3: {12: 1, 13: 1, 14: 1, 15: 1}, 4: {16: 1, 17: 1}}}
-    """
-    lut = {p:{} for p in set(sorted([p for a, p in m.nodes.data("partition")]))}
+def create_partition_lut(m):
+    """Look-up-table of atom indices in partitions."""
+    partitions = set(sorted([v for k, v in m.nodes.data("partition")]))
+    partition_lut = {p:set() for p in partitions}
     for a in m:
-        partition_a = m.nodes[a]["partition"]
-        for partition_n in set(sorted([m.nodes[n]["partition"] for n in m.neighbors(a)])):
-            lut[partition_a][partition_n] = {}
-    for a in m:
-        partition_a = m.nodes[a]["partition"]
-        for n in m.neighbors(a):
-            partition_n = m.nodes[n]["partition"]
-            if n in lut[partition_a][partition_n]:
-                lut[partition_a][partition_n][n] += 1
-            else:
-                lut[partition_a][partition_n][n] = 1
-    return lut
+        partition_lut[m.nodes[a]["partition"]].add(a)
+    partition_lut.update((k, sorted(list(v), reverse=True)) for k, v in partition_lut.items())
+    return partition_lut
 
-def traverse_molecule(m, root_idx, traversal_priorities=[lt, gt, eq]):
+def traverse_molecule(m, root_idx, traversal_priorities=[lt, gt, eq], show_traversal_order=False):
     partitions = m.nodes.data("partition")
-    # lut = create_partition_edge_lut(m)
+    lut = create_partition_lut(m)
     atom_stack = [root_idx]
+    canonical_idcs = {}
 
     while atom_stack:
         a = atom_stack.pop()
-        partition_root = partitions[a]
+        if m.nodes[a]["explored"]:
+            continue
+        a_canon = lut[partitions[a]].pop()
+        canonical_idcs[a] = a_canon
+        if show_traversal_order:
+            print(f"Current atom index: {a}.\tRe-labeling to {a_canon}.")
         neighbors = list(m.neighbors(a))
         neighbor_traversal_order = []
         for priority in traversal_priorities:
-            neighbor_traversal_order.extend(sorted([n for n in neighbors if priority(partitions[n], partition_root)]))
+            neighbors_this_priority = [n for n in neighbors
+                                       if priority(partitions[a], partitions[n])]
+            neighbor_traversal_order.extend(sorted(neighbors_this_priority))
+
         m.nodes[a]["explored"] = True
         for n in neighbor_traversal_order:
-            if m.nodes[n]["explored"]:
-                continue
-            # partition_n = partitions[n]
-            # n_updated = min([k for k, v in lut[partition_root][partition_n].items() if k != a and v > 0])
-            # lut[partition_root][partition_n][n_updated] -= 1
-            # lut[partition_n][partition_root][a] -= 1
-            yield (a, n)
-            atom_stack.append(n)
+            atom_stack.insert(0, n)
+
+    return canonical_idcs

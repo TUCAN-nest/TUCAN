@@ -10,6 +10,29 @@ import matplotlib.pyplot as plt
 import networkx as nx
 
 
+def _parse_molfile(filename):
+    with open(filename) as f:
+        lines = [l.rstrip().split(" ") for l in f]
+    atom_count = int(lines[5][4])
+    bond_count = int(lines[5][5])
+    atom_block_offset = 7
+    bond_block_offset = atom_block_offset + atom_count + 2
+    element_symbols = [l[4] for l in lines[atom_block_offset:atom_block_offset + atom_count]]
+    bonds = [(l[5], l[6]) for l in lines[bond_block_offset:bond_block_offset + bond_count]]
+    return element_symbols, bonds
+
+def graph_from_molfile(filename):
+    element_symbols, bonds = _parse_molfile(filename)
+    graph = nx.Graph()
+    node_labels = [str(label) for label in range(1, len(element_symbols) + 1)]
+    graph.add_nodes_from(node_labels)
+    nx.set_node_attributes(graph, dict(zip(node_labels, element_symbols)), "element_symbol")
+    nx.set_node_attributes(graph, 0, "partition")
+    # TODO: add node attributes: atomic number, element color
+    graph.add_edges_from(bonds)
+    return graph
+
+
 def rdkit_to_nx(m):
     """Convert an RDKit molecule to a NetworkX graph with node properties
     "atomic_number" and "partition"."""

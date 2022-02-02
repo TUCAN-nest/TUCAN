@@ -90,12 +90,12 @@ def partition_molecule_recursively(m, show_steps=False):
 def traverse_molecule(m, root_idx, traversal_priorities=[lt, gt, eq], show_traversal_order=False):
     partitions = m.nodes.data("partition")
     lut = _create_partition_lut(m)
-    atom_stack = [root_idx]
+    atom_queue = [root_idx]
     canonical_idcs = {}
     nx.set_node_attributes(m, False, "explored")
 
-    while atom_stack:
-        a = atom_stack.pop()
+    while atom_queue:
+        a = atom_queue.pop()
         if m.nodes[a]["explored"]:
             continue
         a_canon = lut[partitions[a]].pop()
@@ -111,7 +111,7 @@ def traverse_molecule(m, root_idx, traversal_priorities=[lt, gt, eq], show_trave
 
         m.nodes[a]["explored"] = True
         for n in neighbor_traversal_order:
-            atom_stack.insert(0, n)
+            atom_queue.insert(0, n)
 
     nx.set_node_attributes(m, False, "explored")
     return canonical_idcs
@@ -138,11 +138,6 @@ def permute_molecule(m, random_seed=42):
     random.seed(random_seed)
     random.shuffle(permuted_idcs)
     return _relabel_molecule(m, permuted_idcs, idcs)
-
-
-
-
-
 
 
 

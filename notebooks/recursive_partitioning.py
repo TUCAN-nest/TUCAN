@@ -13,12 +13,13 @@ def graph_from_molfile(filename):
     node_labels = range(len(element_symbols))
     graph = nx.Graph()
     graph.add_nodes_from(node_labels)
+    graph.add_edges_from(bonds)
     nx.set_node_attributes(graph, dict(zip(node_labels, element_symbols)), "element_symbol")
     nx.set_node_attributes(graph, dict(zip(node_labels, element_colors)), "element_color")
     nx.set_node_attributes(graph, dict(zip(node_labels, atomic_numbers)), "atomic_number")
+    nx.set_node_attributes(graph, _find_ring_neighbors(graph), "ring_neighbors")
     nx.set_node_attributes(graph, 0, "partition")
-    bonds = [(int(b[0]) - 1, int(b[1]) - 1) for b in bonds]    # make bond-indices zero-based
-    graph.add_edges_from(bonds)
+    _add_fingerprint_attribute(graph)
     return graph
 
 def _parse_molfile(filename):
@@ -30,8 +31,18 @@ def _parse_molfile(filename):
     atom_block_offset = 7
     bond_block_offset = atom_block_offset + atom_count + 2
     element_symbols = [l[3] for l in lines[atom_block_offset:atom_block_offset + atom_count]]
-    bonds = [(l[4], l[5]) for l in lines[bond_block_offset:bond_block_offset + bond_count]]
+    bonds = [(int(l[4]) - 1, int(l[5]) - 1)
+             for l in lines[bond_block_offset:bond_block_offset + bond_count]]    # make bond-indices zero-based
     return element_symbols, bonds
+
+def _add_fingerprint_attribute(m):
+    """Assign a fingerprint of the following format to each atom:
+    <atomic number><indices ring neighbors sorted in non-ascending order>"""
+    atomic_numbers = list(nx.get_node_attributes(m, "atomic_number").values())
+    ring_neighbors = list(nx.get_node_attributes(m, "ring_neighbors").values())
+    ring_neighbors = [sorted((list(rn)), reverse=True) for rn in ring_neighbors]
+    fingerprints = [str(a) + "".join(map(str, r)) for a, r in zip(atomic_numbers, ring_neighbors)]
+    nx.set_node_attributes(m, dict(zip(range(m.number_of_nodes()), fingerprints)), "fingerprint")
 
 def sort_molecule_by_attribute(m, attribute):
     '''Sort atoms lexicographically by attribute.'''
@@ -55,12 +66,12 @@ def _relabel_molecule(m, old_labels, new_labels):
     m_sorted.add_edges_from(m_relabeled.edges(data=True))
     return m_sorted
 
-def partition_molecule_by_atomic_numbers(m):
+def partition_molecule_by_attribute(m, attribute):
     current_partition = 0
     for i in range(m.number_of_nodes() - 1):
         j = i + 1
-        atomic_numbers_i = _attribute_sequence(i, m, "atomic_number")
-        atomic_numbers_j = _attribute_sequence(j, m, "atomic_number")
+        atomic_numbers_i = _attribute_sequence(i, m, attribute)
+        atomic_numbers_j = _attribute_sequence(j, m, attribute)
         if (atomic_numbers_i != atomic_numbers_j): current_partition += 1
         m.nodes[j]["partition"] = current_partition
     return m
@@ -126,9 +137,9 @@ def _create_partition_lut(m):
     return partition_lut
 
 def canonicalize_molecule(m, root_idx=0):
-    m_sorted_by_atomic_numbers = sort_molecule_by_attribute(m, "atomic_number")
-    m_partitioned_by_atomic_numbers = partition_molecule_by_atomic_numbers(m_sorted_by_atomic_numbers)
-    m_partitioned = partition_molecule_recursively(m_partitioned_by_atomic_numbers, show_steps=False)
+    m_sorted_by_fingerprint = sort_molecule_by_attribute(m, "fingerprint")
+    m_partitioned_by_fingerprint = partition_molecule_by_attribute(m_sorted_by_fingerprint, "fingerprint")
+    m_partitioned = partition_molecule_recursively(m_partitioned_by_fingerprint, show_steps=False)
     canonical_idcs = traverse_molecule(m_partitioned, root_idx)
     return nx.relabel_nodes(m_partitioned, canonical_idcs, copy=True)
 
@@ -138,6 +149,75 @@ def permute_molecule(m, random_seed=42):
     random.seed(random_seed)
     random.shuffle(permuted_idcs)
     return _relabel_molecule(m, permuted_idcs, idcs)
+
+def _find_atomic_cycles(m):
+    """Find atomic cycles in a graph.
+
+    An atomic cycle is a generalization of a chordless cycle, such that the
+    chord can be longer than one edge.
+
+    Adaptation of the `find_large_atomic_cycle` algorithm from figure 6 in
+    DOI: 10.1080/09540091.2012.664122. In constrast to the original
+    implementation, the present implementation returns *all* cycles and uses a
+    fixed lambda threshold of size 3.
+    """
+    root_node = 0
+    outer_node_queue = deque([root_node])    # Q
+    outer_visited_nodes = set([root_node])    # S
+    visited_edges = set()    # T
+    atomic_cycles = []
+
+    while outer_node_queue:    # outer BFS
+        outer_node = outer_node_queue.popleft()    # a
+        for outer_neighbor in m.neighbors(outer_node):    # b
+            if outer_neighbor not in outer_visited_nodes:
+                outer_node_queue.append(outer_neighbor)
+                outer_visited_nodes.add(outer_neighbor)
+                visited_edges.add((outer_node, outer_neighbor))
+                visited_edges.add((outer_neighbor, outer_node))
+                continue
+
+            # A cycle has been detected.
+            inner_node_queue = deque([outer_neighbor])    # I
+            inner_visited_nodes = set([outer_neighbor])    # U
+            parent_nodes = {outer_neighbor: -1}    # P
+
+            while inner_node_queue:    # inner BFS
+                inner_node = inner_node_queue.popleft()    # c
+                for inner_neighbor in m.neighbors(inner_node):    # d
+                    if inner_neighbor in inner_visited_nodes:
+                        continue
+                    if (inner_neighbor, inner_node) not in visited_edges:
+                        continue
+                    parent_nodes[inner_neighbor] = inner_node
+                    inner_node_queue.append(inner_neighbor)
+                    inner_visited_nodes.add(inner_neighbor)
+
+                    if inner_neighbor != outer_node:
+                        continue
+                    # An atomic cycle has been detected.
+                    cycle = set()    # Y
+                    while parent_nodes[inner_neighbor] != -1:
+                        cycle_node, inner_neighbor = inner_neighbor, parent_nodes[inner_neighbor]
+                        cycle.add(cycle_node)
+                    cycle.add(inner_neighbor)
+                    if len(cycle) >= 3:
+                        atomic_cycles.append(cycle)
+                    inner_node_queue.clear()
+                    break
+            visited_edges.add((outer_node, outer_neighbor))
+            visited_edges.add((outer_neighbor, outer_node))
+    return atomic_cycles
+
+def _find_ring_neighbors(m):
+    ring_neighbors = {atom: {-1} for atom in m.nodes}
+    for ring in _find_atomic_cycles(m):
+        for atom in ring:
+            ring_neighbors[atom].update(ring)
+    return ring_neighbors
+
+
+
 
 
 

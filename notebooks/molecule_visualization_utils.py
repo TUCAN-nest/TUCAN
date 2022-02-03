@@ -14,7 +14,6 @@ def _rdkit_to_nx(m):
     nx.set_node_attributes(nx_graph, {i:p for i, p in enumerate(atomic_numbers)}, "atomic_number")
     partitions = [a.GetIntProp("partition") if a.HasProp("partition") else 0 for a in m.GetAtoms()]
     nx.set_node_attributes(nx_graph, {i:p for i, p in enumerate(partitions)}, "partition")
-    nx.set_node_attributes(nx_graph, False, "explored")
     return nx_graph
 
 def _draw_networkx_graph(m, ax, highlight):
@@ -41,10 +40,11 @@ def print_molecule(m, caption=""):
     print(caption)
     table = []
     for atom in nx_graph.nodes():
-        num = nx_graph.nodes[atom]["atomic_number"]
+        fingerprint = nx_graph.nodes[atom]["fingerprint"]
         partition = nx_graph.nodes[atom]["partition"]
-        neighbors = [(n, nx_graph.nodes[n]["atomic_number"], nx_graph.nodes[n]["partition"])
+        neighbors = [(n, nx_graph.nodes[n]["fingerprint"], nx_graph.nodes[n]["partition"])
                      for n in nx_graph.neighbors(atom)]
-        table.append([atom, num, partition, neighbors])
+        table.append([atom, fingerprint, partition, neighbors])
     print(tabulate(table, tablefmt="fancy_grid",
-                   headers=["index", "atomic number", "partition", "neighbors (index, atomic number, partition)"]))
+                   headers=["index", "fingerprint", "partition",
+                            "neighbors (index, fingerprint, partition)"]))

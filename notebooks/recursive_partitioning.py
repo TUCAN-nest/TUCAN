@@ -1,7 +1,7 @@
 from operator import gt, lt, eq
-from molecule_visualization_utils import print_molecule
+from molecule_visualization_utils import print_molecule, draw_molecules
 from element_props import ELEMENT_PROPS
-from collections import deque
+from collections import deque, namedtuple
 import random
 import networkx as nx
 
@@ -143,13 +143,6 @@ def canonicalize_molecule(m, root_idx=0):
     canonical_idcs = traverse_molecule(m_partitioned, root_idx)
     return nx.relabel_nodes(m_partitioned, canonical_idcs, copy=True)
 
-def permute_molecule(m, random_seed=42):
-    idcs = m.nodes()
-    permuted_idcs = list(range(m.number_of_nodes()))
-    random.seed(random_seed)
-    random.shuffle(permuted_idcs)
-    return _relabel_molecule(m, permuted_idcs, idcs)
-
 def _find_atomic_cycles(m):
     """Find atomic cycles in a graph.
 
@@ -216,9 +209,54 @@ def _find_ring_neighbors(m):
             ring_neighbors[atom].update(ring)
     return ring_neighbors
 
+def test_canonicalization_invariance(molfile_path, n_runs=10, root_atom=None,
+                                     visualize=False):
+    m = graph_from_molfile(molfile_path)
+    # Enforce permutation for graphs with at least 2 edges that aren't fully connected (i.e., complete).
+    enforce_permutation = m.number_of_edges() > 1 and nx.density(m) != 1
+    root_atoms = [root_atom] * n_runs
+    n_nodes = m.number_of_nodes()
+    if not root_atom:
+        if n_runs <= n_nodes:
+            root_atoms = random.sample(range(n_nodes), k=n_runs)    # draw without replacement
+        else:
+            root_atoms = random.choices(range(n_nodes), k=n_runs)    # draw with replacement
 
+    print(f"Starting {n_runs} runs of invariance tests for {molfile_path.stem}.")
+    for i in range(n_runs):
+        root_atom = root_atoms[i]
+        permutation_seed = random.random()
 
+        m_permu = permute_molecule(m, random_seed=permutation_seed)
+        if enforce_permutation:
+            while m.edges == m_permu.edges:
+                permutation_seed = random.random()
+                m_permu = permute_molecule(m, random_seed=permutation_seed)
+            assert m.edges != m_permu.edges, f"Permutation didn't change labeling of {molfile_path.stem}."
 
+        m_canon = canonicalize_molecule(m, root_atom)
+        m_permu_canon = canonicalize_molecule(m_permu, root_atom)
+        if visualize:
+            draw_molecules([m, m_permu], ["original", "permuted"], highlight="partition",
+                           title=f"{molfile_path.stem} permuted with random seed {permutation_seed} and root atom {root_atom}.")
+            draw_molecules([m_canon, m_permu_canon], ["original", "permuted"],
+                           highlight="partition", title=f"{molfile_path.stem} canonicalized")
+
+        if m_canon.edges != m_permu_canon.edges:
+            TestConfig = namedtuple("TestConfig", ["permutation_seed", "root_atom"])
+            return TestConfig(permutation_seed, root_atom)
+
+    return None
+
+def permute_molecule(m, random_seed=1.):
+    """
+    random_seed: float in [0.0, 1.0)
+    """
+    idcs = m.nodes()
+    permuted_idcs = list(range(m.number_of_nodes()))
+    random.seed(random_seed)
+    random.shuffle(permuted_idcs)
+    return _relabel_molecule(m, permuted_idcs, idcs)
 
 
 def bfs_molecule(m, root_idx):

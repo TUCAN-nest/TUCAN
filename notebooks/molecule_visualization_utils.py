@@ -1,7 +1,12 @@
 from tabulate import tabulate
 import matplotlib.pyplot as plt
 import networkx as nx
+from rdkit.Chem import rdmolfiles
 
+
+def mdl_2000_to_3000(molfile_path, removeHs=False):
+    v2000 = rdmolfiles.MolFromMolFile(molfile_path, removeHs=removeHs)
+    rdmolfiles.MolToMolFile(v2000, molfile_path, forceV3000=True)
 
 def _rdkit_to_nx(m):
     """Convert an RDKit molecule to a NetworkX graph with node properties

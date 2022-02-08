@@ -4,7 +4,7 @@ name: format_dataset
 on:
   push:
     paths:
-      - 'test/testfiles/**'
+      - 'tests/testfiles/**'
   workflow_dispatch:
 
 jobs:

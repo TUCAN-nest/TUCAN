@@ -1,8 +1,8 @@
+from canonymous.visualization import print_molecule
+from canonymous.utils import relabel_molecule
+from canonymous.element_properties import ELEMENT_PROPS
 from operator import gt, lt, eq
-from molecule_visualization_utils import print_molecule, draw_molecules
-from element_props import ELEMENT_PROPS
-from collections import deque, namedtuple
-import random
+from collections import deque
 import networkx as nx
 
 
@@ -50,21 +50,12 @@ def sort_molecule_by_attribute(m, attribute):
     idcs = list(range(m.number_of_nodes()))
     attr_with_idcs = [(i, j) for i, j in zip(attr_sequence, idcs)] # [(A, 0), (C, 1), (B, 2)]
     sorted_attr, idcs_sorted_by_attr = zip(*sorted(attr_with_idcs)) # (A, B, C), (0, 2, 1)
-    return _relabel_molecule(m, idcs_sorted_by_attr, idcs)
+    return relabel_molecule(m, idcs_sorted_by_attr, idcs)
 
 def _attribute_sequence(atom, m, attribute):
     attr_atom = m.nodes[atom][attribute]
     attr_neighbors = sorted([m.nodes[n][attribute] for n in m.neighbors(atom)], reverse=True)
     return [attr_atom] + attr_neighbors
-
-def _relabel_molecule(m, old_labels, new_labels):
-    m_relabeled = nx.relabel_nodes(m, dict(zip(old_labels, new_labels)))
-    # In the NetworkX Graph datastructure, the relabeled nodes don't occur in
-    # increasing order yet. This is why we change the node order now.
-    m_sorted = nx.Graph()
-    m_sorted.add_nodes_from(sorted(m_relabeled.nodes(data=True)))
-    m_sorted.add_edges_from(m_relabeled.edges(data=True))
-    return m_sorted
 
 def partition_molecule_by_attribute(m, attribute):
     current_partition = 0
@@ -98,7 +89,7 @@ def partition_molecule_recursively(m, show_steps=False):
                            "partition")
     return partition_molecule_recursively(m_sorted, show_steps=show_steps)
 
-def traverse_molecule(m, root_idx, traversal_priorities=[lt, gt, eq], show_traversal_order=False):
+def assign_canonical_labels(m, root_idx, traversal_priorities=[lt, gt, eq], show_traversal_order=False):
     partitions = m.nodes.data("partition")
     lut = _create_partition_lut(m)
     atom_queue = [root_idx]
@@ -140,7 +131,7 @@ def canonicalize_molecule(m, root_idx=0):
     m_sorted_by_fingerprint = sort_molecule_by_attribute(m, "fingerprint")
     m_partitioned_by_fingerprint = partition_molecule_by_attribute(m_sorted_by_fingerprint, "fingerprint")
     m_partitioned = partition_molecule_recursively(m_partitioned_by_fingerprint, show_steps=False)
-    canonical_idcs = traverse_molecule(m_partitioned, root_idx)
+    canonical_idcs = assign_canonical_labels(m_partitioned, root_idx)
     return nx.relabel_nodes(m_partitioned, canonical_idcs, copy=True)
 
 def _find_atomic_cycles(m):
@@ -209,119 +200,70 @@ def _find_ring_neighbors(m):
             ring_neighbors[atom].update(ring)
     return ring_neighbors
 
-def test_canonicalization_invariance(molfile_path, n_runs=10, root_atom=None,
-                                     visualize=False):
-    m = graph_from_molfile(molfile_path)
-    # Enforce permutation for graphs with at least 2 edges that aren't fully connected (i.e., complete).
-    enforce_permutation = m.number_of_edges() > 1 and nx.density(m) != 1
-    root_atoms = [root_atom] * n_runs
-    n_nodes = m.number_of_nodes()
-    if not root_atom:
-        if n_runs <= n_nodes:
-            root_atoms = random.sample(range(n_nodes), k=n_runs)    # draw without replacement
-        else:
-            root_atoms = random.choices(range(n_nodes), k=n_runs)    # draw with replacement
+# def bfs_molecule(m, root_idx):
+#     """Breadth-first search over atoms.
+#     Note that NetworkX provides the same algorithm in `dfs_edges()`.
+#     This (re-)implementation allows for controlling the branching behavior
+#     during the molecule traversal.
+#     m: NetworkX graph.
+#     root_idx: atom at which to start traversal.
+#     """
+#     m.nodes[root_idx]["explored"] = True
+#     atom_queue = deque([root_idx])
+#     while atom_queue:
+#         a = atom_queue.popleft()
+#         for n in m.neighbors(a):
+#             if m.nodes[n]["explored"]:
+#                 continue
+#             yield (a, n)
+#             m.nodes[n]["explored"] = True
+#             atom_queue.append(n)
 
-    for i in range(n_runs):
-        root_atom = root_atoms[i]
-        permutation_seed = random.random()
+# def dfs_molecule(m, root_idx):
+#     """Depth-first search over atoms.
+#     Note that NetworkX provides the same algorithm in `bfs_edges()`.
+#     This (re-)implementation allows for controlling the branching behavior
+#     during the molecule traversal.
+#     m: NetworkX graph.
+#     root_idx: atom at which to start traversal.
+#     """
+#     m.nodes[root_idx]["explored"] = True
+#     for n_idx in m.neighbors(root_idx):
+#         if m.nodes[n_idx]["explored"]:
+#             continue
+#         yield (root_idx, n_idx)
+#         yield from dfs_molecule(m, n_idx)
 
-        m_permu = permute_molecule(m, random_seed=permutation_seed)
-        if enforce_permutation:
-            while m.edges == m_permu.edges:
-                permutation_seed = random.random()
-                m_permu = permute_molecule(m, random_seed=permutation_seed)
-            assert m.edges != m_permu.edges, f"Permutation didn't change labeling of {molfile_path.stem}."
+# def edge_dfs_molecule(m, root_idx):
+#     """Depth-first search over edges.
+#     Note that NetworkX provides the same algorithm in `edge_dfs ()`.
+#     This (re-)implementation allows for controlling the branching behavior
+#     during the molecule traversal.
+#     m: NetworkX graph.
+#     root_idx: atom at which to start traversal.
+#     """
+#     visited_edges = set()
+#     visited_nodes = set()
+#     edges = {}
 
-        m_canon = canonicalize_molecule(m, root_atom)
-        m_permu_canon = canonicalize_molecule(m_permu, root_atom)
-        if visualize:
-            draw_molecules([m, m_permu], ["original", "permuted"], highlight="partition",
-                           title=f"{molfile_path.stem} permuted with random seed {permutation_seed} and root atom {root_atom}.")
-            draw_molecules([m_canon, m_permu_canon], ["original", "permuted"],
-                           highlight="partition", title=f"{molfile_path.stem} canonicalized")
+#     nodes = list(m.nbunch_iter(root_idx))
+#     for start_node in nodes:
+#         stack = [start_node]
+#         while stack:
+#             current_node = stack[-1]
+#             if current_node not in visited_nodes:
+#                 edges[current_node] = iter(m.edges(current_node))
+#                 visited_nodes.add(current_node)
 
-        if m_canon.edges != m_permu_canon.edges:
-            TestConfig = namedtuple("TestConfig", ["permutation_seed", "root_atom"])
-            return TestConfig(permutation_seed, root_atom)
-
-    return None
-
-def permute_molecule(m, random_seed=1.):
-    """
-    random_seed: float in [0.0, 1.0)
-    """
-    idcs = m.nodes()
-    permuted_idcs = list(range(m.number_of_nodes()))
-    random.seed(random_seed)
-    random.shuffle(permuted_idcs)
-    return _relabel_molecule(m, permuted_idcs, idcs)
-
-
-def bfs_molecule(m, root_idx):
-    """Breadth-first search over atoms.
-    Note that NetworkX provides the same algorithm in `dfs_edges()`.
-    This (re-)implementation allows for controlling the branching behavior
-    during the molecule traversal.
-    m: NetworkX graph.
-    root_idx: atom at which to start traversal.
-    """
-    m.nodes[root_idx]["explored"] = True
-    atom_queue = deque([root_idx])
-    while atom_queue:
-        a = atom_queue.popleft()
-        for n in m.neighbors(a):
-            if m.nodes[n]["explored"]:
-                continue
-            yield (a, n)
-            m.nodes[n]["explored"] = True
-            atom_queue.append(n)
-
-def dfs_molecule(m, root_idx):
-    """Depth-first search over atoms.
-    Note that NetworkX provides the same algorithm in `bfs_edges()`.
-    This (re-)implementation allows for controlling the branching behavior
-    during the molecule traversal.
-    m: NetworkX graph.
-    root_idx: atom at which to start traversal.
-    """
-    m.nodes[root_idx]["explored"] = True
-    for n_idx in m.neighbors(root_idx):
-        if m.nodes[n_idx]["explored"]:
-            continue
-        yield (root_idx, n_idx)
-        yield from dfs_molecule(m, n_idx)
-
-def edge_dfs_molecule(m, root_idx):
-    """Depth-first search over edges.
-    Note that NetworkX provides the same algorithm in `edge_dfs ()`.
-    This (re-)implementation allows for controlling the branching behavior
-    during the molecule traversal.
-    m: NetworkX graph.
-    root_idx: atom at which to start traversal.
-    """
-    visited_edges = set()
-    visited_nodes = set()
-    edges = {}
-
-    nodes = list(m.nbunch_iter(root_idx))
-    for start_node in nodes:
-        stack = [start_node]
-        while stack:
-            current_node = stack[-1]
-            if current_node not in visited_nodes:
-                edges[current_node] = iter(m.edges(current_node))
-                visited_nodes.add(current_node)
-
-            try:
-                edge = next(edges[current_node])
-            except StopIteration:
-                # No more edges from the current node.
-                stack.pop()
-            else:
-                edgeid = (frozenset(edge[:2]),) + edge[2:]
-                if edgeid not in visited_edges:
-                    visited_edges.add(edgeid)
-                    # Mark the traversed "to" node as to-be-explored.
-                    stack.append(edge[1])
-                    yield edge
+#             try:
+#                 edge = next(edges[current_node])
+#             except StopIteration:
+#                 # No more edges from the current node.
+#                 stack.pop()
+#             else:
+#                 edgeid = (frozenset(edge[:2]),) + edge[2:]
+#                 if edgeid not in visited_edges:
+#                     visited_edges.add(edgeid)
+#                     # Mark the traversed "to" node as to-be-explored.
+#                     stack.append(edge[1])
+#                     yield edge

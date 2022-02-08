@@ -1,0 +1,35 @@
+from tabulate import tabulate
+import matplotlib.pyplot as plt
+import networkx as nx
+
+
+def _draw_networkx_graph(m, ax, highlight):
+  highlight_colors = list(nx.get_node_attributes(m, highlight).values())
+  node_size = 1 / m.order() * 10000
+  nx.draw_kamada_kawai(m, node_color=highlight_colors, node_size=node_size,
+                       cmap="rainbow", alpha=.5, with_labels=True, font_weight="heavy", ax=ax)
+
+def draw_molecules(m_list, caption_list, highlight="atomic_number", title=""):
+  """`highlight`: color atoms by "atomic_number" (default) or "partition"."""
+  if highlight not in ["atomic_number", "partition"]:
+    print("Please select one of {'partition', 'atomic_number'} for `highlight`.")
+    return
+  n_molecules = len(m_list)
+  fig = plt.figure(figsize=(n_molecules * 6, 6))
+  fig.suptitle(title)
+  for i, m in enumerate(m_list):
+    ax = fig.add_subplot(1, n_molecules, i + 1, title=caption_list[i])
+    _draw_networkx_graph(m, ax, highlight)
+
+def print_molecule(m, caption=""):
+    print(caption)
+    table = []
+    for atom in m.nodes():
+        fingerprint = m.nodes[atom]["fingerprint"]
+        partition = m.nodes[atom]["partition"]
+        neighbors = [(n, m.nodes[n]["fingerprint"], m.nodes[n]["partition"])
+                     for n in m.neighbors(atom)]
+        table.append([atom, fingerprint, partition, neighbors])
+    print(tabulate(table, tablefmt="fancy_grid",
+                   headers=["index", "fingerprint", "partition",
+                            "neighbors (index, fingerprint, partition)"]))

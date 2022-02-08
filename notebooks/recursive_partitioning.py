@@ -222,7 +222,6 @@ def test_canonicalization_invariance(molfile_path, n_runs=10, root_atom=None,
         else:
             root_atoms = random.choices(range(n_nodes), k=n_runs)    # draw with replacement
 
-    print(f"Starting {n_runs} runs of invariance tests for {molfile_path.stem}.")
     for i in range(n_runs):
         root_atom = root_atoms[i]
         permutation_seed = random.random()

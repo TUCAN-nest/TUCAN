@@ -61,9 +61,9 @@ def partition_molecule_by_attribute(m, attribute):
     current_partition = 0
     for i in range(m.number_of_nodes() - 1):
         j = i + 1
-        atomic_numbers_i = _attribute_sequence(i, m, attribute)
-        atomic_numbers_j = _attribute_sequence(j, m, attribute)
-        if (atomic_numbers_i != atomic_numbers_j): current_partition += 1
+        attributes_i = _attribute_sequence(i, m, attribute)
+        attributes_j = _attribute_sequence(j, m, attribute)
+        if (attributes_i != attributes_j): current_partition += 1
         m.nodes[j]["partition"] = current_partition
     return m
 

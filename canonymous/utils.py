@@ -18,9 +18,16 @@ def permute_molecule(m, random_seed=1.):
     """
     idcs = m.nodes()
     permuted_idcs = list(range(m.number_of_nodes()))
-    random.seed(random_seed)
+    # Enforce permutation for graphs with at least 2 edges that aren't fully connected (i.e., complete).
+    enforce_permutation = m.number_of_edges() > 1 and nx.density(m) != 1
+    random.seed(random_seed)    # subsequent calls of random.shuffle(x[, random]) will now use fixed sequence of values for `random` parameter
     random.shuffle(permuted_idcs)
-    return relabel_molecule(m, permuted_idcs, idcs)
+    m_permu = relabel_molecule(m, permuted_idcs, idcs)
+    if enforce_permutation:
+        while m.edges == m_permu.edges:
+            random.shuffle(permuted_idcs)
+            m_permu = relabel_molecule(m, permuted_idcs, idcs)
+    return m_permu
 
 def mdl_2000_to_3000(molfile_path, removeHs=False):
     v2000 = rdmolfiles.MolFromMolFile(molfile_path, removeHs=removeHs)

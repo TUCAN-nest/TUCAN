@@ -26,35 +26,28 @@ def test_permutation(testfiles):
     m_permu = permute_molecule(m, random_seed=permutation_seed)
     assert m.edges != m_permu.edges
 
-def test_invariance(testfiles, n_runs=10, root_atom=None, visualize=False):
-    """
-    TODO:
-    * write separate test for different root atoms (having it in this test clutters test)
-    * refactor `permute_molecule`: permutation should be enforced by default (shouldn't be handled in this test)
-    * have test emit permutation seed on failure for reproducibility
-    """
+def test_invariance(testfiles, n_runs=10, random_seed=random.random()):
     m = graph_from_molfile(testfiles)
-    # Enforce permutation for graphs with at least 2 edges that aren't fully connected (i.e., complete).
-    enforce_permutation = m.number_of_edges() > 1 and nx.density(m) != 1
-    root_atoms = [root_atom] * n_runs
-    n_nodes = m.number_of_nodes()
-    if not root_atom:
-        if n_runs <= n_nodes:
-            root_atoms = random.sample(range(n_nodes), k=n_runs)    # draw without replacement
-        else:
-            root_atoms = random.choices(range(n_nodes), k=n_runs)    # draw with replacement
-
-    for i in range(n_runs):
-        root_atom = root_atoms[i]
+    root_atom = 0
+    random.seed(random_seed)
+    for _ in range(n_runs):
         permutation_seed = random.random()
-
         m_permu = permute_molecule(m, random_seed=permutation_seed)
-        if enforce_permutation:
-            while m.edges == m_permu.edges:
-                permutation_seed = random.random()
-                m_permu = permute_molecule(m, random_seed=permutation_seed)
-            assert m.edges != m_permu.edges
-
         m_canon = canonicalize_molecule(m, root_atom)
         m_permu_canon = canonicalize_molecule(m_permu, root_atom)
         assert m_canon.edges == m_permu_canon.edges
+
+def test_root_atom_independence(testfiles):
+    """
+    Terephthalic acid reveals why exhaustive permutation of partitions
+    (CCAP step in Ivaanciuc, https://doi.org/10.1002/9783527618279.ch7a) is
+    necessary.
+    However, contrary to Ivanciuc's assertion, not all partitions must be
+    permuted. Only those partitions must be permuted that have multiple
+    neighbors from the same partition (see graph of
+    terephthalic acid in conjunction with output of failed test).
+    """
+    m = graph_from_molfile(testfiles)
+    m_canon = canonicalize_molecule(m, 0)
+    for root_atom in range(1, m.number_of_nodes()):
+        assert m_canon.edges == canonicalize_molecule(m, root_atom).edges

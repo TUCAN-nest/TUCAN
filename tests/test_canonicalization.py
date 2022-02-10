@@ -1,7 +1,7 @@
 """Run tests from root of repository with `python -m pytest -v`"""
 
 from canonymous.canonicalization import graph_from_molfile, canonicalize_molecule
-from canonymous.utils import permute_molecule
+from canonymous.utils import permute_molecule, serialize_molecule
 from pathlib import Path
 import networkx as nx
 import random
@@ -27,6 +27,7 @@ def test_permutation(testfiles):
     assert m.edges != m_permu.edges
 
 def test_invariance(testfiles, n_runs=10, random_seed=random.random()):
+    """Eindeutigkeit."""
     m = graph_from_molfile(testfiles)
     root_atom = 0
     random.seed(random_seed)
@@ -35,7 +36,19 @@ def test_invariance(testfiles, n_runs=10, random_seed=random.random()):
         m_permu = permute_molecule(m, random_seed=permutation_seed)
         m_canon = canonicalize_molecule(m, root_atom)
         m_permu_canon = canonicalize_molecule(m_permu, root_atom)
-        assert m_canon.edges == m_permu_canon.edges
+        m_serialized = serialize_molecule(m_canon)
+        m_permu_serialized = serialize_molecule(m_permu_canon)
+        assert m_serialized == m_permu_serialized
+
+def test_bijection():
+    """Eineindeutigkeit."""
+    testfiles = list(Path("tests/testfiles").glob("*/*.mol"))
+    serializations = set()
+    for f in testfiles:
+        m = graph_from_molfile(f)
+        m_serialized = serialize_molecule(canonicalize_molecule(m, 0))
+        assert m_serialized not in serializations, f"duplicate: {f.stem}"
+        serializations.add(m_serialized)
 
 def test_root_atom_independence(testfiles):
     """

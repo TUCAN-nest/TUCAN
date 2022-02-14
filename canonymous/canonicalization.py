@@ -17,9 +17,9 @@ def graph_from_molfile(filename):
     nx.set_node_attributes(graph, dict(zip(node_labels, element_symbols)), "element_symbol")
     nx.set_node_attributes(graph, dict(zip(node_labels, element_colors)), "element_color")
     nx.set_node_attributes(graph, dict(zip(node_labels, atomic_numbers)), "atomic_number")
-    nx.set_node_attributes(graph, _find_ring_neighbors(graph), "ring_neighbors")
+    nx.set_node_attributes(graph, _find_cycle_memberships(graph), "cycle_membership")
     nx.set_node_attributes(graph, 0, "partition")
-    _add_fingerprint_attribute(graph)
+    _add_invariant_code(graph)
     return graph
 
 def _parse_molfile(filename):
@@ -35,16 +35,16 @@ def _parse_molfile(filename):
              for l in lines[bond_block_offset:bond_block_offset + bond_count]]    # make bond-indices zero-based
     return element_symbols, bonds
 
-def _add_fingerprint_attribute(m):
-    """Assign a fingerprint of the following format to each atom:
-    <atomic number><indices ring neighbors sorted in non-ascending order>"""
+def _add_invariant_code(m):
+    """Assign an invariant code of the following format to each atom:
+    <atomic number><IDs of cycles that include this atom>"""
     atomic_numbers = list(nx.get_node_attributes(m, "atomic_number").values())
-    ring_neighbors = list(nx.get_node_attributes(m, "ring_neighbors").values())
-    ring_neighbors = [sorted((list(rn)), reverse=True) for rn in ring_neighbors]
-    fingerprints = [str(a) + "".join(map(str, r)) for a, r in zip(atomic_numbers, ring_neighbors)]
-    nx.set_node_attributes(m, dict(zip(range(m.number_of_nodes()), fingerprints)), "fingerprint")
+    cycle_memberships = list(nx.get_node_attributes(m, "cycle_membership").values())
+    cycle_memberships = [sorted((list(cm)), reverse=True) for cm in cycle_memberships]
+    invariant_codes = [f"{str(a)}-{','.join(map(str, r))}" for a, r in zip(atomic_numbers, cycle_memberships)]
+    nx.set_node_attributes(m, dict(zip(range(m.number_of_nodes()), invariant_codes)), "invariant_code")
 
-def sort_molecule_by_attribute(m, attribute):
+def _sort_molecule_by_attribute(m, attribute):
     '''Sort atoms lexicographically by attribute.'''
     attr_sequence = [_attribute_sequence(atom, m, attribute) for atom in m]
     idcs = list(range(m.number_of_nodes()))
@@ -57,18 +57,19 @@ def _attribute_sequence(atom, m, attribute):
     attr_neighbors = sorted([m.nodes[n][attribute] for n in m.neighbors(atom)], reverse=True)
     return [attr_atom] + attr_neighbors
 
-def partition_molecule_by_attribute(m, attribute):
+def partition_molecule_by_attribute(m, attribute, include_neighbors=True):
+    m_sorted = _sort_molecule_by_attribute(m, attribute)
     current_partition = 0
-    for i in range(m.number_of_nodes() - 1):
+    for i in range(m_sorted.number_of_nodes() - 1):
         j = i + 1
-        attributes_i = _attribute_sequence(i, m, attribute)
-        attributes_j = _attribute_sequence(j, m, attribute)
+        attributes_i = _attribute_sequence(i, m_sorted, attribute) if include_neighbors else m_sorted.nodes[i][attribute]
+        attributes_j = _attribute_sequence(j, m_sorted, attribute) if include_neighbors else m_sorted.nodes[j][attribute]
         if (attributes_i != attributes_j): current_partition += 1
-        m.nodes[j]["partition"] = current_partition
-    return m
+        m_sorted.nodes[j]["partition"] = current_partition
+    return m_sorted
 
 def partition_molecule_recursively(m, show_steps=False):
-    m_sorted = sort_molecule_by_attribute(m, "partition")
+    m_sorted = _sort_molecule_by_attribute(m, "partition")
     if show_steps:
         print_molecule(m_sorted, "refined partitions")
     current_partitions = list(nx.get_node_attributes(m, "partition").values())
@@ -128,9 +129,8 @@ def _create_partition_lut(m):
     return partition_lut
 
 def canonicalize_molecule(m, root_idx=0):
-    m_sorted_by_fingerprint = sort_molecule_by_attribute(m, "fingerprint")
-    m_partitioned_by_fingerprint = partition_molecule_by_attribute(m_sorted_by_fingerprint, "fingerprint")
-    m_partitioned = partition_molecule_recursively(m_partitioned_by_fingerprint, show_steps=False)
+    m_partitioned_by_invariant_code = partition_molecule_by_attribute(m, "invariant_code")
+    m_partitioned = partition_molecule_recursively(m_partitioned_by_invariant_code, show_steps=False)
     canonical_idcs = assign_canonical_labels(m_partitioned, root_idx)
     return nx.relabel_nodes(m_partitioned, canonical_idcs, copy=True)
 
@@ -193,12 +193,12 @@ def _find_atomic_cycles(m):
             visited_edges.add((outer_neighbor, outer_node))
     return atomic_cycles
 
-def _find_ring_neighbors(m):
-    ring_neighbors = {atom: {-1} for atom in m.nodes}
-    for ring in _find_atomic_cycles(m):
-        for atom in ring:
-            ring_neighbors[atom].update(ring)
-    return ring_neighbors
+def _find_cycle_memberships(m):
+    cycle_memberships = {node: {0} for node in m.nodes}
+    for cycle_id, cycle in enumerate(_find_atomic_cycles(m)):
+        for node in cycle:
+            cycle_memberships[node].add(cycle_id + 1)
+    return cycle_memberships
 
 # def bfs_molecule(m, root_idx):
 #     """Breadth-first search over atoms.

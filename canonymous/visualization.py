@@ -25,11 +25,13 @@ def print_molecule(m, caption=""):
     print(caption)
     table = []
     for atom in m.nodes():
-        fingerprint = m.nodes[atom]["fingerprint"]
+        invariant_code = m.nodes[atom]["invariant_code"]
         partition = m.nodes[atom]["partition"]
-        neighbors = [(n, m.nodes[n]["fingerprint"], m.nodes[n]["partition"])
+        neighbors = [(n, m.nodes[n]["invariant_code"], m.nodes[n]["partition"])
                      for n in m.neighbors(atom)]
-        table.append([atom, fingerprint, partition, neighbors])
+        neighbors = sorted(neighbors, key=lambda x: x[1], reverse=True)
+        neighbors = ", ".join([f"({i}, {c}, {p})" for i, c, p in neighbors])
+        table.append([atom, invariant_code, partition, neighbors])
     print(tabulate(table, tablefmt="fancy_grid",
-                   headers=["index", "fingerprint", "partition",
-                            "neighbors (index, fingerprint, partition)"]))
+                   headers=["label", "invariant-code", "partition",
+                            "neighbors (label, invariant-code, partition)"]))

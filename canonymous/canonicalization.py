@@ -14,13 +14,20 @@ def graph_from_molfile(filename):
     graph = nx.Graph()
     graph.add_nodes_from(node_labels)
     graph.add_edges_from(bonds)
-    nx.set_node_attributes(graph, dict(zip(node_labels, element_symbols)), "element_symbol")
-    nx.set_node_attributes(graph, dict(zip(node_labels, element_colors)), "element_color")
-    nx.set_node_attributes(graph, dict(zip(node_labels, atomic_numbers)), "atomic_number")
+    nx.set_node_attributes(
+        graph, dict(zip(node_labels, element_symbols)), "element_symbol"
+    )
+    nx.set_node_attributes(
+        graph, dict(zip(node_labels, element_colors)), "element_color"
+    )
+    nx.set_node_attributes(
+        graph, dict(zip(node_labels, atomic_numbers)), "atomic_number"
+    )
     nx.set_node_attributes(graph, _find_cycle_memberships(graph), "cycle_membership")
     nx.set_node_attributes(graph, 0, "partition")
     _add_invariant_code(graph)
     return graph
+
 
 def _parse_molfile(filename):
     with open(filename) as f:
@@ -30,43 +37,75 @@ def _parse_molfile(filename):
     bond_count = int(lines[5][4])
     atom_block_offset = 7
     bond_block_offset = atom_block_offset + atom_count + 2
-    element_symbols = [l[3] for l in lines[atom_block_offset:atom_block_offset + atom_count]]
-    bonds = [(int(l[4]) - 1, int(l[5]) - 1)
-             for l in lines[bond_block_offset:bond_block_offset + bond_count]]    # make bond-indices zero-based
+    element_symbols = [
+        l[3] for l in lines[atom_block_offset : atom_block_offset + atom_count]
+    ]
+    bonds = [
+        (int(l[4]) - 1, int(l[5]) - 1)
+        for l in lines[bond_block_offset : bond_block_offset + bond_count]
+    ]  # make bond-indices zero-based
     return element_symbols, bonds
 
+
 def _add_invariant_code(m):
-    """Assign an invariant code of the following format to each atom:
-    <atomic number><IDs of cycles that include this atom>"""
+    """Assign an invariant code to each atom.
+
+    Invariant code is formatted as follows:
+    <atomic number>-<comma-separated list of fundamental cycles>
+    """
     atomic_numbers = list(nx.get_node_attributes(m, "atomic_number").values())
     cycle_memberships = list(nx.get_node_attributes(m, "cycle_membership").values())
     cycle_memberships = [sorted((list(cm)), reverse=True) for cm in cycle_memberships]
-    invariant_codes = [f"{str(a)}-{','.join(map(str, r))}" for a, r in zip(atomic_numbers, cycle_memberships)]
-    nx.set_node_attributes(m, dict(zip(range(m.number_of_nodes()), invariant_codes)), "invariant_code")
+    invariant_codes = [
+        f"{str(a)}-{','.join(map(str, c))}"
+        for a, c in zip(atomic_numbers, cycle_memberships)
+    ]
+    nx.set_node_attributes(
+        m, dict(zip(range(m.number_of_nodes()), invariant_codes)), "invariant_code"
+    )
+
 
 def _sort_molecule_by_attribute(m, attribute):
-    '''Sort atoms lexicographically by attribute.'''
+    """Sort atoms lexicographically by attribute."""
     attr_sequence = [_attribute_sequence(atom, m, attribute) for atom in m]
     idcs = list(range(m.number_of_nodes()))
-    attr_with_idcs = [(i, j) for i, j in zip(attr_sequence, idcs)] # [(A, 0), (C, 1), (B, 2)]
-    sorted_attr, idcs_sorted_by_attr = zip(*sorted(attr_with_idcs)) # (A, B, C), (0, 2, 1)
+    attr_with_idcs = [
+        (i, j) for i, j in zip(attr_sequence, idcs)
+    ]  # [(A, 0), (C, 1), (B, 2)]
+    sorted_attr, idcs_sorted_by_attr = zip(
+        *sorted(attr_with_idcs)
+    )  # (A, B, C), (0, 2, 1)
     return relabel_molecule(m, idcs_sorted_by_attr, idcs)
+
 
 def _attribute_sequence(atom, m, attribute):
     attr_atom = m.nodes[atom][attribute]
-    attr_neighbors = sorted([m.nodes[n][attribute] for n in m.neighbors(atom)], reverse=True)
+    attr_neighbors = sorted(
+        [m.nodes[n][attribute] for n in m.neighbors(atom)], reverse=True
+    )
     return [attr_atom] + attr_neighbors
+
 
 def partition_molecule_by_attribute(m, attribute, include_neighbors=True):
     m_sorted = _sort_molecule_by_attribute(m, attribute)
     current_partition = 0
     for i in range(m_sorted.number_of_nodes() - 1):
         j = i + 1
-        attributes_i = _attribute_sequence(i, m_sorted, attribute) if include_neighbors else m_sorted.nodes[i][attribute]
-        attributes_j = _attribute_sequence(j, m_sorted, attribute) if include_neighbors else m_sorted.nodes[j][attribute]
-        if (attributes_i != attributes_j): current_partition += 1
+        attributes_i = (
+            _attribute_sequence(i, m_sorted, attribute)
+            if include_neighbors
+            else m_sorted.nodes[i][attribute]
+        )
+        attributes_j = (
+            _attribute_sequence(j, m_sorted, attribute)
+            if include_neighbors
+            else m_sorted.nodes[j][attribute]
+        )
+        if attributes_i != attributes_j:
+            current_partition += 1
         m_sorted.nodes[j]["partition"] = current_partition
     return m_sorted
+
 
 def partition_molecule_recursively(m, show_steps=False):
     m_sorted = _sort_molecule_by_attribute(m, "partition")
@@ -80,17 +119,20 @@ def partition_molecule_recursively(m, show_steps=False):
         partitions_i = _attribute_sequence(i, m_sorted, "partition")
         partitions_j = _attribute_sequence(j, m_sorted, "partition")
         current_partition = updated_partitions[-1]
-        if (partitions_i != partitions_j):
+        if partitions_i != partitions_j:
             current_partition += 1
         updated_partitions.append(current_partition)
     if current_partitions == updated_partitions:
         return m_sorted
-    nx.set_node_attributes(m_sorted,
-                           dict(zip(range(n_nodes), updated_partitions)),
-                           "partition")
+    nx.set_node_attributes(
+        m_sorted, dict(zip(range(n_nodes), updated_partitions)), "partition"
+    )
     return partition_molecule_recursively(m_sorted, show_steps=show_steps)
 
-def assign_canonical_labels(m, root_idx, traversal_priorities=[lt, gt, eq], show_traversal_order=False):
+
+def assign_canonical_labels(
+    m, root_idx, traversal_priorities=[lt, gt, eq], show_traversal_order=False
+):
     partitions = m.nodes.data("partition")
     lut = _create_partition_lut(m)
     atom_queue = [root_idx]
@@ -108,8 +150,9 @@ def assign_canonical_labels(m, root_idx, traversal_priorities=[lt, gt, eq], show
         neighbors = list(m.neighbors(a))
         neighbor_traversal_order = []
         for priority in traversal_priorities:
-            neighbors_this_priority = [n for n in neighbors
-                                       if priority(partitions[a], partitions[n])]
+            neighbors_this_priority = [
+                n for n in neighbors if priority(partitions[a], partitions[n])
+            ]
             neighbor_traversal_order.extend(sorted(neighbors_this_priority))
 
         m.nodes[a]["explored"] = True
@@ -119,41 +162,52 @@ def assign_canonical_labels(m, root_idx, traversal_priorities=[lt, gt, eq], show
     nx.set_node_attributes(m, False, "explored")
     return canonical_idcs
 
+
 def _create_partition_lut(m):
-    """Look-up-table of atom indices in partitions."""
+    """Create dictionary of partitions to atom labels."""
     partitions = set(sorted([v for k, v in m.nodes.data("partition")]))
-    partition_lut = {p:set() for p in partitions}
+    partition_lut = {p: set() for p in partitions}
     for a in m:
         partition_lut[m.nodes[a]["partition"]].add(a)
-    partition_lut.update((k, sorted(list(v), reverse=True)) for k, v in partition_lut.items())
+    partition_lut.update(
+        (k, sorted(list(v), reverse=True)) for k, v in partition_lut.items()
+    )
     return partition_lut
 
+
 def canonicalize_molecule(m, root_idx=0):
-    m_partitioned_by_invariant_code = partition_molecule_by_attribute(m, "invariant_code")
-    m_partitioned = partition_molecule_recursively(m_partitioned_by_invariant_code, show_steps=False)
+    m_partitioned_by_invariant_code = partition_molecule_by_attribute(
+        m, "invariant_code"
+    )
+    m_partitioned = partition_molecule_recursively(
+        m_partitioned_by_invariant_code, show_steps=False
+    )
     canonical_idcs = assign_canonical_labels(m_partitioned, root_idx)
     return nx.relabel_nodes(m_partitioned, canonical_idcs, copy=True)
+
 
 def _find_atomic_cycles(m):
     """Find atomic cycles in a graph.
 
     An atomic cycle is a generalization of a chordless cycle, such that the
-    chord can be longer than one edge.
+    chord can be longer than one edge. Adaptation of the
+    `find_large_atomic_cycle` algorithm from Figure 6 in [1]. In contrast to
+    [1] the present implementation returns all cycles and uses a fixed lambda
+    threshold of size 3.
 
-    Adaptation of the `find_large_atomic_cycle` algorithm from figure 6 in
-    DOI: 10.1080/09540091.2012.664122. In constrast to the original
-    implementation, the present implementation returns *all* cycles and uses a
-    fixed lambda threshold of size 3.
+    References
+    ----------
+    [1] DOI: 10.1080/09540091.2012.664122
     """
     root_node = 0
-    outer_node_queue = deque([root_node])    # Q
-    outer_visited_nodes = set([root_node])    # S
-    visited_edges = set()    # T
+    outer_node_queue = deque([root_node])  # Q
+    outer_visited_nodes = set([root_node])  # S
+    visited_edges = set()  # T
     atomic_cycles = []
 
-    while outer_node_queue:    # outer BFS
-        outer_node = outer_node_queue.popleft()    # a
-        for outer_neighbor in m.neighbors(outer_node):    # b
+    while outer_node_queue:  # outer BFS
+        outer_node = outer_node_queue.popleft()  # a
+        for outer_neighbor in m.neighbors(outer_node):  # b
             if outer_neighbor not in outer_visited_nodes:
                 outer_node_queue.append(outer_neighbor)
                 outer_visited_nodes.add(outer_neighbor)
@@ -162,13 +216,13 @@ def _find_atomic_cycles(m):
                 continue
 
             # A cycle has been detected.
-            inner_node_queue = deque([outer_neighbor])    # I
-            inner_visited_nodes = set([outer_neighbor])    # U
-            parent_nodes = {outer_neighbor: -1}    # P
+            inner_node_queue = deque([outer_neighbor])  # I
+            inner_visited_nodes = set([outer_neighbor])  # U
+            parent_nodes = {outer_neighbor: -1}  # P
 
-            while inner_node_queue:    # inner BFS
-                inner_node = inner_node_queue.popleft()    # c
-                for inner_neighbor in m.neighbors(inner_node):    # d
+            while inner_node_queue:  # inner BFS
+                inner_node = inner_node_queue.popleft()  # c
+                for inner_neighbor in m.neighbors(inner_node):  # d
                     if inner_neighbor in inner_visited_nodes:
                         continue
                     if (inner_neighbor, inner_node) not in visited_edges:
@@ -180,9 +234,12 @@ def _find_atomic_cycles(m):
                     if inner_neighbor != outer_node:
                         continue
                     # An atomic cycle has been detected.
-                    cycle = set()    # Y
+                    cycle = set()  # Y
                     while parent_nodes[inner_neighbor] != -1:
-                        cycle_node, inner_neighbor = inner_neighbor, parent_nodes[inner_neighbor]
+                        cycle_node, inner_neighbor = (
+                            inner_neighbor,
+                            parent_nodes[inner_neighbor],
+                        )
                         cycle.add(cycle_node)
                     cycle.add(inner_neighbor)
                     if len(cycle) >= 3:
@@ -193,12 +250,14 @@ def _find_atomic_cycles(m):
             visited_edges.add((outer_neighbor, outer_node))
     return atomic_cycles
 
+
 def _find_cycle_memberships(m):
     cycle_memberships = {node: {0} for node in m.nodes}
     for cycle_id, cycle in enumerate(_find_atomic_cycles(m)):
         for node in cycle:
             cycle_memberships[node].add(cycle_id + 1)
     return cycle_memberships
+
 
 # def bfs_molecule(m, root_idx):
 #     """Breadth-first search over atoms.

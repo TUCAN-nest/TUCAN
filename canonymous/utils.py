@@ -14,15 +14,22 @@ def relabel_molecule(m, old_labels, new_labels):
     m_sorted.add_edges_from(m_relabeled.edges(data=True))
     return m_sorted
 
-def permute_molecule(m, random_seed=1.):
+
+def permute_molecule(m, random_seed=1.0):
     """Randomly permute the atom-labels of a molecular graph.
-    random_seed: float in [0.0, 1.0)
+
+    Parameters
+    ----------
+    random_seed: float
+        In [0.0, 1.0).
     """
     idcs = m.nodes()
     permuted_idcs = list(range(m.number_of_nodes()))
     # Enforce permutation for graphs with at least 2 edges that aren't fully connected (i.e., complete).
     enforce_permutation = m.number_of_edges() > 1 and nx.density(m) != 1
-    random.seed(random_seed)    # subsequent calls of random.shuffle(x[, random]) will now use fixed sequence of values for `random` parameter
+    random.seed(
+        random_seed
+    )  # subsequent calls of random.shuffle(x[, random]) will now use fixed sequence of values for `random` parameter
     random.shuffle(permuted_idcs)
     m_permu = relabel_molecule(m, permuted_idcs, idcs)
     if enforce_permutation:
@@ -31,6 +38,7 @@ def permute_molecule(m, random_seed=1.):
             m_permu = relabel_molecule(m, permuted_idcs, idcs)
     return m_permu
 
+
 def serialize_molecule(m):
     """Serialize a molecule."""
     serialization = write_sum_formula(m)
@@ -38,12 +46,16 @@ def serialize_molecule(m):
         serialization += f"/{edge[0]}-{edge[1]}"
     return serialization
 
+
 def write_sum_formula(m):
     """Write sum formula of a molecule.
-    Order: C, H, other elements in alphabetic order.
+
+    Elements occur in the following order: C, H, other elements in alphabetic order.
     """
     element_counts = Counter(nx.get_node_attributes(m, "element_symbol").values())
-    element_counts = {k: (v if v > 1 else "") for k, v in element_counts.items()}    # remove counts of 1 since those are implicit in sum formula
+    element_counts = {
+        k: (v if v > 1 else "") for k, v in element_counts.items()
+    }  # remove counts of 1 since those are implicit in sum formula
     sum_formula = ""
     for element in ["C", "H"]:
         count = element_counts.pop(element, None)
@@ -52,6 +64,7 @@ def write_sum_formula(m):
     for k, v in dict(sorted(element_counts.items())).items():
         sum_formula += f"{k}{v}"
     return sum_formula
+
 
 def mdl_2000_to_3000(molfile_path, removeHs=False):
     v2000 = rdmolfiles.MolFromMolFile(molfile_path, removeHs=removeHs)

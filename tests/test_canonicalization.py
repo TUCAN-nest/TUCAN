@@ -12,19 +12,23 @@ def idtestfile(testfile):
     """Generate a test ID."""
     return testfile.stem
 
-@pytest.fixture(params=list(Path("tests/testfiles").glob("*/*.mol")),
-                ids=idtestfile)    # automatically runs the test(s) using this fixture on all values of `params`
+
+@pytest.fixture(
+    params=list(Path("tests/testfiles").glob("*/*.mol")), ids=idtestfile
+)  # automatically runs the test(s) using this fixture on all values of `params`
 def testfiles(request):
     return request.param
+
 
 def test_permutation(testfiles):
     m = graph_from_molfile(testfiles)
     # Enforce permutation for graphs with at least 2 edges that aren't fully connected (i.e., complete).
     if m.number_of_edges() <= 1 or nx.density(m) == 1:
         return
-    permutation_seed = .42
+    permutation_seed = 0.42
     m_permu = permute_molecule(m, random_seed=permutation_seed)
     assert m.edges != m_permu.edges
+
 
 def test_invariance(testfiles, n_runs=10, random_seed=random.random(), root_atom=0):
     """Eindeutigkeit."""
@@ -39,6 +43,7 @@ def test_invariance(testfiles, n_runs=10, random_seed=random.random(), root_atom
         m_permu_serialized = serialize_molecule(m_permu_canon)
         assert m_serialized == m_permu_serialized
 
+
 def test_bijection():
     """Eineindeutigkeit."""
     testfiles = list(Path("tests/testfiles").glob("*/*.mol"))
@@ -48,6 +53,7 @@ def test_bijection():
         m_serialized = serialize_molecule(canonicalize_molecule(m, 0))
         assert m_serialized not in serializations, f"duplicate: {f.stem}"
         serializations.add(m_serialized)
+
 
 def test_root_atom_independence(testfiles):
     """

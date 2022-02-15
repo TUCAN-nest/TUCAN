@@ -26,17 +26,16 @@ def test_permutation(testfiles):
     m_permu = permute_molecule(m, random_seed=permutation_seed)
     assert m.edges != m_permu.edges
 
-def test_invariance(testfiles, n_runs=10, random_seed=random.random()):
+def test_invariance(testfiles, n_runs=10, random_seed=random.random(), root_atom=0):
     """Eindeutigkeit."""
     m = graph_from_molfile(testfiles)
-    root_atom = 0
+    m_canon = canonicalize_molecule(m, root_atom)
+    m_serialized = serialize_molecule(m_canon)
     random.seed(random_seed)
     for _ in range(n_runs):
         permutation_seed = random.random()
         m_permu = permute_molecule(m, random_seed=permutation_seed)
-        m_canon = canonicalize_molecule(m, root_atom)
         m_permu_canon = canonicalize_molecule(m_permu, root_atom)
-        m_serialized = serialize_molecule(m_canon)
         m_permu_serialized = serialize_molecule(m_permu_canon)
         assert m_serialized == m_permu_serialized
 

@@ -1,7 +1,11 @@
 """Run tests from root of repository with `python -m pytest -v`"""
 
-from canonymous.canonicalization import graph_from_molfile, canonicalize_molecule
-from canonymous.utils import permute_molecule, serialize_molecule
+from canonymous.canonicalization import (
+    graph_from_molfile,
+    canonicalize_molecule,
+    permute_molecule,
+    serialize_molecule,
+)
 from pathlib import Path
 import networkx as nx
 import random

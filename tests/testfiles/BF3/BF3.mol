@@ -1,18 +1,18 @@
-Boron trifluoride         
-  hand-drawn
+Boron trifluoride
+ OpenBabel02172217462D
 
-  0  0  0     0  0              0 V3000
+  0  0  0     0  0            999 V3000
 M  V30 BEGIN CTAB
 M  V30 COUNTS 4 3 0 0 0
 M  V30 BEGIN ATOM
-M  V30 1 F 0.0   1.0    0.0000 0
-M  V30 2 F 1.0   0.0    0.0000 0
-M  V30 3 B 0.0   0.0    0.0000 0
-M  V30 4 F 0.5   0.5    0.0000 0
+M  V30 1 F 0 1 0 0
+M  V30 2 F 1 0 0 0
+M  V30 3 B 0 0 0 0
+M  V30 4 F 0.5 0.5 0 0
 M  V30 END ATOM
 M  V30 BEGIN BOND
-M  V30 1 1 2 3
-M  V30 2 1 1 3
+M  V30 1 1 1 3
+M  V30 2 1 2 3
 M  V30 3 1 4 3
 M  V30 END BOND
 M  V30 END CTAB

@@ -1,17 +1,17 @@
-Beryllium chloride         
-  hand-drawn
+Beryllium chloride
+ OpenBabel02172217462D
 
-  0  0  0     0  0              0 V3000
+  0  0  0     0  0            999 V3000
 M  V30 BEGIN CTAB
 M  V30 COUNTS 3 2 0 0 0
 M  V30 BEGIN ATOM
-M V30 1 Cl 0.0   0.0    0.0000 0
-M V30 2 Cl 0.0   0.0    0.0000 0
-M V30 3 Be 0.0   0.0    0.0000 0
-M V30 END ATOM
-M V30 BEGIN BOND
-M V30 1 1 2 3
-M V30 2 1 1 3
+M  V30 1 Cl 0 0 0 0
+M  V30 2 Cl 0 0 0 0
+M  V30 3 Be 0 0 0 0
+M  V30 END ATOM
+M  V30 BEGIN BOND
+M  V30 1 1 1 3
+M  V30 2 1 2 3
 M  V30 END BOND
 M  V30 END CTAB
 M  END

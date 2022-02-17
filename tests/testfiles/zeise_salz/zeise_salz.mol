@@ -1,32 +1,32 @@
 zeise_salz.mol
- Zeise-Salz [PtCl3(CH2CH2)]+
+ OpenBabel02172217462D
 
-  0  0  0     0  0              0 V3000
+  0  0  0     0  0            999 V3000
 M  V30 BEGIN CTAB
 M  V30 COUNTS 10 10 0 0 0
 M  V30 BEGIN ATOM
-M  V30 1 Cl   0  0  0  0
-M  V30 2 Pt  0  0  0  0
-M  V30 3 Cl   0  0  0  0
-M  V30 4 C   0  0  0  0
-M  V30 5 H   0  0  0  0
-M  V30 6 H   0  0  0  0
-M  V30 7 H   0  0  0  0
-M  V30 8 H   0  0  0  0
-M  V30 9 C   0  0  0  0
-M  V30 10 Cl   0  0  0  0
+M  V30 1 Cl 0 0 0 0
+M  V30 2 Pt 0 0 0 0
+M  V30 3 Cl 0 0 0 0
+M  V30 4 C 0 0 0 0
+M  V30 5 H 0 0 0 0
+M  V30 6 H 0 0 0 0
+M  V30 7 H 0 0 0 0
+M  V30 8 H 0 0 0 0
+M  V30 9 C 0 0 0 0
+M  V30 10 Cl 0 0 0 0
 M  V30 END ATOM
 M  V30 BEGIN BOND
-M  V30 1 1 1  2
-M  V30 2 1 2  3
-M  V30 3 1 10  2
-M  V30 4 1 2  4
-M  V30 5 1 9  2
-M  V30 6 1 4  9
-M  V30 7 1 5  4
-M  V30 8 1 6  4
-M  V30 9 1 9  7
-M  V30 10 1 8  9
+M  V30 1 1 1 2
+M  V30 2 1 2 3
+M  V30 3 1 10 2
+M  V30 4 1 2 4
+M  V30 5 1 9 2
+M  V30 6 1 4 9
+M  V30 7 1 5 4
+M  V30 8 1 6 4
+M  V30 9 1 9 7
+M  V30 10 1 8 9
 M  V30 END BOND
 M  V30 END CTAB
 M  END

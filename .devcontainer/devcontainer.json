@@ -1,18 +1,18 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
 // https://github.com/microsoft/vscode-dev-containers/tree/v0.205.2/containers/docker-existing-dockerfile
 {
-	"name": "Jupyter and Ruby",
+	"name": "Jupyter",
 
 	// Update the 'dockerFile' property if you aren't using the standard 'Dockerfile' filename.
 	"dockerFile": "Dockerfile",
 
 	// Set *default* container specific settings.json values on container create.
-	"settings": {
-		"[ruby]": {
-			"editor.insertSpaces": true,
-			"editor.tabSize": 2
-		  },
-	},
+	// "settings": {
+	// 	"[ruby]": {
+	// 		"editor.insertSpaces": true,
+	// 		"editor.tabSize": 2
+	// 	  },
+	// },
 
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
@@ -20,15 +20,15 @@
 		"ms-python.python",
 		"robbowen.synthwave-vscode",
 		"ms-python.vscode-pylance",
-		"rebornix.Ruby",
-		"misogi.ruby-rubocop"
+		// "rebornix.Ruby",
+		// "misogi.ruby-rubocop"
 	],
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
 
 	// Uncomment the next line to run commands after the container is created - for example installing curl.
-	"postCreateCommand": "conda update --yes -n base conda && conda install --yes rdkit tabulate matplotlib networkx pytest black",
+	"postCreateCommand": "conda update --yes -n base conda && conda install --yes tabulate matplotlib networkx pytest black openbabel",
 
 	// Uncomment when using a ptrace-based debugger like C++, Go, and Rust
 	// "runArgs": [ "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined" ],

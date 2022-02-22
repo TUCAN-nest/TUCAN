@@ -6,8 +6,11 @@ import networkx as nx
 import random
 
 
-def graph_from_molfile(filename):
-    element_symbols, bonds = _parse_molfile(filename)
+def graph_from_file(filepath):
+    if filepath.suffix == ".mol":
+        element_symbols, bonds = _parse_molfile(filepath)
+    if filepath.suffix == ".col":
+        element_symbols, bonds = _parse_dimacs(filepath)
     element_colors = [ELEMENT_PROPS[s]["element_color"] for s in element_symbols]
     atomic_numbers = [ELEMENT_PROPS[s]["atomic_number"] for s in element_symbols]
     node_labels = range(len(element_symbols))
@@ -29,8 +32,8 @@ def graph_from_molfile(filename):
     return graph
 
 
-def _parse_molfile(filename):
-    with open(filename) as f:
+def _parse_molfile(filepath):
+    with open(filepath) as f:
         lines = [l.rstrip().split(" ") for l in f]
     lines = [[value for value in line if value != ""] for line in lines]
     atom_count = int(lines[5][3])
@@ -43,6 +46,18 @@ def _parse_molfile(filename):
     bonds = [
         (int(l[4]) - 1, int(l[5]) - 1)
         for l in lines[bond_block_offset : bond_block_offset + bond_count]
+    ]  # make bond-indices zero-based
+    return element_symbols, bonds
+
+
+def _parse_dimacs(filepath):
+    with open(filepath) as f:
+        lines = [l.rstrip().split(" ") for l in f]
+    lines = [l for l in lines if l[0] in ["p", "e"]]
+    atom_count = int(lines[0][2])
+    element_symbols = ["C"] * atom_count
+    bonds = [
+        (int(l[1]) - 1, int(l[2]) - 1) for l in lines[1:]
     ]  # make bond-indices zero-based
     return element_symbols, bonds
 

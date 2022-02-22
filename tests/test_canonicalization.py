@@ -1,12 +1,11 @@
 """Run tests from root of repository with `python -m pytest -v`"""
 
 from canonymous.canonicalization import (
-    graph_from_molfile,
+    graph_from_file,
     canonicalize_molecule,
     permute_molecule,
     serialize_molecule,
 )
-from pathlib import Path
 import networkx as nx
 import random
 import pytest
@@ -17,15 +16,16 @@ def idtestfile(testfile):
     return testfile.stem
 
 
+# pytest.testset is configured based on command-line option in conftest.py.
 @pytest.fixture(
-    params=list(Path("tests/testfiles").glob("*/*.mol")), ids=idtestfile
+    params=pytest.testset, ids=idtestfile
 )  # automatically runs the test(s) using this fixture on all values of `params`
-def testfiles(request):
+def testfile(request):
     return request.param
 
 
-def test_permutation(testfiles):
-    m = graph_from_molfile(testfiles)
+def test_permutation(testfile):
+    m = graph_from_file(testfile)
     # Enforce permutation for graphs with at least 2 edges that aren't fully connected (i.e., complete).
     if m.number_of_edges() <= 1 or nx.density(m) == 1:
         return
@@ -34,9 +34,9 @@ def test_permutation(testfiles):
     assert m.edges != m_permu.edges
 
 
-def test_invariance(testfiles, n_runs=10, random_seed=random.random(), root_atom=0):
+def test_invariance(testfile, n_runs=10, random_seed=random.random(), root_atom=0):
     """Eindeutigkeit."""
-    m = graph_from_molfile(testfiles)
+    m = graph_from_file(testfile)
     m_canon = canonicalize_molecule(m, root_atom)
     m_serialized = serialize_molecule(m_canon)
     random.seed(random_seed)
@@ -50,16 +50,15 @@ def test_invariance(testfiles, n_runs=10, random_seed=random.random(), root_atom
 
 def test_bijection():
     """Eineindeutigkeit."""
-    testfiles = list(Path("tests/testfiles").glob("*/*.mol"))
     serializations = set()
-    for f in testfiles:
-        m = graph_from_molfile(f)
+    for f in pytest.testset:
+        m = graph_from_file(f)
         m_serialized = serialize_molecule(canonicalize_molecule(m, 0))
         assert m_serialized not in serializations, f"duplicate: {f.stem}"
         serializations.add(m_serialized)
 
 
-def test_root_atom_independence(testfiles):
+def test_root_atom_independence(testfile):
     """
     Terephthalic acid reveals why exhaustive permutation of partitions
     (CCAP step in Ivaanciuc, https://doi.org/10.1002/9783527618279.ch7a) is
@@ -69,7 +68,7 @@ def test_root_atom_independence(testfiles):
     neighbors from the same partition (see graph of
     terephthalic acid in conjunction with output of failed test).
     """
-    m = graph_from_molfile(testfiles)
+    m = graph_from_file(testfile)
     m_canon = canonicalize_molecule(m, 0)
     for root_atom in range(1, m.number_of_nodes()):
         assert m_canon.edges == canonicalize_molecule(m, root_atom).edges

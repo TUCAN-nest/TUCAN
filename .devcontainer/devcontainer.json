@@ -20,6 +20,7 @@
 		"ms-python.python",
 		"robbowen.synthwave-vscode",
 		"ms-python.vscode-pylance",
+        "KevinRose.vsc-python-indent",
         "streetsidesoftware.code-spell-checker"
 		// "rebornix.Ruby",
 		// "misogi.ruby-rubocop"

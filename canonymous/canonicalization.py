@@ -1,4 +1,4 @@
-from canonymous.visualization import print_molecule
+from canonymous.visualization import print_molecule, draw_molecules
 from canonymous.element_properties import ELEMENT_PROPS
 from operator import gt, lt, eq
 from collections import deque, Counter
@@ -208,11 +208,16 @@ def _relabel_molecule(m, old_labels, new_labels):
 
 def partition_molecule_recursively(m, show_steps=False):
     m_sorted = _sort_molecule_by_attribute(m, "partition")
-    if show_steps:
-        print_molecule(m_sorted, "refined partitions")
     current_partitions = list(nx.get_node_attributes(m, "partition").values())
     updated_partitions = [0]
     n_nodes = m.number_of_nodes()
+    if show_steps:  # TODO: yield refined molecules instead of visualizing them
+        print_molecule(m_sorted, "refined partitions")
+        draw_molecules(
+            [m_sorted],
+            [f"refined to {len(set(current_partitions))} partitions"],
+            highlight="partition",
+        )
     for i in range(n_nodes - 1):
         j = i + 1
         partitions_i = _attribute_sequence(i, m_sorted, "partition")
@@ -255,6 +260,10 @@ def assign_canonical_labels(
             neighbor_traversal_order.extend(sorted(neighbors_this_priority))
 
         m.nodes[a]["explored"] = True
+        # neighbor_partitions = [partitions[a] for a in neighbor_traversal_order]
+        # if len(neighbor_partitions) != len(set(neighbor_partitions)):
+        #     print(f"Cannot branch deterministically from {a}.")
+        # assert len(neighbor_partitions) == len(set(neighbor_partitions)), f"Cannot branch deterministically from {a}."
         for n in neighbor_traversal_order:
             atom_queue.insert(0, n)
 

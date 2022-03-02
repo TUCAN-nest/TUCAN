@@ -229,7 +229,11 @@ def refine_partitions(m):
 
 
 def assign_canonical_labels(
-    m, root_idx, traversal_priorities=[lt, gt, eq], show_traversal_order=False
+    m,
+    root_idx,
+    traversal_priorities=[lt, gt, eq],
+    enforce_deterministic_branching=False,
+    show_traversal_order=False,
 ):
     partitions = m.nodes.data("partition")
     labels_by_partition = _labels_by_partition(m)
@@ -254,10 +258,17 @@ def assign_canonical_labels(
             neighbor_traversal_order.extend(sorted(neighbors_this_priority))
 
         m.nodes[a]["explored"] = True
-        # neighbor_partitions = [partitions[a] for a in neighbor_traversal_order]
-        # if len(neighbor_partitions) != len(set(neighbor_partitions)):
-        #     print(f"Cannot branch deterministically from {a}.")
-        # assert len(neighbor_partitions) == len(set(neighbor_partitions)), f"Cannot branch deterministically from {a}."
+
+        if enforce_deterministic_branching:
+            neighbor_partitions = [
+                partitions[a]
+                for a in neighbor_traversal_order
+                if (len(list(m.neighbors(a))) > 1) and (not m.nodes[a]["explored"])
+            ]  # non-terminal neighbors only
+            assert len(neighbor_partitions) == len(
+                set(neighbor_partitions)
+            ), f"Cannot branch deterministically from node {a}."
+
         for n in neighbor_traversal_order:
             atom_queue.insert(0, n)
 

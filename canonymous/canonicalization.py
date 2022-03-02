@@ -1,4 +1,3 @@
-from canonymous.visualization import print_molecule, draw_molecules
 from canonymous.element_properties import ELEMENT_PROPS
 from operator import gt, lt, eq
 from collections import deque, Counter
@@ -155,8 +154,9 @@ def _add_invariant_code(m):
 
 def partition_molecule_by_attribute(m, attribute, include_neighbors=True):
     m_sorted = _sort_molecule_by_attribute(m, attribute)
-    current_partition = 0
-    for i in range(m_sorted.number_of_nodes() - 1):
+    updated_partitions = [0]
+    n_nodes = m.number_of_nodes()
+    for i in range(n_nodes - 1):
         j = i + 1
         attributes_i = (
             _attribute_sequence(i, m_sorted, attribute)
@@ -168,9 +168,13 @@ def partition_molecule_by_attribute(m, attribute, include_neighbors=True):
             if include_neighbors
             else m_sorted.nodes[j][attribute]
         )
+        current_partition = updated_partitions[-1]
         if attributes_i != attributes_j:
             current_partition += 1
-        m_sorted.nodes[j]["partition"] = current_partition
+        updated_partitions.append(current_partition)
+    nx.set_node_attributes(
+        m_sorted, dict(zip(range(n_nodes), updated_partitions)), "partition"
+    )
     return m_sorted
 
 
@@ -206,32 +210,22 @@ def _relabel_molecule(m, old_labels, new_labels):
     return m_sorted
 
 
-def partition_molecule_recursively(m, show_steps=False):
-    m_sorted = _sort_molecule_by_attribute(m, "partition")
-    current_partitions = list(nx.get_node_attributes(m, "partition").values())
-    updated_partitions = [0]
-    n_nodes = m.number_of_nodes()
-    if show_steps:  # TODO: yield refined molecules instead of visualizing them
-        print_molecule(m_sorted, "refined partitions")
-        draw_molecules(
-            [m_sorted],
-            [f"refined to {len(set(current_partitions))} partitions"],
-            highlight="partition",
-        )
-    for i in range(n_nodes - 1):
-        j = i + 1
-        partitions_i = _attribute_sequence(i, m_sorted, "partition")
-        partitions_j = _attribute_sequence(j, m_sorted, "partition")
-        current_partition = updated_partitions[-1]
-        if partitions_i != partitions_j:
-            current_partition += 1
-        updated_partitions.append(current_partition)
-    if current_partitions == updated_partitions:
-        return m_sorted
-    nx.set_node_attributes(
-        m_sorted, dict(zip(range(n_nodes), updated_partitions)), "partition"
+def refine_partitions(m):
+    current_partitions = list(
+        nx.get_node_attributes(
+            _sort_molecule_by_attribute(m, "partition"), "partition"
+        ).values()
     )
-    return partition_molecule_recursively(m_sorted, show_steps=show_steps)
+    m_refined = partition_molecule_by_attribute(m, "partition")
+    refined_partitions = list(nx.get_node_attributes(m_refined, "partition").values())
+
+    while current_partitions != refined_partitions:
+        yield m_refined
+        current_partitions = refined_partitions
+        m_refined = partition_molecule_by_attribute(m_refined, "partition")
+        refined_partitions = list(
+            nx.get_node_attributes(m_refined, "partition").values()
+        )
 
 
 def assign_canonical_labels(
@@ -287,9 +281,8 @@ def canonicalize_molecule(m, root_idx=0):
     m_partitioned_by_invariant_code = partition_molecule_by_attribute(
         m, "invariant_code"
     )
-    m_partitioned = partition_molecule_recursively(
-        m_partitioned_by_invariant_code, show_steps=False
-    )
+    m_refined = list(refine_partitions(m_partitioned_by_invariant_code))
+    m_partitioned = m_refined[-1] if m_refined else m_partitioned_by_invariant_code
     canonical_labels = assign_canonical_labels(m_partitioned, root_idx)
     return nx.relabel_nodes(m_partitioned, canonical_labels, copy=True)
 

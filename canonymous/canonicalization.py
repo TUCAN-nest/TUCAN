@@ -241,6 +241,9 @@ def assign_canonical_labels(
     canonical_labels = {}
     nx.set_node_attributes(m, False, "explored")
 
+    if enforce_deterministic_branching:
+        partitions_to_permute = set()
+
     while atom_queue:
         a = atom_queue.pop()
         if m.nodes[a]["explored"]:
@@ -265,14 +268,24 @@ def assign_canonical_labels(
                 for a in neighbor_traversal_order
                 if (len(list(m.neighbors(a))) > 1) and (not m.nodes[a]["explored"])
             ]  # non-terminal neighbors only
-            assert len(neighbor_partitions) == len(
-                set(neighbor_partitions)
-            ), f"Cannot branch deterministically from node {a}."
+            duplicate_partitions = [
+                p for p in neighbor_partitions if neighbor_partitions.count(p) > 1
+            ]
+            partitions_to_permute.update(duplicate_partitions)
 
         for n in neighbor_traversal_order:
             atom_queue.insert(0, n)
 
     nx.set_node_attributes(m, False, "explored")
+
+    if enforce_deterministic_branching:
+        n_partitions = len(set(dict(partitions).values()))
+        n_partitions_to_permute = len(partitions_to_permute)
+        assert not partitions_to_permute, (
+            f"Could branch deterministically to {n_partitions - n_partitions_to_permute}/{n_partitions} partition(s);"
+            f" {n_partitions_to_permute}/{n_partitions} partition(s) need to be permuted: {partitions_to_permute}."
+        )
+
     return canonical_labels
 
 

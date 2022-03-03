@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 
 
-def _draw_networkx_graph(m, ax, highlight):
+def _draw_networkx_graph(m, ax, labels, highlight):
     highlight_colors = list(nx.get_node_attributes(m, highlight).values())
     node_size = 1 / m.order() * 10000
     nx.draw_kamada_kawai(
@@ -13,12 +13,15 @@ def _draw_networkx_graph(m, ax, highlight):
         cmap="rainbow",
         alpha=0.5,
         with_labels=True,
+        labels=labels,
         font_weight="heavy",
         ax=ax,
     )
 
 
-def draw_molecules(m_list, caption_list, highlight="atomic_number", title=""):
+def draw_molecules(
+    m_list, caption_list, labels=None, highlight="atomic_number", title=""
+):
     """Draw molecule(s).
 
     Parameters
@@ -34,7 +37,7 @@ def draw_molecules(m_list, caption_list, highlight="atomic_number", title=""):
     fig.suptitle(title)
     for i, m in enumerate(m_list):
         ax = fig.add_subplot(1, n_molecules, i + 1, title=caption_list[i])
-        _draw_networkx_graph(m, ax, highlight)
+        _draw_networkx_graph(m, ax, labels, highlight)
 
 
 def print_molecule(m, caption=""):

@@ -6,11 +6,11 @@ Etymology: TUCAN stands for "<i>tu canonicalización</i>" since we hope that it 
 
 Credits:
 
-Jan C. Brammer (RWTH Aachen) - main programming<br>
+Jan C. Brammer (RWTH Aachen) - main programming & documentation<br>
 Claudia Kellner (Universität Würzburg) - molecule test set<br>
 Alexander Hoffmann (Universität Würzburg) - molecule test set<br>
 Sonja Herres-Pawlis (RWTH Aachen) - concept<br>
-Ulrich Schatzschneider (Universität Würzburg) - concept<br>
+Ulrich Schatzschneider (Universität Würzburg) - concept, documentation, and programming<br>
 
 Copyright:
 

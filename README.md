@@ -8,7 +8,7 @@ Credits:
 
 Jan C. Brammer (RWTH Aachen) - main programming & documentation<br>
 Claudia Kellner (Universität Würzburg) - molecule test set<br>
-Alexander Hoffmann (Universität Würzburg) - molecule test set<br>
+Alexander Hoffmann (RWTH Aachen) - molecule test set<br>
 Sonja Herres-Pawlis (RWTH Aachen) - concept<br>
 Ulrich Schatzschneider (Universität Würzburg) - concept, documentation, and programming<br>
 

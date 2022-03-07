@@ -1,17 +1,13 @@
-![TUCAN logo](https://github.com/JanCBrammer/nInChI/blob/main/tucan_logo.png)
+![TUCAN logo](https://github.com/JanCBrammer/nInChI/blob/main/logo.png)
 
-<b>TUCAN - A molecular identifier and descriptor for all domains of chemistry</b>
+TUCAN[^1] - A molecular identifier and descriptor for all domains of chemistry
 
-Etymology: TUCAN stands for "<i>tu canonicalización</i>" since we hope that it will be of use to you to canonicalize your molecules. And besides that, the tucán is a friendly bird with a colorful look which captures everybodies attention, much like we expect this software will: https://en.wikipedia.org/wiki/Toco_toucan  
+Contributors:
 
-Credits:
+* Jan C. Brammer (RWTH Aachen) - software development and documentation
+* Claudia Kellner (Universität Würzburg) - molecule test set
+* Alexander Hoffmann (RWTH Aachen) - molecule test set
+* Sonja Herres-Pawlis (RWTH Aachen) - concept
+* Ulrich Schatzschneider (Universität Würzburg) - concept, documentation, and software development
 
-Jan C. Brammer (RWTH Aachen) - main programming & documentation<br>
-Claudia Kellner (Universität Würzburg) - molecule test set<br>
-Alexander Hoffmann (RWTH Aachen) - molecule test set<br>
-Sonja Herres-Pawlis (RWTH Aachen) - concept<br>
-Ulrich Schatzschneider (Universität Würzburg) - concept, documentation, and programming<br>
-
-Copyright:
-
-CC BY-SA 2021-2022
+[^1]:Etymology: TUCAN stands for **tu**ple **can**onicalization, since we're using 2-tuples to represent the bonds of our canonicalized molecules. Besides, [WikiPedia informs us](https://en.wikipedia.org/wiki/Toco_toucan) that in the tucán's native parlance, "_tu canonicalización_" expresses our hope that this software will help you canonicalize your molecules.

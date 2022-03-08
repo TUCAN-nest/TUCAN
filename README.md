@@ -1,14 +1,14 @@
-<img src="https://github.com/JanCBrammer/nInChI/raw/main/logo.png" alt="logo" style="width:600px;"/>
-
+<img src="https://github.com/JanCBrammer/nInChI/raw/main/logo.png" alt="logo" style="width:400px;"/>
 
 TUCAN[^1] - A molecular identifier and descriptor for all domains of chemistry
 
-Contributors:
+Have a look at our [demo notebook](https://github.com/JanCBrammer/nInChI/raw/main/demo.ipynb) to see TUCAN at work.
 
-* Jan C. Brammer (RWTH Aachen) - software development and documentation
+Contributors:
 * Claudia Kellner (Universität Würzburg) - molecule test set
 * Alexander Hoffmann (RWTH Aachen) - molecule test set
 * Sonja Herres-Pawlis (RWTH Aachen) - concept
 * Ulrich Schatzschneider (Universität Würzburg) - concept, documentation, and software development
+* Jan C. Brammer (RWTH Aachen) - software development and documentation
 
-[^1]:Etymology: TUCAN stands for **tu**ple **can**onicalization, since we're using 2-tuples to represent the bonds of our canonicalized molecules. Besides, [WikiPedia informs us](https://en.wikipedia.org/wiki/Toco_toucan) that in the tucán's native parlance, "_tu canonicalización_" expresses our hope that this software will help you canonicalize your molecules.
+[^1]:TUCAN stands for **tu**ple **can**onicalization, since we're using 2-tuples to represent the bonds of our canonicalized molecules. Besides, [Wikipedia informs us](https://en.wikipedia.org/wiki/Toco_toucan) that in the tucán's native parlance, "_tu canonicalización_" expresses our hope that this software will help you canonicalize your molecules.

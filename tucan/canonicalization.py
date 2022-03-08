@@ -1,4 +1,4 @@
-from canonymous.element_properties import ELEMENT_PROPS
+from tucan.element_properties import ELEMENT_PROPS
 from operator import gt, lt, eq
 from collections import deque, Counter
 import networkx as nx

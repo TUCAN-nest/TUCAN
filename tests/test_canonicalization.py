@@ -1,6 +1,6 @@
 """Run tests from root of repository with `python -m pytest -v`"""
 
-from canonymous.canonicalization import (
+from tucan.canonicalization import (
     graph_from_file,
     canonicalize_molecule,
     permute_molecule,

@@ -1,7 +1,7 @@
 import pytest
 from pathlib import Path
 from networkx.algorithms.components import is_connected
-from canonymous.canonicalization import graph_from_file
+from tucan.canonicalization import graph_from_file
 
 
 def pytest_addoption(parser):

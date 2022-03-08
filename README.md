@@ -2,7 +2,7 @@
 
 TUCAN[^1] - A molecular identifier and descriptor for all domains of chemistry
 
-Have a look at our [demo notebook](https://github.com/JanCBrammer/nInChI/raw/main/demo.ipynb) to see TUCAN at work.
+Have a look at our [demo notebook](https://github.com/JanCBrammer/nInChI/blob/main/demo.ipynb) to see TUCAN at work.
 
 Contributors:
 * Claudia Kellner (Universität Würzburg) - molecule test set

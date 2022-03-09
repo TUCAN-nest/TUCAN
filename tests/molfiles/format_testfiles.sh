@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Need to use quotation marks oround paths since they can contain spaces.
+# Need to use quotation marks around paths since they can contain spaces.
 
 for mol2path in ./Data/*/*.mol2 ; do
     mol2file=${mol2path##*/}

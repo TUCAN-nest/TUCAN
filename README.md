@@ -1,4 +1,4 @@
-<img src="https://github.com/JanCBrammer/nInChI/raw/main/tucan_logo.png" alt="logo" style="width:400px;"/>
+<img src="https://github.com/JanCBrammer/nInChI/raw/main/logo.png" alt="logo" style="width:400px;"/>
 
 TUCAN[^1] - A molecular identifier and descriptor for all domains of chemistry
 

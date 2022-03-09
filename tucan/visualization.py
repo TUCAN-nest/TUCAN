@@ -56,7 +56,8 @@ def print_molecule(m, caption=""):
     print(
         tabulate(
             table,
-            tablefmt="fancy_grid",
+            tablefmt="simple",
+            colalign=["left"] * 4,
             headers=[
                 "label",
                 "invariant-code",

@@ -281,10 +281,9 @@ def assign_canonical_labels(
     if enforce_deterministic_branching:
         n_partitions = len(set(dict(partitions).values()))
         n_partitions_to_permute = len(partitions_to_permute)
-        assert not partitions_to_permute, (
-            f"Could branch deterministically to {n_partitions - n_partitions_to_permute}/{n_partitions} partition(s);"
-            f" {n_partitions_to_permute}/{n_partitions} partition(s) need to be permuted: {partitions_to_permute}."
-        )
+        assert (
+            not partitions_to_permute
+        ), f"Couldn't branch determinstically to {n_partitions_to_permute}/{n_partitions} partition(s): {partitions_to_permute}."
 
     return canonical_labels
 

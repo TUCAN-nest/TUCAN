@@ -21,7 +21,8 @@
 		"robbowen.synthwave-vscode",
 		"ms-python.vscode-pylance",
         "KevinRose.vsc-python-indent",
-        "streetsidesoftware.code-spell-checker"
+        "streetsidesoftware.code-spell-checker",
+        "marp-team.marp-vscode"
 		// "rebornix.Ruby",
 		// "misogi.ruby-rubocop"
 	],

@@ -254,7 +254,9 @@ def assign_canonical_labels(
             print(f"Current atom index: {a}.\tRe-labeling to {a_canon}.")
         neighbors = list(m.neighbors(a))
         neighbor_traversal_order = []
-        for priority in traversal_priorities:
+        for priority in reversed(
+            traversal_priorities
+        ):  # reverse to preserve order of traversal priorities in queue
             neighbors_this_priority = [
                 n for n in neighbors if priority(partitions[a], partitions[n])
             ]

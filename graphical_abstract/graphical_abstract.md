@@ -26,7 +26,7 @@ style: |
 
 Initialize the graph and assign to each node a label, a partition, and an invariant-code. The invariant-code captures features of a node with label $i$ and its neighbors (nodes that are connected to $i$ by a single edge). Consider for example, the invariant-code of node `16`. The leading `6` is the atomic number and indicates that the node represents a carbon atom. Further, we can infer that the node is part of two fundamental cycles: `2` and `1`. Note that all nodes carry a trailing `0` in their invariant-codes. The `0`s are placeholders in case a node does not belong to a fundamental cycle. The invariant-code continues with a slash-separated list of $i$'s neighbors.
 
-![](./initial.png)
+![](./initial.svg)
 </div>
 <div>
 
@@ -64,7 +64,7 @@ Initialize the graph and assign to each node a label, a partition, and an invari
 
 If two nodes have identical invariant-codes, put them in the same partition.
 
-![](./partitioned.png)
+![](./partitioned.svg)
 </div>
 <div>
 
@@ -98,15 +98,16 @@ If two nodes have identical invariant-codes, put them in the same partition.
 
 
 # Refine partitions
+
 Refine the partitions by applying the 1-dimensional Weisfeiler-Lehman algorithm$^1$:
 
-> Assign nodes $i$ and $j$ to different partitions iff $i$ and $j$ are connected to different multisets of partitions. Repeat this until no node can be assigned to a new partition anymore. 
+Assign nodes $i$ and $j$ to different partitions iff $i$ and $j$ are connected to different multisets of partitions. Repeat this until no node can be assigned to a new partition anymore. 
 
 For example, in the left graph, consider the nodes $0$ through $9$ from the purple partition. $\{2,6,8,9\}$ are connected to the mint-green partition, whereas $\{0,1,3,4,5,7\}$ are connected to the blue partition. Therefore, we can split the purple partition into two new partitions, purple and blue, as shown in the middle graph.
 
 Likewise, consider the blue partition in the left graph. Node $10$ is connected to the purple and blue partition, whereas $\{11, 12\}$ are connected to the purple, blue, and mint-green partition. We can split the blue partition as shown in the middle graph.
 
-![](./refined.png)
+![](./refined.svg)
 
 
 ---
@@ -160,7 +161,7 @@ $i(P):j$ means "swap node $i$ from partition $P$ against node $j$" (note that sw
                     ...                       ...
 ```
 
-![](./canonicalized.png)
+![](./canonicalized.svg)
 
 
 </div>

@@ -26,8 +26,10 @@ def m(request):
 
 def test_permutation(m):
     # Enforce permutation for graphs with at least 2 edges that aren't fully connected (i.e., complete).
-    if m.number_of_edges() <= 1 or nx.density(m) == 1:
-        return
+    if m.number_of_edges() <= 1:
+        pytest.skip("Skipping graph with less than two edges.")
+    if nx.density(m) == 1:
+        pytest.skip("Skipping fully connected graph.")
     permutation_seed = 0.42
     m_permu = permute_molecule(m, random_seed=permutation_seed)
     assert m.edges != m_permu.edges
@@ -57,15 +59,6 @@ def test_bijection():
 
 
 def test_root_atom_independence(m):
-    """
-    Terephthalic acid reveals why exhaustive permutation of partitions
-    (CCAP step in Ivaanciuc, https://doi.org/10.1002/9783527618279.ch7a) is
-    necessary.
-    However, contrary to Ivanciuc's assertion, not all partitions must be
-    permuted. Only those partitions must be permuted that have multiple
-    neighbors from the same partition (see graph of
-    terephthalic acid in conjunction with output of failed test).
-    """
     m_canon = canonicalize_molecule(m, 0)
     for root_atom in range(1, m.number_of_nodes()):
         assert m_canon.edges == canonicalize_molecule(m, root_atom).edges

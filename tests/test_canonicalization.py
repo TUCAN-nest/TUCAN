@@ -1,5 +1,3 @@
-"""Run tests from root of repository with `python -m pytest -v`"""
-
 from tucan.canonicalization import (
     graph_from_file,
     canonicalize_molecule,
@@ -9,19 +7,6 @@ from tucan.canonicalization import (
 import networkx as nx
 import random
 import pytest
-
-
-def idtestfile(m):
-    """Generate a test ID."""
-    return m.stem
-
-
-# pytest.testset is configured based on command-line option in conftest.py.
-@pytest.fixture(
-    params=pytest.testset, ids=idtestfile
-)  # automatically runs the test(s) using this fixture on all molecules in `params`
-def m(request):
-    return graph_from_file(request.param)
 
 
 def test_permutation(m):

@@ -7,6 +7,7 @@ from tucan.canonicalization import (
 import networkx as nx
 import random
 import pytest
+from pathlib import Path
 
 
 def test_permutation(m):
@@ -47,3 +48,26 @@ def test_root_atom_independence(m):
     m_canon = canonicalize_molecule(m, 0)
     for root_atom in range(1, m.number_of_nodes()):
         assert m_canon.edges == canonicalize_molecule(m, root_atom).edges
+
+
+@pytest.mark.parametrize(
+    "m, expected_serialization",
+    [
+        (
+            "ferrocene",
+            "C10H10Fe/1-11/2-12/3-13/4-14/5-15/6-16/7-17/8-18/9-19/10-20/11-12/11-18/11-21/12-20/12-21/13-14/13-15/13-21/14-16/14-21/15-17/15-21/16-17/16-21/17-21/18-19/18-21/19-20/19-21/20-21",
+        ),
+        (
+            "bipyridine",
+            "C10H8N2/1-9/2-10/3-11/4-15/5-12/6-13/7-14/8-16/9-10/9-11/10-15/11-17/12-13/12-14/13-16/14-18/15-19/16-20/17-18/17-19/18-20",
+        ),
+        (
+            "cf3alkyne",
+            "C6H5F3O2/1-6/2-6/3-6/4-9/5-9/6-9/7-8/7-10/8-11/9-13/10-12/10-13/11-14/11-15/11-16"
+        )
+    ],
+)
+def test_regression(m, expected_serialization):
+    m = graph_from_file((Path(f"tests/molfiles/{m}/{m}.mol")))
+    m_serialized = serialize_molecule(canonicalize_molecule(m, 0))
+    assert m_serialized == expected_serialization

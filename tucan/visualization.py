@@ -43,7 +43,7 @@ def draw_molecules(
 def print_molecule(m, caption=""):
     print(caption)
     table = []
-    for atom in m.nodes():
+    for atom in sorted(m.nodes()):
         invariant_code = m.nodes[atom]["invariant_code"]
         partition = m.nodes[atom]["partition"]
         neighbors = [

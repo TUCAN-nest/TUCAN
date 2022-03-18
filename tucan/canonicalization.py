@@ -199,14 +199,14 @@ def partition_molecule_by_attribute(m, attribute, include_neighbors=True):
 def _sort_molecule_by_attribute(m, attribute):
     """Sort atoms by attribute."""
     attr_sequence = [_attribute_sequence(atom, m, attribute) for atom in m]
-    labels = list(range(m.number_of_nodes()))
     attr_with_labels = [
-        (i, j) for i, j in zip(attr_sequence, labels)
+        (i, j) for i, j in zip(attr_sequence, m.nodes())
     ]  # [(A, 0), (C, 1), (B, 2)]
     sorted_attr, labels_sorted_by_attr = zip(
         *sorted(attr_with_labels)
     )  # (A, B, C), (0, 2, 1)
-    return _relabel_molecule(m, labels_sorted_by_attr, labels)
+    return _relabel_molecule(m, labels_sorted_by_attr,
+                             list(range(m.number_of_nodes())))
 
 
 def _attribute_sequence(atom, m, attribute):
@@ -219,13 +219,7 @@ def _attribute_sequence(atom, m, attribute):
 
 def _relabel_molecule(m, old_labels, new_labels):
     """Relabel the atoms of a molecular graph."""
-    m_relabeled = nx.relabel_nodes(m, dict(zip(old_labels, new_labels)))
-    # In the NetworkX Graph datastructure, the relabeled nodes don't occur in
-    # increasing order yet. This is why we change the node order now.
-    m_sorted = nx.Graph()
-    m_sorted.add_nodes_from(sorted(m_relabeled.nodes(data=True)))
-    m_sorted.add_edges_from(m_relabeled.edges(data=True))
-    return m_sorted
+    return nx.relabel_nodes(m, dict(zip(old_labels, new_labels)), copy=True)
 
 
 def refine_partitions(m):

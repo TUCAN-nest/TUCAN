@@ -107,7 +107,7 @@ For example, in the left graph, consider the nodes $0$ through $9$ from the purp
 
 Likewise, consider the blue partition in the left graph. Node $10$ is connected to the purple and blue partition, whereas $\{11, 12\}$ are connected to the purple, blue, and mint-green partition. We can split the blue partition as shown in the middle graph.
 
-![](./refined.svg)
+![](./refined_summary.svg)
 
 
 ---
@@ -161,7 +161,7 @@ $i(P):j$ means "swap node $i$ from partition $P$ against node $j$" (note that sw
                     ...                       ...
 ```
 
-![](./canonicalized.svg)
+![](./canonicalized_summary.svg)
 
 
 </div>

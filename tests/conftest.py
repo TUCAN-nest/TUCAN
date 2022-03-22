@@ -3,7 +3,7 @@
 import pytest
 from pathlib import Path
 from networkx.algorithms.components import is_connected
-from tucan.canonicalization import graph_from_file
+from tucan.io import graph_from_file
 
 
 def pytest_addoption(parser):
@@ -29,6 +29,7 @@ def pytest_configure(config):
 
     class Plugin:
         """https://github.com/pytest-dev/pytest/issues/5027"""
+
         def idtestfile(m):
             """Generate a test ID."""
             return m.stem

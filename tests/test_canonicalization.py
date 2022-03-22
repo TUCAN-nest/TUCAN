@@ -1,9 +1,9 @@
 from tucan.canonicalization import (
-    graph_from_file,
     canonicalize_molecule,
     permute_molecule,
     serialize_molecule,
 )
+from tucan.io import graph_from_file
 import networkx as nx
 import random
 import pytest
@@ -63,8 +63,8 @@ def test_root_atom_independence(m):
         ),
         (
             "cf3alkyne",
-            "C6H5F3O2/1-6/2-6/3-6/4-9/5-9/6-9/7-8/7-10/8-11/9-13/10-12/10-13/11-14/11-15/11-16"
-        )
+            "C6H5F3O2/1-6/2-6/3-6/4-9/5-9/6-9/7-8/7-10/8-11/9-13/10-12/10-13/11-14/11-15/11-16",
+        ),
     ],
 )
 def test_regression(m, expected_serialization):

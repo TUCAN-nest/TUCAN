@@ -1,7 +1,7 @@
 import networkx as nx
 from tucan.element_properties import ELEMENT_PROPS
 from tucan.canonicalization import _cycle_memberships, _add_invariant_code
-from openbabel.openbabel import OBConversion, OBMol
+from rdkit import Chem
 from typing import List, Tuple
 
 
@@ -24,13 +24,8 @@ def graph_from_smiles(smiles: str):
 
 
 def _molfile3000_from_smiles(smiles: str):
-    converter = OBConversion()
-    converter.SetInAndOutFormats("smi", "mdl")
-    converter.AddOption("3")
-    mol = OBMol()
-    converter.ReadString(mol, smiles)
-    mol.AddHydrogens()
-    return converter.WriteString(mol)
+    m = Chem.MolFromSmiles(smiles, sanitize=False)
+    return Chem.MolToMolBlock(m, forceV3000=True, includeStereo=False, kekulize=False)
 
 
 def _graph_from_moldata(element_symbols: List[str], bonds: List[Tuple[int]]):

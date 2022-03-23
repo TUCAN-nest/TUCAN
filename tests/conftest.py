@@ -1,4 +1,4 @@
-"""Run tests from root of repository with `python -m pytest -v`"""
+"""Run tests from root of repository with `pytest -v`."""
 
 import pytest
 from pathlib import Path

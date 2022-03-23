@@ -1,0 +1,22 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
+// https://github.com/microsoft/vscode-dev-containers/tree/v0.205.2/containers/docker-existing-dockerfile
+{
+	"name": "TUCAN",
+
+    "image": "mcr.microsoft.com/vscode/devcontainers/python:3.9",
+
+	// Add the IDs of extensions you want installed when the container is created.
+	"extensions": [
+		"ms-toolsai.jupyter",
+		"ms-python.python",
+		"robbowen.synthwave-vscode",
+		"ms-python.vscode-pylance",
+        "KevinRose.vsc-python-indent",
+        "streetsidesoftware.code-spell-checker",
+        "marp-team.marp-vscode",
+        "bungcip.better-toml",
+	],
+
+	"postCreateCommand": "pip install -e .[dev,smiles]",
+
+}

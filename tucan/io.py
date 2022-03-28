@@ -1,6 +1,11 @@
 import networkx as nx
+import random
 from tucan.element_properties import ELEMENT_PROPS
-from tucan.canonicalization import _cycle_memberships, _add_invariant_code
+from tucan.canonicalization import (
+    _cycle_memberships,
+    _add_invariant_code,
+    _relabel_molecule,
+)
 from rdkit import Chem
 from typing import List, Tuple
 
@@ -112,3 +117,27 @@ def _parse_dimacs(filecontent: str):
         (int(l[1]) - 1, int(l[2]) - 1) for l in lines[1:]
     ]  # make bond-indices zero-based
     return element_symbols, bonds
+
+
+def permute_molecule(m, random_seed=1.0):
+    """Randomly permute the atom-labels of a molecular graph.
+
+    Parameters
+    ----------
+    random_seed: float
+        In [0.0, 1.0).
+    """
+    labels = m.nodes()
+    permuted_labels = list(range(m.number_of_nodes()))
+    # Enforce permutation for graphs with at least 2 edges that aren't fully connected (i.e., complete).
+    enforce_permutation = m.number_of_edges() > 1 and nx.density(m) != 1
+    random.seed(
+        random_seed
+    )  # subsequent calls of random.shuffle(x[, random]) will now use fixed sequence of values for `random` parameter
+    random.shuffle(permuted_labels)
+    m_permu = _relabel_molecule(m, permuted_labels, labels)
+    if enforce_permutation:
+        while m.edges == m_permu.edges:
+            random.shuffle(permuted_labels)
+            m_permu = _relabel_molecule(m, permuted_labels, labels)
+    return m_permu

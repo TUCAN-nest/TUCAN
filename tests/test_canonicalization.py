@@ -1,9 +1,8 @@
 from tucan.canonicalization import (
     canonicalize_molecule,
-    permute_molecule,
     serialize_molecule,
 )
-from tucan.io import graph_from_file
+from tucan.io import graph_from_file, permute_molecule
 import networkx as nx
 import random
 import pytest

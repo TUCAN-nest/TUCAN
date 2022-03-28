@@ -2,8 +2,6 @@ import networkx as nx
 import random
 from tucan.element_properties import ELEMENT_PROPS
 from tucan.canonicalization import (
-    _cycle_memberships,
-    _add_invariant_code,
     _relabel_molecule,
 )
 from rdkit import Chem
@@ -54,7 +52,6 @@ def _graph_from_moldata(element_symbols: List[str], bonds: List[Tuple[int]]):
     nx.set_node_attributes(
         graph, dict(zip(node_labels, atomic_numbers)), "atomic_number"
     )
-    nx.set_node_attributes(graph, _cycle_memberships(graph), "cycle_membership")
     nx.set_node_attributes(graph, 0, "partition")
     _add_invariant_code(graph)
     return graph
@@ -140,6 +137,17 @@ def permute_molecule(m, random_seed=1.0):
         while m.edges == m_permu.edges:
             random.shuffle(permuted_labels)
             m_permu = _relabel_molecule(m, permuted_labels, labels)
-    element_symbols_permu = [e for (i, e) in sorted(m_permu.nodes(data="element_symbol"))]
+    element_symbols_permu = [
+        e for (i, e) in sorted(m_permu.nodes(data="element_symbol"))
+    ]
     edges_permu = m_permu.edges()
     return _graph_from_moldata(element_symbols_permu, edges_permu)
+
+
+def _add_invariant_code(m):
+    """Assign an invariant code to each atom."""
+    atomic_numbers = list(nx.get_node_attributes(m, "atomic_number").values())
+    invariant_codes = list(map(str, atomic_numbers))
+    nx.set_node_attributes(
+        m, dict(zip(range(m.number_of_nodes()), invariant_codes)), "invariant_code"
+    )

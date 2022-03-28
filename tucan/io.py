@@ -140,4 +140,6 @@ def permute_molecule(m, random_seed=1.0):
         while m.edges == m_permu.edges:
             random.shuffle(permuted_labels)
             m_permu = _relabel_molecule(m, permuted_labels, labels)
-    return m_permu
+    element_symbols_permu = [e for (i, e) in sorted(m_permu.nodes(data="element_symbol"))]
+    edges_permu = m_permu.edges()
+    return _graph_from_moldata(element_symbols_permu, edges_permu)

@@ -1,6 +1,8 @@
 from tabulate import tabulate
 import matplotlib.pyplot as plt
 import networkx as nx
+import plotly.graph_objects as go
+import plotly.subplots as sp
 
 
 def _draw_networkx_graph(m, ax, labels, highlight):
@@ -19,8 +21,54 @@ def _draw_networkx_graph(m, ax, labels, highlight):
     )
 
 
+def _draw_networkx_graph_3d(m, highlight, fig, col):
+    coords = nx.kamada_kawai_layout(m, dim=3)
+    highlight_colors = list(nx.get_node_attributes(m, highlight).values())
+
+    # Plotly requires separate node coordinates...
+    x_nodes = [coords[key][0] for key in coords.keys()]
+    y_nodes = [coords[key][1] for key in coords.keys()]
+    z_nodes = [coords[key][2] for key in coords.keys()]
+    # ...as well as tuples of node coordinated that define edges.
+    x_edges = []
+    y_edges = []
+    z_edges = []
+    for edge in m.edges():
+        x_edges.extend([coords[edge[0]][0], coords[edge[1]][0], None])
+        y_edges.extend([coords[edge[0]][1], coords[edge[1]][1], None])
+        z_edges.extend([coords[edge[0]][2], coords[edge[1]][2], None])
+
+    trace_edges = go.Scatter3d(
+        x=x_edges,
+        y=y_edges,
+        z=z_edges,
+        mode="lines",
+        line=dict(color="black", width=2),
+        hoverinfo="none",
+    )
+
+    trace_nodes = go.Scatter3d(
+        x=x_nodes,
+        y=y_nodes,
+        z=z_nodes,
+        mode="markers+text",
+        marker=dict(
+            symbol="circle",
+            size=7,
+            color=highlight_colors,
+            colorscale="turbo",
+            opacity=0.5,
+        ),
+        text=list(map(str, m.nodes())),
+        hoverinfo="none",
+        textfont=dict(size=7.5),
+    )
+
+    fig.add_traces([trace_edges, trace_nodes], rows=1, cols=col)
+
+
 def draw_molecules(
-    m_list, caption_list, labels=None, highlight="atomic_number", title=""
+    m_list, caption_list, labels=None, highlight="atomic_number", title="", dim=2
 ):
     """Draw molecule(s).
 
@@ -28,16 +76,40 @@ def draw_molecules(
     ----------
     highlight: str
         Color atoms by "atomic_number" (default) or "partition".
+    dim: int
+        Plot in "2" (default) or "3" dimensions.
     """
     if highlight not in ["atomic_number", "partition"]:
         print("Please select one of {'partition', 'atomic_number'} for `highlight`.")
         return
     n_molecules = len(m_list)
-    fig = plt.figure(figsize=(n_molecules * 6, 6))
-    fig.suptitle(title)
-    for i, m in enumerate(m_list):
-        ax = fig.add_subplot(1, n_molecules, i + 1, title=caption_list[i])
-        _draw_networkx_graph(m, ax, labels, highlight)
+
+    if dim == 2:
+        fig = plt.figure(figsize=(n_molecules * 6, 6))
+        fig.suptitle(title)
+        for i, m in enumerate(m_list):
+            ax = fig.add_subplot(1, n_molecules, i + 1, title=caption_list[i])
+            _draw_networkx_graph(m, ax, labels, highlight)
+    elif dim == 3:
+        fig = sp.make_subplots(
+            rows=1,
+            cols=n_molecules,
+            subplot_titles=caption_list,
+            specs=[[{"is_3d": True}] * n_molecules],
+            horizontal_spacing=0.1 / n_molecules,
+        )
+        for i, m in enumerate(m_list):
+            _draw_networkx_graph_3d(m, highlight, fig, i + 1)
+        fig.update_layout(showlegend=False, title=title)
+        fig.update_scenes(
+            patch=dict(
+                xaxis=dict(visible=False),
+                yaxis=dict(visible=False),
+                zaxis=dict(visible=False),
+                camera_eye=dict(x=1, y=1, z=1),
+            ),
+        )
+        fig.show()
 
 
 def print_molecule(m, caption=""):

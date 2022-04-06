@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 import plotly.subplots as sp
 
 
-def _draw_networkx_graph(m, ax, labels, highlight):
+def _draw_networkx_graph(m, highlight, labels, ax):
     highlight_colors = list(nx.get_node_attributes(m, highlight).values())
     node_size = 1 / m.order() * 10000
     nx.draw_kamada_kawai(
@@ -21,9 +21,10 @@ def _draw_networkx_graph(m, ax, labels, highlight):
     )
 
 
-def _draw_networkx_graph_3d(m, highlight, fig, col):
+def _draw_networkx_graph_3d(m, highlight, labels, fig, col):
     coords = nx.kamada_kawai_layout(m, dim=3)
     highlight_colors = list(nx.get_node_attributes(m, highlight).values())
+    labels = list(map(str, m.nodes())) if not labels else labels
 
     # Plotly requires separate node coordinates...
     x_nodes = [coords[key][0] for key in coords.keys()]
@@ -59,7 +60,7 @@ def _draw_networkx_graph_3d(m, highlight, fig, col):
             colorscale="turbo",
             opacity=0.5,
         ),
-        text=list(map(str, m.nodes())),
+        text=labels,
         hoverinfo="none",
         textfont=dict(size=7.5),
     )
@@ -89,7 +90,7 @@ def draw_molecules(
         fig.suptitle(title)
         for i, m in enumerate(m_list):
             ax = fig.add_subplot(1, n_molecules, i + 1, title=caption_list[i])
-            _draw_networkx_graph(m, ax, labels, highlight)
+            _draw_networkx_graph(m, highlight, labels, ax)
     elif dim == 3:
         fig = sp.make_subplots(
             rows=1,
@@ -99,7 +100,7 @@ def draw_molecules(
             horizontal_spacing=0.1 / n_molecules,
         )
         for i, m in enumerate(m_list):
-            _draw_networkx_graph_3d(m, highlight, fig, i + 1)
+            _draw_networkx_graph_3d(m, highlight, labels, fig, i + 1)
         fig.update_layout(showlegend=False, title=title)
         fig.update_scenes(
             patch=dict(

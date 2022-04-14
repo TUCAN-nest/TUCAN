@@ -17,6 +17,6 @@
         "bungcip.better-toml",
 	],
 
-	"postCreateCommand": "pip install -e .[dev,smiles]",
+	"postCreateCommand": "pip install -e .[dev,io,drawing]",
 
 }

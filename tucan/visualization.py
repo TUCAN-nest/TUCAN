@@ -57,7 +57,7 @@ def _draw_networkx_graph_3d(m, highlight, labels, fig, col):
             symbol="circle",
             size=7,
             color=highlight_colors,
-            colorscale="turbo",
+            colorscale="plotly3_r",  # turbo
             opacity=0.5,
         ),
         text=labels,
@@ -123,7 +123,7 @@ def print_molecule(m, caption=""):
             (n, m.nodes[n]["invariant_code"], m.nodes[n]["partition"])
             for n in m.neighbors(atom)
         ]
-        neighbors = sorted(neighbors, key=lambda x: x[1], reverse=True)
+        neighbors = sorted(neighbors, key=lambda x: x[2], reverse=True)
         neighbors = ", ".join([f"({i}, {c}, {p})" for i, c, p in neighbors])
         table.append([atom, invariant_code, partition, neighbors])
     print(
@@ -133,9 +133,9 @@ def print_molecule(m, caption=""):
             colalign=["left"] * 4,
             headers=[
                 "label",
-                "invariant-code",
+                "invariants",
                 "partition",
-                "neighbors (label, invariant-code, partition)",
+                "neighbors (label, invariants, partition)",
             ],
         )
     )

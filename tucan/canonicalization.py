@@ -160,14 +160,13 @@ def serialize_molecule(m):
     """Serialize a molecule."""
     serialization = _sum_formula(m)
     m_sorted_by_atomic_number = _sort_molecule_by_attribute(m, "atomic_number")
-    for edge in sorted(
-        [
-            sorted(map(lambda x: x + 1, edge))
-            for edge in m_sorted_by_atomic_number.edges()
-        ]
-    ):
-        serialization += f"/{edge[0]}-{edge[1]}"
+    for edge in _edge_list(m_sorted_by_atomic_number):
+        serialization += f"/{edge[0] + 1}-{edge[1] + 1}"
     return serialization
+
+
+def _edge_list(m):
+    return sorted([sorted(edge) for edge in m.edges()])
 
 
 def _sum_formula(m):

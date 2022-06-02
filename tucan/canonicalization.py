@@ -1,6 +1,6 @@
-from operator import gt, lt, eq
 from tucan.graph_utils import sort_molecule_by_attribute, attribute_sequence
 import networkx as nx
+from igraph import Graph as iGraph
 
 
 def partition_molecule_by_attribute(m, attribute, include_neighbors=True):
@@ -47,78 +47,29 @@ def refine_partitions(m):
         )
 
 
-def assign_canonical_labels(
-    m,
-    root_idx,
-    traversal_priorities=[lt, gt, eq],
-    enforce_deterministic_branching=False,
-    show_traversal_order=False,
-):
-    partitions = m.nodes.data("partition")
-    labels_by_partition = _labels_by_partition(m)
-    atom_queue = [root_idx]
-    canonical_labels = {}
-    nx.set_node_attributes(m, False, "explored")
+def assign_canonical_labels(m):
+    """Canonicalize node-labels of a graph.
 
-    if enforce_deterministic_branching:
-        partitions_to_permute = set()
+    The canonical labels are computed using the igraph [1] implementation of
+    the "bliss" algorithm [2].
 
-    while atom_queue:
-        a = atom_queue.pop()
-        if m.nodes[a]["explored"]:
-            continue
-        a_canon = labels_by_partition[partitions[a]].pop()
-        canonical_labels[a] = a_canon
-        if show_traversal_order:
-            print(f"Current atom index: {a}.\tRe-labeling to {a_canon}.")
-        neighbors = list(m.neighbors(a))
-        neighbor_traversal_order = []
-        for priority in reversed(
-            traversal_priorities
-        ):  # reverse to preserve order of traversal priorities in queue
-            neighbors_this_priority = [
-                n for n in neighbors if priority(partitions[a], partitions[n])
-            ]
-            neighbor_traversal_order.extend(sorted(neighbors_this_priority))
+    Returns
+    -------
+    dict
+        From old labels (keys) to canonical labels (values).
 
-        m.nodes[a]["explored"] = True
+    References
+    ----------
+    [1] https://igraph.org
+    [2] https://doi.org/10.1137/1.9781611972870.13
+    """
 
-        if enforce_deterministic_branching:
-            neighbor_partitions = [
-                partitions[a]
-                for a in neighbor_traversal_order
-                if (len(list(m.neighbors(a))) > 1) and (not m.nodes[a]["explored"])
-            ]  # non-terminal neighbors only
-            duplicate_partitions = [
-                p for p in neighbor_partitions if neighbor_partitions.count(p) > 1
-            ]
-            partitions_to_permute.update(duplicate_partitions)
+    m_igraph = iGraph.from_networkx(m)
+    old_labels = m_igraph.vs["_nx_name"]
+    partitions = m_igraph.vs["partition"]
+    canonical_labels = m_igraph.canonical_permutation(color=partitions)
 
-        for n in neighbor_traversal_order:
-            atom_queue.insert(0, n)
-
-    nx.set_node_attributes(m, False, "explored")
-
-    if enforce_deterministic_branching:
-        n_partitions = len(set(dict(partitions).values()))
-        n_partitions_to_permute = len(partitions_to_permute)
-        assert (
-            not partitions_to_permute
-        ), f"Couldn't branch determinstically to {n_partitions_to_permute}/{n_partitions} partition(s): {partitions_to_permute}."
-
-    return canonical_labels
-
-
-def _labels_by_partition(m):
-    """Create dictionary of partitions to atom labels."""
-    partitions = set(sorted([v for k, v in m.nodes.data("partition")]))
-    labels_by_partition = {p: set() for p in partitions}
-    for a in m:
-        labels_by_partition[m.nodes[a]["partition"]].add(a)
-    labels_by_partition.update(
-        (k, sorted(list(v), reverse=True)) for k, v in labels_by_partition.items()
-    )
-    return labels_by_partition
+    return dict(zip(old_labels, canonical_labels))
 
 
 def _add_invariant_code(m):
@@ -129,6 +80,7 @@ def _add_invariant_code(m):
         m, dict(zip(range(m.number_of_nodes()), invariant_codes)), "invariant_code"
     )
 
+
 def canonicalize_molecule(m, root_idx=0):
     _add_invariant_code(m)
     m_partitioned_by_invariant_code = partition_molecule_by_attribute(
@@ -136,7 +88,7 @@ def canonicalize_molecule(m, root_idx=0):
     )
     m_refined = list(refine_partitions(m_partitioned_by_invariant_code))
     m_partitioned = m_refined[-1] if m_refined else m_partitioned_by_invariant_code
-    canonical_labels = assign_canonical_labels(m_partitioned, root_idx)
+    canonical_labels = assign_canonical_labels(m_partitioned)
     return nx.relabel_nodes(m_partitioned, canonical_labels, copy=True)
 
 

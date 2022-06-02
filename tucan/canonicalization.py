@@ -121,7 +121,16 @@ def _labels_by_partition(m):
     return labels_by_partition
 
 
+def _add_invariant_code(m):
+    """Assign an invariant code to each atom (mutates graph)."""
+    atomic_numbers = list(nx.get_node_attributes(m, "atomic_number").values())
+    invariant_codes = list(map(str, atomic_numbers))
+    nx.set_node_attributes(
+        m, dict(zip(range(m.number_of_nodes()), invariant_codes)), "invariant_code"
+    )
+
 def canonicalize_molecule(m, root_idx=0):
+    _add_invariant_code(m)
     m_partitioned_by_invariant_code = partition_molecule_by_attribute(
         m, "invariant_code"
     )

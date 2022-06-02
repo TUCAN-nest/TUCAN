@@ -1,21 +1,21 @@
 from operator import gt, lt, eq
-from collections import Counter
+from tucan.graph_utils import sort_molecule_by_attribute, attribute_sequence
 import networkx as nx
 
 
 def partition_molecule_by_attribute(m, attribute, include_neighbors=True):
-    m_sorted = _sort_molecule_by_attribute(m, attribute)
+    m_sorted = sort_molecule_by_attribute(m, attribute)
     updated_partitions = [0]
     n_nodes = m.number_of_nodes()
     for i in range(n_nodes - 1):
         j = i + 1
         attributes_i = (
-            _attribute_sequence(i, m_sorted, attribute)
+            attribute_sequence(i, m_sorted, attribute)
             if include_neighbors
             else m_sorted.nodes[i][attribute]
         )
         attributes_j = (
-            _attribute_sequence(j, m_sorted, attribute)
+            attribute_sequence(j, m_sorted, attribute)
             if include_neighbors
             else m_sorted.nodes[j][attribute]
         )
@@ -29,35 +29,10 @@ def partition_molecule_by_attribute(m, attribute, include_neighbors=True):
     return m_sorted
 
 
-def _sort_molecule_by_attribute(m, attribute):
-    """Sort atoms by attribute."""
-    attr_sequence = [_attribute_sequence(atom, m, attribute) for atom in m]
-    attr_with_labels = [
-        (i, j) for i, j in zip(attr_sequence, m.nodes())
-    ]  # [(A, 0), (C, 1), (B, 2)]
-    sorted_attr, labels_sorted_by_attr = zip(
-        *sorted(attr_with_labels)
-    )  # (A, B, C), (0, 2, 1)
-    return _relabel_molecule(m, labels_sorted_by_attr, list(range(m.number_of_nodes())))
-
-
-def _attribute_sequence(atom, m, attribute):
-    attr_atom = m.nodes[atom][attribute]
-    attr_neighbors = sorted(
-        [m.nodes[n][attribute] for n in m.neighbors(atom)], reverse=True
-    )
-    return [attr_atom] + attr_neighbors
-
-
-def _relabel_molecule(m, old_labels, new_labels):
-    """Relabel the atoms of a molecular graph."""
-    return nx.relabel_nodes(m, dict(zip(old_labels, new_labels)), copy=True)
-
-
 def refine_partitions(m):
     current_partitions = list(
         nx.get_node_attributes(
-            _sort_molecule_by_attribute(m, "partition"), "partition"
+            sort_molecule_by_attribute(m, "partition"), "partition"
         ).values()
     )
     m_refined = partition_molecule_by_attribute(m, "partition")
@@ -154,48 +129,6 @@ def canonicalize_molecule(m, root_idx=0):
     m_partitioned = m_refined[-1] if m_refined else m_partitioned_by_invariant_code
     canonical_labels = assign_canonical_labels(m_partitioned, root_idx)
     return nx.relabel_nodes(m_partitioned, canonical_labels, copy=True)
-
-
-def serialize_molecule(m):
-    """Serialize a molecule."""
-    serialization = _sum_formula(m)
-    m_sorted_by_atomic_number = _sort_molecule_by_attribute(m, "atomic_number")
-    for edge in _edge_list(m_sorted_by_atomic_number):
-        serialization += f"/{edge[0] + 1}-{edge[1] + 1}"
-    return serialization
-
-
-def _edge_list(m):
-    return sorted([sorted(edge) for edge in m.edges()])
-
-
-def _sum_formula(m):
-    """Write the sum formula of a molecule.
-
-    In the sum formula the elements are ordered according to Hill system [1]:
-    1. C
-    2. H
-    3. symbols of remaining elements in alphabetic order (including H in other
-    than carbon compounds)
-
-    References
-    ----------
-    [1] doi:10.1021/ja02046a005
-    """
-    element_counts = Counter(nx.get_node_attributes(m, "element_symbol").values())
-    element_counts = {
-        k: (v if v > 1 else "") for k, v in element_counts.items()
-    }  # remove counts of 1 since those are implicit in sum formula
-    sum_formula = ""
-    carbon_count = element_counts.pop("C", None)
-    if carbon_count:
-        sum_formula += f"C{carbon_count}"
-        hydrogen_count = element_counts.pop("H", None)
-        if hydrogen_count:
-            sum_formula += f"H{hydrogen_count}"
-    for k, v in dict(sorted(element_counts.items())).items():
-        sum_formula += f"{k}{v}"
-    return sum_formula
 
 
 # def bfs_molecule(m, root_idx):

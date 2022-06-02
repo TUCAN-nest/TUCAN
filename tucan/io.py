@@ -1,9 +1,5 @@
 import networkx as nx
-import random
 from tucan.element_properties import ELEMENT_PROPS
-from tucan.canonicalization import (
-    _relabel_molecule,
-)
 from rdkit import Chem
 from typing import List, Tuple
 
@@ -17,13 +13,13 @@ def graph_from_file(filepath):
         element_symbols, bonds = _parse_dimacs(filecontent)
     else:
         raise IOError("Invalid file format, must be one of {.mol, .col}.")
-    return _graph_from_moldata(element_symbols, bonds)
+    return graph_from_moldata(element_symbols, bonds)
 
 
 def graph_from_smiles(smiles: str):
     molfile = _molfile3000_from_smiles(smiles)
     element_symbols, bonds = _parse_molfile3000(molfile)
-    return _graph_from_moldata(element_symbols, bonds)
+    return graph_from_moldata(element_symbols, bonds)
 
 
 def _molfile3000_from_smiles(smiles: str):
@@ -31,7 +27,7 @@ def _molfile3000_from_smiles(smiles: str):
     return Chem.MolToMolBlock(m, forceV3000=True, includeStereo=False, kekulize=False)
 
 
-def _graph_from_moldata(element_symbols: List[str], bonds: List[Tuple[int]]):
+def graph_from_moldata(element_symbols: List[str], bonds: List[Tuple[int]]):
     """Instantiate a NetworkX graph from molecular data.
 
     Parameters
@@ -114,34 +110,6 @@ def _parse_dimacs(filecontent: str):
         (int(l[1]) - 1, int(l[2]) - 1) for l in lines[1:]
     ]  # make bond-indices zero-based
     return element_symbols, bonds
-
-
-def permute_molecule(m, random_seed=1.0):
-    """Randomly permute the atom-labels of a molecular graph.
-
-    Parameters
-    ----------
-    random_seed: float
-        In [0.0, 1.0).
-    """
-    labels = m.nodes()
-    permuted_labels = list(range(m.number_of_nodes()))
-    # Enforce permutation for graphs with at least 2 edges that aren't fully connected (i.e., complete).
-    enforce_permutation = m.number_of_edges() > 1 and nx.density(m) != 1
-    random.seed(
-        random_seed
-    )  # subsequent calls of random.shuffle(x[, random]) will now use fixed sequence of values for `random` parameter
-    random.shuffle(permuted_labels)
-    m_permu = _relabel_molecule(m, permuted_labels, labels)
-    if enforce_permutation:
-        while m.edges == m_permu.edges:
-            random.shuffle(permuted_labels)
-            m_permu = _relabel_molecule(m, permuted_labels, labels)
-    element_symbols_permu = [
-        e for (i, e) in sorted(m_permu.nodes(data="element_symbol"))
-    ]
-    edges_permu = m_permu.edges()
-    return _graph_from_moldata(element_symbols_permu, edges_permu)
 
 
 def _add_invariant_code(m):

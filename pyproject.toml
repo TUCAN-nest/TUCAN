@@ -18,18 +18,18 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = [
-    "notebook",
-    "ipywidgets",
-    "black",
-    "flake8",
-    "pytest"
-]
 io = [
     "rdkit-pypi >=2021.9.5.1"    # reading SMILES
 ]
 drawing = [
-    "plotly"    # interactive 3D drawings
+    "plotly",    # interactive 3D drawings
+    "notebook",
+    "ipywidgets"
+]
+dev = [
+    "black",
+    "flake8",
+    "pytest"
 ]
 
 [tool.pytest.ini_options]

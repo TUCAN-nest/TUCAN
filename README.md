@@ -23,11 +23,11 @@ pip install -e .
 The commands above will only install the minimal set of dependencies that is necessary to use TUCAN. If you want to install the additional development dependencies (testing, linting, support for notebooks), run
 
 ```
-pip install .[dev]
+pip install .[dev,drawing]
 ```
 or
 ```
-pip install git+https://github.com/JanCBrammer/TUCAN.git#egg=tucan[dev]
+pip install git+https://github.com/JanCBrammer/TUCAN.git#egg=tucan[dev,drawing]
 ```
 
 Have a look at the [pyproject.toml](https://github.com/JanCBrammer/TUCAN/blob/main/pyproject.toml) for details regarding the optional dependencies.

@@ -42,12 +42,6 @@ def test_bijection():
         serializations.add(m_serialized)
 
 
-def test_root_atom_independence(m):
-    m_canon = canonicalize_molecule(m, 0)
-    for root_atom in range(1, m.number_of_nodes()):
-        assert m_canon.edges == canonicalize_molecule(m, root_atom).edges
-
-
 @pytest.mark.parametrize(
     "m, expected_serialization",
     [

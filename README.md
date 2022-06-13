@@ -1,3 +1,6 @@
+![CI](https://github.com/JanCBrammer/TUCAN/actions/workflows/ci.yml/badge.svg)
+
+
 <img src="https://github.com/JanCBrammer/nInChI/raw/main/logo.png" alt="logo" style="width:400px;"/>
 
 TUCAN[^1] - A molecular identifier and descriptor for all domains of chemistry

@@ -31,3 +31,12 @@ io = [
 drawing = [
     "plotly"    # interactive 3D drawings
 ]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = """
+    -v
+    --deselect=tests/test_canonicalization.py::test_bijection"""
+testpaths = [
+    "tests",
+]

@@ -1,6 +1,5 @@
 import networkx as nx
 from tucan.element_properties import ELEMENT_PROPS
-from rdkit import Chem
 from typing import List, Tuple
 
 
@@ -14,17 +13,6 @@ def graph_from_file(filepath):
     else:
         raise IOError("Invalid file format, must be one of {.mol, .col}.")
     return graph_from_moldata(element_symbols, bonds)
-
-
-def graph_from_smiles(smiles: str):
-    molfile = _molfile3000_from_smiles(smiles)
-    element_symbols, bonds = _parse_molfile3000(molfile)
-    return graph_from_moldata(element_symbols, bonds)
-
-
-def _molfile3000_from_smiles(smiles: str):
-    m = Chem.MolFromSmiles(smiles, sanitize=False)
-    return Chem.MolToMolBlock(m, forceV3000=True, includeStereo=False, kekulize=False)
 
 
 def graph_from_moldata(element_symbols: List[str], bonds: List[Tuple[int]]):

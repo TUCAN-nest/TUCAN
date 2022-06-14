@@ -128,6 +128,8 @@ element_symbols = [
     "Og",
 ]
 
+atomic_numbers = range(1, len(element_symbols) + 1)
+
 element_colors = [
     "lightgrey",
     "0xD9FFFF",
@@ -251,7 +253,5 @@ element_colors = [
 
 ELEMENT_PROPS = {
     s: {"atomic_number": n, "element_color": c}
-    for s, n, c in zip(
-        element_symbols, range(1, len(element_symbols) + 1), element_colors
-    )
+    for s, n, c in zip(element_symbols, atomic_numbers, element_colors)
 }

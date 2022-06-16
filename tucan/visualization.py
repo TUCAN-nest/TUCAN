@@ -24,7 +24,7 @@ def _draw_networkx_graph(m, highlight, labels, ax):
 def _draw_networkx_graph_3d(m, highlight, labels, fig, col):
     coords = nx.kamada_kawai_layout(m, dim=3)
     highlight_colors = list(nx.get_node_attributes(m, highlight).values())
-    labels = list(map(str, m.nodes())) if not labels else labels
+    labels = list(map(str, list(m.nodes))) if not labels else labels
 
     # Plotly requires separate node coordinates...
     x_nodes = [coords[key][0] for key in coords.keys()]
@@ -116,7 +116,7 @@ def draw_molecules(
 def print_molecule(m, caption=""):
     print(caption)
     table = []
-    for atom in sorted(m.nodes()):
+    for atom in sorted(list(m.nodes)):
         invariant_code = m.nodes[atom]["invariant_code"]
         partition = m.nodes[atom]["partition"]
         neighbors = [

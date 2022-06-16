@@ -36,19 +36,26 @@ def permute_molecule(m, random_seed=1.0):
     random_seed: float
         In [0.0, 1.0).
     """
-    labels = m.nodes()
-    permuted_labels = list(range(m.number_of_nodes()))
-    # Enforce permutation for graphs with at least 2 edges that aren't fully connected (i.e., complete).
-    enforce_permutation = m.number_of_edges() > 1 and nx.density(m) != 1
     random.seed(
         random_seed
     )  # subsequent calls of random.shuffle(x[, random]) will now use fixed sequence of values for `random` parameter
-    random.shuffle(permuted_labels)
-    m_permu = relabel_molecule(m, permuted_labels, labels)
+
+    m_permu = _permute_molecule(m)
+
+    # Enforce permutation for graphs with at least 2 edges that aren't fully connected (i.e., complete).
+    enforce_permutation = m.number_of_edges() > 1 and nx.density(m) != 1
     if enforce_permutation:
         while m.edges == m_permu.edges:
-            random.shuffle(permuted_labels)
-            m_permu = relabel_molecule(m, permuted_labels, labels)
+            m_permu = _permute_molecule(m)
+
     element_symbols_permu = [e for (i, e) in m_permu.nodes(data="element_symbol")]
-    edges_permu = m_permu.edges()
-    return graph_from_moldata(list(m_permu.nodes), element_symbols_permu, edges_permu)
+    return graph_from_moldata(
+        list(m_permu.nodes), element_symbols_permu, list(m_permu.edges)
+    )
+
+
+def _permute_molecule(m):
+    labels = list(m.nodes)
+    permuted_labels = list(labels)  # shallow copy
+    random.shuffle(permuted_labels)
+    return relabel_molecule(m, permuted_labels, labels)

@@ -49,8 +49,6 @@ def permute_molecule(m, random_seed=1.0):
         while m.edges == m_permu.edges:
             random.shuffle(permuted_labels)
             m_permu = relabel_molecule(m, permuted_labels, labels)
-    element_symbols_permu = [
-        e for (i, e) in sorted(m_permu.nodes(data="element_symbol"))
-    ]
+    element_symbols_permu = [e for (i, e) in m_permu.nodes(data="element_symbol")]
     edges_permu = m_permu.edges()
-    return graph_from_moldata(element_symbols_permu, edges_permu)
+    return graph_from_moldata(list(m_permu.nodes), element_symbols_permu, edges_permu)

@@ -24,7 +24,7 @@ def partition_molecule_by_attribute(m, attribute, include_neighbors=True):
             current_partition += 1
         updated_partitions.append(current_partition)
     nx.set_node_attributes(
-        m_sorted, dict(zip(range(n_nodes), updated_partitions)), "partition"
+        m_sorted, dict(zip(list(m_sorted.nodes), updated_partitions)), "partition"
     )
     return m_sorted
 
@@ -78,7 +78,7 @@ def _add_invariant_code(m):
     # Zero-fill atomic numbers in order for them to be sorted numerically (002 < 012) rather than lexicographically (12 > 2).
     invariant_codes = [str(a).zfill(3) for a in atomic_numbers]
     nx.set_node_attributes(
-        m, dict(zip(range(m.number_of_nodes()), invariant_codes)), "invariant_code"
+        m, dict(zip(list(m.nodes), invariant_codes)), "invariant_code"
     )
 
 

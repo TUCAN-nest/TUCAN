@@ -69,31 +69,6 @@ def _parse_molfile3000(filecontent: str):
     return node_labels, element_symbols, bonds
 
 
-def _parse_molfile2000(filecontent: str):
-    lines = [
-        [l[i : i + 3].strip(" ") for i in range(0, len(l), 3)]
-        for l in filecontent.splitlines()
-    ]
-    atom_count = int(lines[3][0])
-    bond_count = int(lines[3][1])
-    atom_block_offset = 4
-    bond_block_offset = atom_block_offset + atom_count
-    element_symbols = [
-        l[10] for l in lines[atom_block_offset : atom_block_offset + atom_count]
-    ]
-    assert (
-        len(element_symbols) == atom_count
-    ), f"Number of atoms {len(element_symbols)} doesn't match atom-count specified in header {atom_count}."
-    bonds = [
-        (int(l[0]) - 1, int(l[1]) - 1)
-        for l in lines[bond_block_offset : bond_block_offset + bond_count]
-    ]  # make bond-indices zero-based
-    assert (
-        len(bonds) == bond_count
-    ), f"Number of bonds {len(bonds)} doesn't match bond-count specified in header {bond_count}."
-    return element_symbols, bonds
-
-
 def _parse_dimacs(filecontent: str):
     lines = [l.rstrip().split(" ") for l in filecontent.splitlines()]
     lines = [l for l in lines if l[0] in ["p", "e"]]

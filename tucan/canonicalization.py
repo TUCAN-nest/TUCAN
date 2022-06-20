@@ -24,7 +24,7 @@ def partition_molecule_by_attribute(m, attribute, include_neighbors=True):
             current_partition += 1
         updated_partitions.append(current_partition)
     nx.set_node_attributes(
-        m_sorted, dict(zip(list(m_sorted.nodes), updated_partitions)), "partition"
+        m_sorted, dict(zip(range(n_nodes), updated_partitions)), "partition"
     )
     return m_sorted
 

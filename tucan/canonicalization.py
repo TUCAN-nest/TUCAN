@@ -82,7 +82,7 @@ def _add_invariant_code(m):
     )
 
 
-def canonicalize_molecule(m, root_idx=0):
+def canonicalize_molecule(m):
     _add_invariant_code(m)
     m_partitioned_by_invariant_code = partition_molecule_by_attribute(
         m, "invariant_code"

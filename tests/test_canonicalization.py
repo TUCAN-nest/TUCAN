@@ -19,15 +19,15 @@ def test_permutation(m):
     assert m.edges != m_permu.edges
 
 
-def test_invariance(m, n_runs=10, random_seed=random.random(), root_atom=0):
+def test_invariance(m, n_runs=10, random_seed=random.random()):
     """Eindeutigkeit."""
-    m_canon = canonicalize_molecule(m, root_atom)
+    m_canon = canonicalize_molecule(m)
     m_serialized = serialize_molecule(m_canon)
     random.seed(random_seed)
     for _ in range(n_runs):
         permutation_seed = random.random()
         m_permu = permute_molecule(m, random_seed=permutation_seed)
-        m_permu_canon = canonicalize_molecule(m_permu, root_atom)
+        m_permu_canon = canonicalize_molecule(m_permu)
         m_permu_serialized = serialize_molecule(m_permu_canon)
         assert m_serialized == m_permu_serialized
 
@@ -37,7 +37,7 @@ def test_bijection():
     serializations = set()
     for f in pytest.testset:
         m = graph_from_file(f)
-        m_serialized = serialize_molecule(canonicalize_molecule(m, 0))
+        m_serialized = serialize_molecule(canonicalize_molecule(m))
         assert m_serialized not in serializations, f"duplicate: {f.stem}"
         serializations.add(m_serialized)
 
@@ -61,5 +61,5 @@ def test_bijection():
 )
 def test_regression(m, expected_serialization):
     m = graph_from_file((Path(f"tests/molfiles/{m}/{m}.mol")))
-    m_serialized = serialize_molecule(canonicalize_molecule(m, 0))
+    m_serialized = serialize_molecule(canonicalize_molecule(m))
     assert m_serialized == expected_serialization

@@ -75,10 +75,8 @@ def assign_canonical_labels(m):
 def _add_invariant_code(m):
     """Assign an invariant code to each atom (mutates graph)."""
     atomic_numbers = list(nx.get_node_attributes(m, "atomic_number").values())
-    # Zero-fill atomic numbers in order for them to be sorted numerically (002 < 012) rather than lexicographically (12 > 2).
-    invariant_codes = [str(a).zfill(3) for a in atomic_numbers]
     nx.set_node_attributes(
-        m, dict(zip(list(m.nodes), invariant_codes)), "invariant_code"
+        m, dict(zip(list(m.nodes), atomic_numbers)), "invariant_code"
     )
 
 

@@ -5,7 +5,7 @@
 
 TUCAN[^1] - A molecular identifier and descriptor for all domains of chemistry
 
-Have a look at our [demo notebook](https://github.com/JanCBrammer/nInChI/blob/main/docs/demo.ipynb) to see TUCAN at work.
+Have a look at our [demo notebook](https://github.com/JanCBrammer/nInChI/blob/HEAD/docs/demo.ipynb) to see TUCAN at work.
 
 # Installation
 TUCAN requires a Python installation (>=3.9), and preferably you install the package in a virtual environment (e.g., [venv](https://docs.python.org/3.8/library/venv.html)).
@@ -33,7 +33,12 @@ or
 pip install git+https://github.com/JanCBrammer/TUCAN.git#egg=tucan[dev,drawing]
 ```
 
-Have a look at the [pyproject.toml](https://github.com/JanCBrammer/TUCAN/blob/main/pyproject.toml) for details regarding the optional dependencies.
+Have a look at the [pyproject.toml](https://github.com/JanCBrammer/TUCAN/blob/
+
+
+
+
+/pyproject.toml) for details regarding the optional dependencies.
 
 # Contributors
 * Claudia Kellner (Universität Würzburg) - molecule test set

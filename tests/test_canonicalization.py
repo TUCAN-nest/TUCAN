@@ -36,7 +36,7 @@ def test_bijection():
     """Eineindeutigkeit."""
     serializations = set()
     for f in pytest.testset:
-        m = graph_from_file(f)
+        m = pytest.filereader(f)
         m_serialized = serialize_molecule(canonicalize_molecule(m))
         assert m_serialized not in serializations, f"duplicate: {f.stem}"
         serializations.add(m_serialized)

@@ -1,6 +1,5 @@
 import networkx as nx
 import random
-from tucan.io import graph_from_moldata
 
 
 def sort_molecule_by_attribute(m, attribute):
@@ -47,11 +46,7 @@ def permute_molecule(m, random_seed=1.0):
     if enforce_permutation:
         while m.edges == m_permu.edges:
             m_permu = _permute_molecule(m)
-
-    element_symbols_permu = [e for (i, e) in m_permu.nodes(data="element_symbol")]
-    return graph_from_moldata(
-        list(m_permu.nodes), element_symbols_permu, list(m_permu.edges)
-    )
+    return m_permu
 
 
 def _permute_molecule(m):

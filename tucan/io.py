@@ -63,10 +63,6 @@ def _parse_atom_block_molfile3000(lines: List[List[str]]) -> Dict:
 
 
 def _parse_atom_props(line: List[str]) -> Dict:
-    chg = [int(i.split("=")[1]) for i in line if "CHG" in i]
-    mass = [int(i.split("=")[1]) for i in line if "MASS" in i]
-    rad = [int(i.split("=")[1]) for i in line if "RAD" in i]
-
     atom_props = {
         "element_symbol": line[3],
         "atomic_number": ELEMENT_PROPS[line[3]]["atomic_number"],
@@ -74,10 +70,16 @@ def _parse_atom_props(line: List[str]) -> Dict:
         "x_coord": float(line[4]),
         "y_coord": float(line[5]),
         "z_coord": float(line[6]),
-        "chg": chg.pop() if chg else 0,
-        "mass": mass.pop() if mass else 0,
-        "rad": rad.pop() if rad else 0,
     }
+
+    optional_props = {
+        "chg": [int(i.split("=")[1]) for i in line if "CHG" in i],
+        "mass": [int(i.split("=")[1]) for i in line if "MASS" in i],
+        "rad": [int(i.split("=")[1]) for i in line if "RAD" in i],
+    }
+    for key, val in optional_props.items():
+        if val:
+            atom_props[key] = val.pop()
 
     return atom_props
 

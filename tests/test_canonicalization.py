@@ -1,11 +1,9 @@
 from tucan.canonicalization import canonicalize_molecule
 from tucan.serialization import serialize_molecule
-from tucan.io import graph_from_file
 from tucan.graph_utils import permute_molecule
 import networkx as nx
 import random
 import pytest
-from pathlib import Path
 
 
 def test_permutation(m):
@@ -40,26 +38,3 @@ def test_bijection():
         m_serialized = serialize_molecule(canonicalize_molecule(m))
         assert m_serialized not in serializations, f"duplicate: {f.stem}"
         serializations.add(m_serialized)
-
-
-@pytest.mark.parametrize(
-    "m, expected_serialization",
-    [
-        (
-            "ferrocene",
-            "C10H10Fe/1-13/2-14/3-11/4-12/5-15/6-16/7-17/8-18/9-19/10-20/11-12/11-13/11-21/12-14/12-21/13-15/13-21/14-15/14-21/15-21/16-17/16-18/16-21/17-19/17-21/18-20/18-21/19-20/19-21/20-21",
-        ),
-        (
-            "bipyridine",
-            "C10H8N2/1-9/2-10/3-11/4-12/5-13/6-14/7-15/8-16/9-11/9-13/10-12/10-14/11-15/12-16/13-17/14-18/15-19/16-20/17-18/17-19/18-20",
-        ),
-        (
-            "cf3alkyne",
-            "C6H5F3O2/1-6/2-6/3-6/4-9/5-9/6-9/7-8/7-10/8-11/9-13/10-12/10-13/11-14/11-15/11-16",
-        ),
-    ],
-)
-def test_regression(m, expected_serialization):
-    m = graph_from_file((Path(f"tests/molfiles/{m}/{m}.mol")))
-    m_serialized = serialize_molecule(canonicalize_molecule(m))
-    assert m_serialized == expected_serialization

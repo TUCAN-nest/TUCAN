@@ -1,11 +1,12 @@
 from collections import Counter
 from tucan.graph_utils import sort_molecule_by_attribute
+from operator import gt, lt, eq
 import networkx as nx
 
 
 def serialize_molecule(m):
     """Serialize a molecule."""
-    m_sorted = sort_molecule_by_attribute(m, "atomic_number")
+    m_sorted = sort_molecule_by_attribute(_assign_final_labels(m), "atomic_number")
     serialization = _write_sum_formula(m_sorted)
     serialization += f"/{_write_edge_list(m_sorted)}"
     node_properties = _write_node_properties(m_sorted)
@@ -67,3 +68,57 @@ def _write_sum_formula(m):
         sum_formula_string += f"{k}{v}"
 
     return sum_formula_string
+
+
+def _assign_final_labels(
+    m,
+    traversal_priorities=[lt, gt, eq],
+):
+    """Re-label nodes such that each node is connected to neighbors with the
+    smallest possible labels.
+    This is not part of (and not required for) the canonicalization.
+    The re-labeling is for cosmetic purposes."""
+    partitions = m.nodes.data("partition")
+    labels_by_partition = _labels_by_partition(m)
+    atom_queue = [0]
+    final_labels = {}
+    nx.set_node_attributes(m, False, "explored")
+
+    while atom_queue:
+        a = atom_queue.pop()
+        if m.nodes[a]["explored"]:
+            continue
+        a_final = labels_by_partition[
+            partitions[a]
+        ].pop()  # assign smallest label available in this partition
+        final_labels[a] = a_final
+
+        neighbors = list(m.neighbors(a))
+        neighbor_traversal_order = []
+        for priority in reversed(
+            traversal_priorities
+        ):  # reverse to preserve order of traversal priorities in queue
+            neighbors_this_priority = [
+                n for n in neighbors if priority(partitions[a], partitions[n])
+            ]
+            neighbor_traversal_order.extend(sorted(neighbors_this_priority))
+        m.nodes[a]["explored"] = True
+
+        for n in neighbor_traversal_order:
+            atom_queue.insert(0, n)
+
+    nx.set_node_attributes(m, False, "explored")
+
+    return nx.relabel_nodes(m, final_labels, copy=True)
+
+
+def _labels_by_partition(m):
+    """Create dictionary of partitions to node labels."""
+    partitions = set(sorted([v for _, v in m.nodes.data("partition")]))
+    labels_by_partition = {p: set() for p in partitions}
+    for a in m:
+        labels_by_partition[m.nodes[a]["partition"]].add(a)
+    labels_by_partition.update(
+        (k, sorted(list(v), reverse=True)) for k, v in labels_by_partition.items()
+    )
+    return labels_by_partition

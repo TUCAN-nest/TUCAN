@@ -33,12 +33,7 @@ or
 pip install git+https://github.com/JanCBrammer/TUCAN.git#egg=tucan[dev,drawing]
 ```
 
-Have a look at the [pyproject.toml](https://github.com/JanCBrammer/TUCAN/blob/
-
-
-
-
-/pyproject.toml) for details regarding the optional dependencies.
+Have a look at the [pyproject.toml](https://github.com/JanCBrammer/TUCAN/blob/pyproject.toml) for details regarding the optional dependencies.
 
 # Contributors
 * Claudia Kellner (Universität Würzburg) - molecule test set

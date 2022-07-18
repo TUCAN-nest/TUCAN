@@ -34,7 +34,7 @@ def _write_node_properties(m):
         ]
         if not available_props:
             continue
-        node_property_string += f"({label}:"
+        node_property_string += f"({label + 1}:"
         node_property_string += f"{','.join(available_props)})"
 
     return node_property_string

@@ -54,18 +54,15 @@ def _write_sum_formula(m):
     [1] doi:10.1021/ja02046a005
     """
     element_counts = Counter(nx.get_node_attributes(m, "element_symbol").values())
-    element_counts = {
-        k: (v if v > 1 else "") for k, v in element_counts.items()
-    }  # remove counts of 1 since those are implicit in sum formula
     sum_formula_string = ""
     carbon_count = element_counts.pop("C", None)
     if carbon_count:
-        sum_formula_string += f"C{carbon_count}"
+        sum_formula_string += f"C{carbon_count}" if carbon_count > 1 else "C"
         hydrogen_count = element_counts.pop("H", None)
         if hydrogen_count:
-            sum_formula_string += f"H{hydrogen_count}"
+            sum_formula_string += f"H{hydrogen_count}" if hydrogen_count > 1 else "H"
     for k, v in dict(sorted(element_counts.items())).items():
-        sum_formula_string += f"{k}{v}"
+        sum_formula_string += f"{k}{v}" if v > 1 else k
 
     return sum_formula_string
 

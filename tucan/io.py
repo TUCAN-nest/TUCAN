@@ -24,10 +24,21 @@ def graph_from_file(filepath: str) -> nx.Graph:
     filepath = Path(filepath)
     if filepath.suffix != ".mol":
         raise IOError(f"The file must be in '.mol' format, not {filepath.suffix}.")
-    filecontent = _read_file(filepath)
+    with open(filepath) as file:
+        filecontent = file.read()
 
-    atom_props = _parse_atom_block_molfile3000(filecontent)
-    bonds = _parse_bond_block_molfile3000(filecontent)
+    return graph_from_molblock(filecontent)
+
+
+def _split_into_tokenized_lines(string: str) -> List[List[str]]:
+    lines = [line.rstrip().split(" ") for line in string.splitlines()]
+    return [[value for value in line if value != ""] for line in lines]
+
+
+def graph_from_molblock(molblock: str) -> nx.Graph:
+    lines = _split_into_tokenized_lines(molblock)
+    atom_props = _parse_atom_block_molfile3000(lines)
+    bonds = _parse_bond_block_molfile3000(lines)
 
     graph = nx.Graph()
     graph.add_nodes_from(list(atom_props.keys()))
@@ -35,14 +46,6 @@ def graph_from_file(filepath: str) -> nx.Graph:
     graph.add_edges_from(bonds)
 
     return graph
-
-
-def _read_file(filepath: str) -> List[List[str]]:
-    with open(filepath) as file:
-        filecontent = file.read()
-    lines = [line.rstrip().split(" ") for line in filecontent.splitlines()]
-
-    return [[value for value in line if value != ""] for line in lines]
 
 
 def _parse_atom_block_molfile3000(lines: List[List[str]]) -> Dict:

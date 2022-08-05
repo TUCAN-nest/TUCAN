@@ -24,10 +24,14 @@ def graph_from_file(filepath: str) -> nx.Graph:
     filepath = Path(filepath)
     if filepath.suffix != ".mol":
         raise IOError(f"The file must be in '.mol' format, not {filepath.suffix}.")
-    with open(filepath) as file:
-        filecontent = file.read()
+    filecontent = _read_file(filepath)
 
-    return graph_from_molblock(filecontent)
+    return _graph_from_tokenized_lines(filecontent)
+
+
+def graph_from_molfile_text(molfile: str) -> nx.Graph:
+    lines = _split_into_tokenized_lines(molfile)
+    return _graph_from_tokenized_lines(lines)
 
 
 def _split_into_tokenized_lines(string: str) -> List[List[str]]:
@@ -35,8 +39,13 @@ def _split_into_tokenized_lines(string: str) -> List[List[str]]:
     return [[value for value in line if value != ""] for line in lines]
 
 
-def graph_from_molblock(molblock: str) -> nx.Graph:
-    lines = _split_into_tokenized_lines(molblock)
+def _read_file(filepath: str) -> List[List[str]]:
+    with open(filepath) as file:
+        filecontent = file.read()
+    return _split_into_tokenized_lines(filecontent)
+
+
+def _graph_from_tokenized_lines(lines: List[List[str]]) -> nx.Graph:
     atom_props = _parse_atom_block_molfile3000(lines)
     bonds = _parse_bond_block_molfile3000(lines)
 

@@ -1,6 +1,6 @@
 from tucan.canonicalization import canonicalize_molecule
 from tucan.serialization import serialize_molecule
-from tucan.io import graph_from_molblock
+from tucan.io import graph_from_molfile_text
 from tucan.graph_utils import permute_molecule
 from rdkit import Chem
 import random
@@ -23,8 +23,8 @@ CHUNKS = NUM_MOLFILES // MOLFILES_PER_CHUNK + 1
 CHUNK_SIZE = NUM_MOLFILES // CHUNKS + 1
 
 # from TUCAN/tests/test_canonicalization.py
-def test_invariance(molblock, chembl_id, n_runs=10, random_seed=random.random()):
-  m = graph_from_molblock(molblock)
+def test_invariance(molfile, chembl_id, n_runs=10, random_seed=random.random()):
+  m = graph_from_molfile_text(molfile)
 
   m_canon = canonicalize_molecule(m)
   m_serialized = serialize_molecule(m_canon)
@@ -39,8 +39,8 @@ def test_invariance(molblock, chembl_id, n_runs=10, random_seed=random.random())
   return ""
 
 
-def execInvarianceTestForMolecule(molblock, output, chembl_id):
-  result = test_invariance(molblock, chembl_id)
+def execInvarianceTestForMolecule(molfile, output, chembl_id):
+  result = test_invariance(molfile, chembl_id)
   with open(output, "a") as file:
     file.write(result)
 
@@ -48,9 +48,9 @@ def execInvarianceTestForMolecule(molblock, output, chembl_id):
 def execInvarianceTestForChunk(input, output):
   supplier = Chem.SDMolSupplier(fileName=input, removeHs=False)
   for molecule in supplier:
-    molblock = Chem.MolToMolBlock(mol = molecule, forceV3000 = True)
+    molfile = Chem.MolToMolBlock(mol = molecule, forceV3000 = True)
     chembl_id = molecule.GetProp("chembl_id")
-    execInvarianceTestForMolecule(molblock, output, chembl_id)
+    execInvarianceTestForMolecule(molfile, output, chembl_id)
 
 
 def createSDF(dbFilename, outputFilename, firstRow, lastRow):

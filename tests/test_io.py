@@ -2,7 +2,7 @@ from typing import List
 from tucan.io import (
     _parse_atom_block_molfile3000,
     _parse_bond_block_molfile3000,
-    _split_into_tokenized_lines,
+    _read_file,
 )
 
 
@@ -186,9 +186,3 @@ def test_parsing_bond_block():
         (12, 14),
         (12, 13),
     ]
-
-
-def _read_file(filepath: str) -> List[List[str]]:
-    with open(filepath) as file:
-        filecontent = file.read()
-    return _split_into_tokenized_lines(filecontent)

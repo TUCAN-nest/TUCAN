@@ -1,3 +1,4 @@
+from typing import List
 from tucan.io import (
     _parse_atom_block_molfile3000,
     _parse_bond_block_molfile3000,

@@ -26,8 +26,28 @@ def graph_from_file(filepath: str) -> nx.Graph:
         raise IOError(f"The file must be in '.mol' format, not {filepath.suffix}.")
     filecontent = _read_file(filepath)
 
-    atom_props = _parse_atom_block_molfile3000(filecontent)
-    bonds = _parse_bond_block_molfile3000(filecontent)
+    return _graph_from_tokenized_lines(filecontent)
+
+
+def graph_from_molfile_text(molfile: str) -> nx.Graph:
+    lines = _split_into_tokenized_lines(molfile)
+    return _graph_from_tokenized_lines(lines)
+
+
+def _split_into_tokenized_lines(string: str) -> List[List[str]]:
+    lines = [line.rstrip().split(" ") for line in string.splitlines()]
+    return [[value for value in line if value != ""] for line in lines]
+
+
+def _read_file(filepath: str) -> List[List[str]]:
+    with open(filepath) as file:
+        filecontent = file.read()
+    return _split_into_tokenized_lines(filecontent)
+
+
+def _graph_from_tokenized_lines(lines: List[List[str]]) -> nx.Graph:
+    atom_props = _parse_atom_block_molfile3000(lines)
+    bonds = _parse_bond_block_molfile3000(lines)
 
     graph = nx.Graph()
     graph.add_nodes_from(list(atom_props.keys()))
@@ -35,14 +55,6 @@ def graph_from_file(filepath: str) -> nx.Graph:
     graph.add_edges_from(bonds)
 
     return graph
-
-
-def _read_file(filepath: str) -> List[List[str]]:
-    with open(filepath) as file:
-        filecontent = file.read()
-    lines = [line.rstrip().split(" ") for line in filecontent.splitlines()]
-
-    return [[value for value in line if value != ""] for line in lines]
 
 
 def _parse_atom_block_molfile3000(lines: List[List[str]]) -> Dict:
@@ -83,7 +95,9 @@ def _parse_atom_props(line: List[str]) -> Dict:
 
     optional_props = {
         "chg": [int(i.split("=")[1]) for i in line if "CHG" in i],
-        "mass": [int(i.split("=")[1]) for i in line if "MASS" in i] if isotope_mass is None else [isotope_mass],
+        "mass": [int(i.split("=")[1]) for i in line if "MASS" in i]
+        if isotope_mass is None
+        else [isotope_mass],
         "rad": [int(i.split("=")[1]) for i in line if "RAD" in i],
     }
     for key, val in optional_props.items():

@@ -1,0 +1,122 @@
+from tucan.canonicalization import canonicalize_molecule
+from tucan.serialization import serialize_molecule
+from tucan.io import graph_from_molfile_text
+from tucan.graph_utils import permute_molecule
+from rdkit import Chem
+import random
+import sqlite3
+
+##############
+# Parameters #
+##############
+
+# Number of compounds in the database
+NUM_MOLFILES = 2136187
+
+# Number of compounds to be processed iteratively within one chunk
+MOLFILES_PER_CHUNK = 1000
+
+###############
+# Python code #
+###############
+CHUNKS = NUM_MOLFILES // MOLFILES_PER_CHUNK + 1
+CHUNK_SIZE = NUM_MOLFILES // CHUNKS + 1
+
+# from TUCAN/tests/test_canonicalization.py
+def test_invariance(molfile, chembl_id, n_runs=10, random_seed=random.random()):
+  m = graph_from_molfile_text(molfile)
+
+  m_canon = canonicalize_molecule(m)
+  m_serialized = serialize_molecule(m_canon)
+  random.seed(random_seed)
+  for _ in range(n_runs):
+    permutation_seed = random.random()
+    m_permu = permute_molecule(m, random_seed=permutation_seed)
+    m_permu_canon = canonicalize_molecule(m_permu)
+    m_permu_serialized = serialize_molecule(m_permu_canon)
+    if m_serialized != m_permu_serialized:
+      return "invariance test failed for %s\n" % chembl_id
+  return ""
+
+
+def execInvarianceTestForMolecule(molfile, output, chembl_id):
+  result = test_invariance(molfile, chembl_id)
+  with open(output, "a") as file:
+    file.write(result)
+
+
+def execInvarianceTestForChunk(input, output):
+  supplier = Chem.SDMolSupplier(fileName=input, removeHs=False)
+  for molecule in supplier:
+    molfile = Chem.MolToMolBlock(mol = molecule, forceV3000 = True)
+    chembl_id = molecule.GetProp("chembl_id")
+    execInvarianceTestForMolecule(molfile, output, chembl_id)
+
+
+def createSDF(dbFilename, outputFilename, firstRow, lastRow):
+  query = "SELECT cs.molfile, md.chembl_id, cs.rowid FROM compound_structures cs JOIN molecule_dictionary md ON cs.molregno = md.molregno WHERE cs.rowid BETWEEN ? AND ?"
+  con = sqlite3.connect(dbFilename)
+
+  with Chem.SDWriter(outputFilename) as writer:
+    writer.SetForceV3000(True)
+    for row in con.execute(query, (firstRow, lastRow)):
+      mol = Chem.MolFromMolBlock(row[0])
+      mol = Chem.AddHs(mol)
+      mol.SetProp("chembl_id", row[1])
+      mol.SetProp("rowid", str(row[2]))
+      writer.write(mol)
+
+
+###################
+# Snakemake rules #
+###################
+rule download_chembl_sqlite:
+  output:
+    "chembl_30_sqlite.tar.gz"
+  shell:
+    "curl https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/latest/chembl_30_sqlite.tar.gz -o {output}"
+
+
+rule extract_chembl_sqlite:
+  input:
+    "chembl_30_sqlite.tar.gz"
+  output:
+    "chembl_30/chembl_30_sqlite/chembl_30.db"
+  shell:
+    "tar -xzf {input}"
+
+
+# Creates a sdf file with V3000 molfiles for the given chunk number
+rule molfiles_from_db_for_chunk:
+  input:
+    "chembl_30/chembl_30_sqlite/chembl_30.db"
+  output:
+    "chembl_30/molfiles/{chunk}.sdf"
+  params:
+    chunk_start = lambda wildcards: (int(wildcards.chunk) - 1) * CHUNK_SIZE + 1,
+    chunk_end = lambda wildcards: int(wildcards.chunk) * CHUNK_SIZE
+  run:
+    createSDF(input[0], output[0], params.chunk_start, params.chunk_end)
+
+
+rule test_invariance_for_chunk:
+  input:
+    "chembl_30/molfiles/{chunk}.sdf"
+  output:
+    "chembl_30/logs/{chunk}.log"
+  run:
+    execInvarianceTestForChunk(input[0], output[0])
+
+
+rule aggregate_logfiles:
+  input:
+    expand("chembl_30/logs/{chunk}.log", chunk=range(1, CHUNKS + 1))
+  output:
+    "chembl_30/test_invariance.log"
+  shell:
+    "find chembl_30/logs/ -name '*.log' -exec cat {{}} >> {output} \;"
+
+
+rule test_invariance:
+  input:
+    "chembl_30/test_invariance.log"

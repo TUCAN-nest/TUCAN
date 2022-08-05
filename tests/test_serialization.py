@@ -39,7 +39,7 @@ import pytest
         (
             "water-t2",
             "H2O/(1-3)(2-3)/(1:mass=3)(2:mass=3)",
-        )
+        ),
     ],
 )
 def test_regression(m, expected_serialization):

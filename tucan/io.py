@@ -95,7 +95,9 @@ def _parse_atom_props(line: List[str]) -> Dict:
 
     optional_props = {
         "chg": [int(i.split("=")[1]) for i in line if "CHG" in i],
-        "mass": [int(i.split("=")[1]) for i in line if "MASS" in i] if isotope_mass is None else [isotope_mass],
+        "mass": [int(i.split("=")[1]) for i in line if "MASS" in i]
+        if isotope_mass is None
+        else [isotope_mass],
         "rad": [int(i.split("=")[1]) for i in line if "RAD" in i],
     }
     for key, val in optional_props.items():

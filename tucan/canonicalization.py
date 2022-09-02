@@ -1,30 +1,22 @@
 from tucan.graph_utils import sort_molecule_by_attribute, attribute_sequence
 import networkx as nx
 from igraph import Graph as iGraph
+from itertools import pairwise
 
 
-def partition_molecule_by_attribute(m, attribute, include_neighbors=True):
+def partition_molecule_by_attribute(m, attribute):
     m_sorted = sort_molecule_by_attribute(m, attribute)
+    attribute_sequences = [
+        attribute_sequence(a, m_sorted, attribute) for a in sorted(m_sorted)
+    ]
     updated_partitions = [0]
-    n_nodes = m.number_of_nodes()
-    for i in range(n_nodes - 1):
-        j = i + 1
-        attributes_i = (
-            attribute_sequence(i, m_sorted, attribute)
-            if include_neighbors
-            else m_sorted.nodes[i][attribute]
-        )
-        attributes_j = (
-            attribute_sequence(j, m_sorted, attribute)
-            if include_neighbors
-            else m_sorted.nodes[j][attribute]
-        )
+    for i, j in pairwise(attribute_sequences):
         current_partition = updated_partitions[-1]
-        if attributes_i != attributes_j:
+        if i != j:
             current_partition += 1
         updated_partitions.append(current_partition)
     nx.set_node_attributes(
-        m_sorted, dict(zip(range(n_nodes), updated_partitions)), "partition"
+        m_sorted, dict(zip(sorted(m_sorted), updated_partitions)), "partition"
     )
     return m_sorted
 

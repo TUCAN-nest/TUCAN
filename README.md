@@ -1,14 +1,14 @@
-![CI](https://github.com/JanCBrammer/TUCAN/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/TUCAN-nest/TUCAN/actions/workflows/ci.yml/badge.svg)
 
 
-<img src="https://github.com/JanCBrammer/nInChI/raw/main/logo.png" alt="logo" style="width:400px;"/>
+<img src="https://github.com/TUCAN-nest/TUCAN/blob/HEAD/logo.png" alt="logo" style="width:400px;"/>
 
 TUCAN[^1] - A molecular identifier and descriptor for all domains of chemistry
 
-Have a look at our [demo notebook](https://github.com/JanCBrammer/nInChI/blob/HEAD/docs/demo.ipynb) to see TUCAN at work.
+Have a look at our [demo notebook](https://github.com/TUCAN-nest/TUCAN/blob/HEAD/docs/demo.ipynb) to see TUCAN at work.
 
 # Installation
-TUCAN requires a Python installation (>=3.9), and preferably you install the package in a virtual environment (e.g., [venv](https://docs.python.org/3.8/library/venv.html)).
+TUCAN requires a Python installation (>=3.9), and preferably you install the package in a virtual environment (e.g., [venv](https://docs.python.org/3.10/library/venv.html)).
 
 You can install TUCAN locally using [pip](https://pip.pypa.io/en/stable/) by first [cloning the repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository), and then running
 ```
@@ -16,7 +16,7 @@ pip install .
 ```
 in the root of the repository. Alternatively, you can skip cloning by running
 ```
-pip install git+https://github.com/JanCBrammer/TUCAN.git
+pip install git+https://github.com/TUCAN-nest/TUCAN.git
 ```
 
 In order to install an editable development version run
@@ -30,10 +30,10 @@ pip install .[dev,drawing]
 ```
 or
 ```
-pip install git+https://github.com/JanCBrammer/TUCAN.git#egg=tucan[dev,drawing]
+pip install git+https://github.com/TUCAN-nest/TUCAN.git#egg=tucan[dev,drawing]
 ```
 
-Have a look at the [pyproject.toml](https://github.com/JanCBrammer/TUCAN/blob/pyproject.toml) for details regarding the optional dependencies.
+Have a look at the [pyproject.toml](https://github.com/TUCAN-nest/TUCAN/blob/HEAD/pyproject.toml) for details regarding the optional dependencies.
 
 # Contributors
 * Claudia Kellner (Universität Würzburg) - molecule test set

@@ -14,7 +14,8 @@ dependencies = [
     "networkx[default] >=2.7.1",
     "matplotlib >=3.5.0",
     "tabulate >=0.8.9",
-    "igraph >=0.9.10"
+    "igraph >=0.9.10",
+    "antlr4-python3-runtime == 4.11.1"
 ]
 
 [project.optional-dependencies]

@@ -41,9 +41,7 @@ def test_cannot_parse_sum_formula(sum_formula):
         _parse_sum_formula(sum_formula)
 
 
-@pytest.mark.parametrize(
-    "symbol", element_symbols
-)
+@pytest.mark.parametrize("symbol", element_symbols)
 def test_grammar_has_all_element_symbols(symbol):
     try:
         _parse_sum_formula(symbol)

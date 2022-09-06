@@ -8,6 +8,42 @@ else:
 # This class defines a complete listener for a parse tree produced by tucanParser.
 class tucanListener(ParseTreeListener):
 
+    # Enter a parse tree produced by tucanParser#tuples.
+    def enterTuples(self, ctx:tucanParser.TuplesContext):
+        pass
+
+    # Exit a parse tree produced by tucanParser#tuples.
+    def exitTuples(self, ctx:tucanParser.TuplesContext):
+        pass
+
+
+    # Enter a parse tree produced by tucanParser#tuples_start.
+    def enterTuples_start(self, ctx:tucanParser.Tuples_startContext):
+        pass
+
+    # Exit a parse tree produced by tucanParser#tuples_start.
+    def exitTuples_start(self, ctx:tucanParser.Tuples_startContext):
+        pass
+
+
+    # Enter a parse tree produced by tucanParser#tuple.
+    def enterTuple(self, ctx:tucanParser.TupleContext):
+        pass
+
+    # Exit a parse tree produced by tucanParser#tuple.
+    def exitTuple(self, ctx:tucanParser.TupleContext):
+        pass
+
+
+    # Enter a parse tree produced by tucanParser#node_index.
+    def enterNode_index(self, ctx:tucanParser.Node_indexContext):
+        pass
+
+    # Exit a parse tree produced by tucanParser#node_index.
+    def exitNode_index(self, ctx:tucanParser.Node_indexContext):
+        pass
+
+
     # Enter a parse tree produced by tucanParser#sum_formula.
     def enterSum_formula(self, ctx:tucanParser.Sum_formulaContext):
         pass

@@ -1,6 +1,21 @@
 grammar tucan;
 
-// Hill system formula
+/*
+ * Tuples
+ */
+tuples : tuple* ;
+
+// for testing only
+tuples_start : tuples EOF ;
+
+tuple : '(' node_index '-' node_index ')' ;
+
+node_index : '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | GREATER_THAN_NINE ;
+//node_index : ONE_TO_NINE | GREATER_THAN_NINE ;
+
+/*
+ * Hill system formula
+ */
 sum_formula : (with_carbon | without_carbon) ;
 
 // for testing only
@@ -130,6 +145,9 @@ lv : 'Lv' count? ;
 ts : 'Ts' count? ;
 og : 'Og' count? ;
 
-count : TWO_TO_NINE | GREATER_THAN_NINE ;
-TWO_TO_NINE : [2-9] ;
+//count : TWO_TO_NINE | GREATER_THAN_NINE ;
+count : '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | GREATER_THAN_NINE ;
+
+//TWO_TO_NINE : [2-9] ;
+//ONE_TO_NINE : [1-9] ;
 GREATER_THAN_NINE : [1-9] [0-9]+ ;

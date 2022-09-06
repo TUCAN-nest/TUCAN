@@ -60,3 +60,42 @@ def test_element_order_is_correct():
     elements_with_carbon.insert(0, "H")
     elements_with_carbon.insert(0, "C")
     _parse_sum_formula("".join(elements_with_carbon))
+
+
+def _parse_tuples(s):
+    parser = _prepare_parser(s)
+
+    # invoke the parser on rule "tuples_start"
+    parser.tuples_start()
+
+
+@pytest.mark.parametrize(
+    "tuples",
+    [
+        "(1-2)(3-4)(5-6)(7-8)(9-10)(11-12)",
+        "(2-1)(1-2)",
+        "(1-2)(1-2)",
+        "(1-1)",
+        "(987654321-123456789)",
+    ],
+)
+def test_can_parse_tuples(tuples):
+    _parse_tuples(tuples)
+
+
+@pytest.mark.parametrize(
+    "tuples",
+    [
+        "(0-1)",
+        "(1-0)",
+        "(01-2)",
+        "(1-02)",
+        "1-2",
+        "(1-2",
+        "1-2)",
+        "(1 2)",
+    ],
+)
+def test_cannot_parse_tuples(tuples):
+    with pytest.raises(ParseCancellationException):
+        _parse_tuples(tuples)

@@ -1,8 +1,13 @@
 from antlr4 import InputStream, CommonTokenStream
 from antlr4.error.ErrorListener import ErrorListener
-from antlr4.error.Errors import ParseCancellationException
 from tucan.parser.tucanLexer import tucanLexer
 from tucan.parser.tucanParser import tucanParser
+
+
+def parse_tucan(s):
+    parser = _prepare_parser(s)
+    tree = parser.tucan()
+    # TODO: extract graph
 
 
 def _prepare_parser(s):
@@ -22,9 +27,11 @@ def _prepare_parser(s):
 
 class RaisingErrorListener(ErrorListener):
     def syntaxError(self, recognizer, offending_symbol, line, column, msg, e):
-        error_str = "line " + str(line) + ":" + str(column) + " " + msg + "\n"
-        error_str += self._underline_error(recognizer, offending_symbol, line, column)
-        raise ParseCancellationException(error_str)
+        marked_error_location = self._underline_error(
+            recognizer, offending_symbol, line, column
+        )
+        error_str = f"line {line}:{column} {msg}\n{marked_error_location}"
+        raise TucanParserException(error_str)
 
     def _underline_error(self, recognizer, offending_symbol, line, column):
         pass
@@ -36,11 +43,7 @@ class LexerErrorListener(RaisingErrorListener):
         lexer_input = str(recognizer.inputStream)
         error_line = lexer_input.split("\n")[line - 1]
 
-        output = error_line + "\n"
-        for _ in range(0, column):
-            output += " "
-        output += "^"
-        return output
+        return f"{error_line}\n{column * ' '}^"
 
 
 class ParserErrorListener(RaisingErrorListener):
@@ -48,14 +51,11 @@ class ParserErrorListener(RaisingErrorListener):
         tokens = recognizer.getInputStream()
         parser_input = str(tokens.tokenSource.inputStream)
         error_line = parser_input.split("\n")[line - 1]
-
-        output = error_line + "\n"
-        for _ in range(0, column):
-            output += " "
-
         start = offending_symbol.start
         stop = offending_symbol.stop
-        if 0 <= start <= stop:
-            for _ in range(start, stop + 1):
-                output += "^"
-        return output
+
+        return f"{error_line}\n{column * ' '}{(stop - start + 1) * '^'}"
+
+
+class TucanParserException(Exception):
+    pass

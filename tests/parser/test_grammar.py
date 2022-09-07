@@ -1,8 +1,7 @@
 import pytest
-from antlr4.error.Errors import ParseCancellationException
 from tucan.canonicalization import canonicalize_molecule
 from tucan.element_properties import element_symbols
-from tucan.parser.parser import _prepare_parser
+from tucan.parser.parser import _prepare_parser, TucanParserException, parse_tucan
 from tucan.serialization import serialize_molecule
 
 
@@ -51,7 +50,7 @@ def test_can_parse_sum_formula(sum_formula):
     ],
 )
 def test_cannot_parse_sum_formula(sum_formula):
-    with pytest.raises(ParseCancellationException):
+    with pytest.raises(TucanParserException):
         _parse_sum_formula(sum_formula)
 
 
@@ -59,7 +58,7 @@ def test_cannot_parse_sum_formula(sum_formula):
 def test_grammar_has_all_element_symbols(symbol):
     try:
         _parse_sum_formula(symbol)
-    except ParseCancellationException:
+    except TucanParserException:
         pytest.fail('Unknown element symbol "' + symbol + '"')
 
 
@@ -124,7 +123,7 @@ def test_can_parse_tuples(tuples):
     ],
 )
 def test_cannot_parse_tuples(tuples):
-    with pytest.raises(ParseCancellationException):
+    with pytest.raises(TucanParserException):
         _parse_tuples(tuples)
 
 
@@ -177,15 +176,8 @@ def test_can_parse_node_attributes(node_attributes):
     ],
 )
 def test_cannot_parse_node_attributes(node_attributes):
-    with pytest.raises(ParseCancellationException):
+    with pytest.raises(TucanParserException):
         _parse_node_attributes(node_attributes)
-
-
-def _parse_tucan(s):
-    parser = _prepare_parser(s)
-
-    # invoke the parser on rule "tucan"
-    parser.tucan()
 
 
 @pytest.mark.parametrize(
@@ -199,7 +191,7 @@ def _parse_tucan(s):
     ],
 )
 def test_can_parse_tucan(tucan):
-    _parse_tucan(tucan)
+    parse_tucan(tucan)
 
 
 @pytest.mark.parametrize(
@@ -211,10 +203,10 @@ def test_can_parse_tucan(tucan):
     ],
 )
 def test_cannot_parse_tucan(tucan):
-    with pytest.raises(ParseCancellationException):
-        _parse_tucan(tucan)
+    with pytest.raises(TucanParserException):
+        parse_tucan(tucan)
 
 
 def test_roundtrip_graph_tucan_graph(m):
     m_serialized = serialize_molecule(canonicalize_molecule(m))
-    _parse_tucan(m_serialized)
+    parse_tucan(m_serialized)

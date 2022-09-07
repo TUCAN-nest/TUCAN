@@ -25,7 +25,7 @@ def _write_edge_list(m):
 
 
 def _write_node_properties(m):
-    node_properties = ["chg", "mass", "rad"]
+    node_properties = ["mass", "rad"]
     node_property_string = ""
     for node in sorted(m.nodes(data=True)):
         label, props = node

@@ -15,10 +15,18 @@ def _parse_sum_formula(s):
 @pytest.mark.parametrize(
     "sum_formula",
     [
+        "",
         "CHCl3",
         "ClH",
         "H2",
         "C123456789Zr987654321",
+        "Cu",
+        "CU",
+        "Os",
+        "OS",
+        "Bi",
+        "BI",
+        "IIn",
     ],
 )
 def test_can_parse_sum_formula(sum_formula):
@@ -34,6 +42,11 @@ def test_can_parse_sum_formula(sum_formula):
         "H0123",
         "HH",
         "Ar3Ar10",
+        "D2O",
+        "OT2",
+        "h",
+        "hCl",
+        "Hga",
     ],
 )
 def test_cannot_parse_sum_formula(sum_formula):
@@ -72,6 +85,7 @@ def _parse_tuples(s):
 @pytest.mark.parametrize(
     "tuples",
     [
+        "",
         "(1-2)(3-4)(5-6)(7-8)(9-10)(11-12)",
         "(2-1)(1-2)",
         "(1-2)(1-2)",
@@ -94,6 +108,14 @@ def test_can_parse_tuples(tuples):
         "(1-2",
         "1-2)",
         "(1 2)",
+        "(1--2)",
+        "(12)",
+        # different dash symbols ;)
+        "(1‐2)",
+        "(1–2)",
+        "(1—2)",
+        "(1―2)",
+        "(1−2)",
     ],
 )
 def test_cannot_parse_tuples(tuples):

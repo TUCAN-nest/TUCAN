@@ -110,6 +110,10 @@ def test_can_parse_tuples(tuples):
         "(1 2)",
         "(1--2)",
         "(12)",
+        "()",
+        "(",
+        ")",
+        "()(1-2)",
         # different dash symbols ;)
         "(1‐2)",
         "(1–2)",
@@ -121,3 +125,56 @@ def test_can_parse_tuples(tuples):
 def test_cannot_parse_tuples(tuples):
     with pytest.raises(ParseCancellationException):
         _parse_tuples(tuples)
+
+
+def _parse_node_attributes(s):
+    parser = _prepare_parser(s)
+
+    # invoke the parser on rule "node_attributes_start"
+    parser.node_attributes_start()
+
+
+@pytest.mark.parametrize(
+    "node_attributes",
+    [
+        "",
+        "(1:MASS=2)",
+        "(2:RAD=5)",
+        "(3210:MASS=10,RAD=5)",
+        "(1234:RAD=5,MASS=10)",
+        "(1:MASS=10)(2:RAD=1)",
+        "(2:RAD=1)(1:MASS=10)",
+        "(1:MASS=123456789)(1:RAD=987654321)",
+        "(1:MASS=10,RAD=5)(2:RAD=1)(1:RAD=3,MASS=12)",
+        "(2:MASS=5,MASS=7)",
+    ],
+)
+def test_can_parse_node_attributes(node_attributes):
+    _parse_node_attributes(node_attributes)
+
+
+@pytest.mark.parametrize(
+    "node_attributes",
+    [
+        "()",
+        "(1:)",
+        "(1:MASS=2,)",
+        "(2:MASS=2,RAD=4,)",
+        "(01:MASS=2)",
+        "(:MASS=2)",
+        "(4321:MAS=2)",
+        "(4321:MASS2)",
+        "(4321:MASS 2)",
+        "(1:MASS=0)",
+        "(1:RAD=0123)",
+        "(1:MASS=)",
+        "(1:RAD)",
+        "(2:MASS=10",
+        "(3:MASS=10)(",
+        "(",
+        ")",
+    ],
+)
+def test_cannot_parse_node_attributes(node_attributes):
+    with pytest.raises(ParseCancellationException):
+        _parse_node_attributes(node_attributes)

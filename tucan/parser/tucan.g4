@@ -1,25 +1,39 @@
 grammar tucan;
 
 /*
+ * Node attributes
+ */
+node_attributes_start : node_attributes EOF ; // for testing only
+
+node_attributes : node_attribute* ;
+
+node_attribute : '(' node_index ':' node_properties ')' ;
+
+node_properties : node_property (',' node_property)* ;
+
+node_property : node_property_key '=' node_property_value ;
+
+node_property_key : 'MASS' | 'RAD' ;
+
+node_property_value : gte_one ;
+
+/*
  * Tuples
  */
-tuples : tuple* ;
+tuples_start : tuples EOF ; // for testing only
 
-// for testing only
-tuples_start : tuples EOF ;
+tuples : tuple* ;
 
 tuple : '(' node_index '-' node_index ')' ;
 
-node_index : '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | GREATER_THAN_NINE ;
-//node_index : ONE_TO_NINE | GREATER_THAN_NINE ;
+node_index : gte_one ;
 
 /*
  * Hill system formula
  */
-sum_formula : (with_carbon | without_carbon) ;
+sum_formula_start : sum_formula EOF ; // for testing only
 
-// for testing only
-sum_formula_start : sum_formula EOF ;
+sum_formula : with_carbon | without_carbon ;
 
 with_carbon : c h? ac? ag? al? am? ar? as? at? au? b? ba? be? bh? bi? bk? br? ca? cd? ce? cf? cl? cm? cn? co? cr? cs? cu? db? ds? dy? er? es? eu? f? fe? fl? fm? fr? ga? gd? ge? he? hf? hg? ho? hs? i? in? ir? k? kr? la? li? lr? lu? lv? mc? md? mg? mn? mo? mt? n? na? nb? nd? ne? nh? ni? no? np? o? og? os? p? pa? pb? pd? pm? po? pr? pt? pu? ra? rb? re? rf? rg? rh? rn? ru? s? sb? sc? se? sg? si? sm? sn? sr? ta? tb? tc? te? th? ti? tl? tm? ts? u? v? w? xe? y? yb? zn? zr? ;
 
@@ -145,9 +159,8 @@ lv : 'Lv' count? ;
 ts : 'Ts' count? ;
 og : 'Og' count? ;
 
-//count : TWO_TO_NINE | GREATER_THAN_NINE ;
-count : '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | GREATER_THAN_NINE ;
+count : gt_one ;
 
-//TWO_TO_NINE : [2-9] ;
-//ONE_TO_NINE : [1-9] ;
+gte_one : '1' | gt_one ;
+gt_one : '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | GREATER_THAN_NINE ;
 GREATER_THAN_NINE : [1-9] [0-9]+ ;

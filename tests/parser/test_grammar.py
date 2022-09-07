@@ -1,8 +1,9 @@
 import pytest
 from antlr4.error.Errors import ParseCancellationException
+from tucan.canonicalization import canonicalize_molecule
 from tucan.element_properties import element_symbols
-
 from tucan.parser.parser import _prepare_parser
+from tucan.serialization import serialize_molecule
 
 
 def _parse_sum_formula(s):
@@ -138,15 +139,15 @@ def _parse_node_attributes(s):
     "node_attributes",
     [
         "",
-        "(1:MASS=2)",
-        "(2:RAD=5)",
-        "(3210:MASS=10,RAD=5)",
-        "(1234:RAD=5,MASS=10)",
-        "(1:MASS=10)(2:RAD=1)",
-        "(2:RAD=1)(1:MASS=10)",
-        "(1:MASS=123456789)(1:RAD=987654321)",
-        "(1:MASS=10,RAD=5)(2:RAD=1)(1:RAD=3,MASS=12)",
-        "(2:MASS=5,MASS=7)",
+        "(1:mass=2)",
+        "(2:rad=5)",
+        "(3210:mass=10,rad=5)",
+        "(1234:rad=5,mass=10)",
+        "(1:mass=10)(2:rad=1)",
+        "(2:rad=1)(1:mass=10)",
+        "(1:mass=123456789)(1:rad=987654321)",
+        "(1:mass=10,rad=5)(2:rad=1)(1:rad=3,mass=12)",
+        "(2:mass=5,mass=7)",
     ],
 )
 def test_can_parse_node_attributes(node_attributes):
@@ -158,19 +159,19 @@ def test_can_parse_node_attributes(node_attributes):
     [
         "()",
         "(1:)",
-        "(1:MASS=2,)",
-        "(2:MASS=2,RAD=4,)",
-        "(01:MASS=2)",
-        "(:MASS=2)",
+        "(1:mass=2,)",
+        "(2:mass=2,rad=4,)",
+        "(01:mass=2)",
+        "(:mass=2)",
         "(4321:MAS=2)",
-        "(4321:MASS2)",
-        "(4321:MASS 2)",
-        "(1:MASS=0)",
-        "(1:RAD=0123)",
-        "(1:MASS=)",
-        "(1:RAD)",
-        "(2:MASS=10",
-        "(3:MASS=10)(",
+        "(4321:mass2)",
+        "(4321:mass 2)",
+        "(1:mass=0)",
+        "(1:rad=0123)",
+        "(1:mass=)",
+        "(1:rad)",
+        "(2:mass=10",
+        "(3:mass=10)(",
         "(",
         ")",
     ],
@@ -178,3 +179,42 @@ def test_can_parse_node_attributes(node_attributes):
 def test_cannot_parse_node_attributes(node_attributes):
     with pytest.raises(ParseCancellationException):
         _parse_node_attributes(node_attributes)
+
+
+def _parse_tucan(s):
+    parser = _prepare_parser(s)
+
+    # invoke the parser on rule "tucan"
+    parser.tucan()
+
+
+@pytest.mark.parametrize(
+    "tucan",
+    [
+        "/",
+        "//",
+        "C2H6O/(1-7)(2-7)(3-7)(4-8)(5-8)(6-9)(7-8)(8-9)",
+        "Xe/",
+        "C2H4O/(1-5)(2-5)(3-5)(4-7)(5-6)(6-7)/(4:mass=2)(5:mass=14)(6:rad=3)(7:mass=17)",
+    ],
+)
+def test_can_parse_tucan(tucan):
+    _parse_tucan(tucan)
+
+
+@pytest.mark.parametrize(
+    "tucan",
+    [
+        "",
+        "C2H6O(1-7)(2-7)(3-7)(4-8)(5-8)(6-9)(7-8)(8-9)",
+        "C2H6O(1-7)(2-7)(3-7)(4-8)(5-8)(6-9)(7-8)(8-9)/",
+    ],
+)
+def test_cannot_parse_tucan(tucan):
+    with pytest.raises(ParseCancellationException):
+        _parse_tucan(tucan)
+
+
+def test_roundtrip_graph_tucan_graph(m):
+    m_serialized = serialize_molecule(canonicalize_molecule(m))
+    _parse_tucan(m_serialized)

@@ -8,6 +8,15 @@ else:
 # This class defines a complete listener for a parse tree produced by tucanParser.
 class tucanListener(ParseTreeListener):
 
+    # Enter a parse tree produced by tucanParser#tucan.
+    def enterTucan(self, ctx:tucanParser.TucanContext):
+        pass
+
+    # Exit a parse tree produced by tucanParser#tucan.
+    def exitTucan(self, ctx:tucanParser.TucanContext):
+        pass
+
+
     # Enter a parse tree produced by tucanParser#node_attributes_start.
     def enterNode_attributes_start(self, ctx:tucanParser.Node_attributes_startContext):
         pass

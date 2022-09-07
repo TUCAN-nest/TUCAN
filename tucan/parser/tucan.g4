@@ -1,6 +1,11 @@
 grammar tucan;
 
 /*
+ * TUCAN
+ */
+tucan : sum_formula '/' tuples ('/' node_attributes)? EOF ;
+
+/*
  * Node attributes
  */
 node_attributes_start : node_attributes EOF ; // for testing only
@@ -13,7 +18,7 @@ node_properties : node_property (',' node_property)* ;
 
 node_property : node_property_key '=' node_property_value ;
 
-node_property_key : 'MASS' | 'RAD' ;
+node_property_key : 'mass' | 'rad' ;
 
 node_property_value : gte_one ;
 

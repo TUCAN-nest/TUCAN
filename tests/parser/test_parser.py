@@ -78,3 +78,46 @@ def test_self_loop_in_tuples_raises_exception():
     with pytest.raises(TucanParserException) as excinfo:
         _extract_bonds_from_tuples("(1-2)(1-1)(2-2)")
     assert str(excinfo.value) == 'Error in tuple "(1-1)": Self-loops are not allowed.'
+
+
+def _extract_node_attributes(s):
+    parser = _prepare_parser(s)
+    tree = parser.node_attributes_start()
+    listener = _walk_tree(tree)
+    return listener._node_attributes
+
+
+@pytest.mark.parametrize(
+    "node_attributes, expected_node_attributes",
+    [
+        ("", {}),
+        ("(1:mass=2)", {1: {"mass": 2}}),
+        ("(2:rad=5)", {2: {"rad": 5}}),
+        ("(1234:rad=5,mass=10)", {1234: {"mass": 10, "rad": 5}}),
+        ("(1:mass=10)(2:rad=1)", {1: {"mass": 10}, 2: {"rad": 1}}),
+        (
+            "(1:mass=123456789)(1:rad=987654321)",
+            {1: {"mass": 123456789, "rad": 987654321}},
+        ),
+    ],
+)
+def test_node_attributes(node_attributes, expected_node_attributes):
+    assert _extract_node_attributes(node_attributes) == expected_node_attributes
+
+
+@pytest.mark.parametrize(
+    "node_attributes, offending_node_index, offending_key",
+    [
+        ("(1:mass=10,rad=5)(2:rad=1)(1:rad=3,mass=12)", 1, "rad"),
+        ("(2:mass=5,mass=7)", 2, "mass"),
+    ],
+)
+def test_overriding_node_property_raises_exception(
+    node_attributes, offending_node_index, offending_key
+):
+    with pytest.raises(TucanParserException) as excinfo:
+        _extract_node_attributes(node_attributes)
+    assert (
+        str(excinfo.value)
+        == f'Atom {offending_node_index}: Property "{offending_key}" was already defined.'
+    )

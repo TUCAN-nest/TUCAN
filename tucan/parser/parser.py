@@ -39,6 +39,7 @@ class TucanListenerImpl(tucanListener):
     def __init__(self):
         self._atoms = []
         self._bonds = []
+        self._node_attributes = {}  # becomes a dictionary of dictionaries
 
     def enterWith_carbon(self, ctx: tucanParser.With_carbonContext):
         self._parse_sum_formula(ctx)
@@ -53,7 +54,13 @@ class TucanListenerImpl(tucanListener):
             raise TucanParserException(
                 f'Error in tuple "{ctx.getText()}": Self-loops are not allowed.'
             )
-        self._addBond(index1, index2)
+        self._add_bond(index1, index2)
+
+    def enterNode_property(self, ctx: tucanParser.Node_propertyContext):
+        node_index = int(ctx.parentCtx.node_index().getText())
+        key = ctx.node_property_key().getText()
+        value = int(ctx.node_property_value().getText())
+        self._add_node_property(node_index, key, value)
 
     def _parse_sum_formula(self, formula_ctx):
         if formula_ctx.getChildCount() == 0:
@@ -76,8 +83,17 @@ class TucanListenerImpl(tucanListener):
         for _ in range(count):
             self._atoms.append(atom_props)
 
-    def _addBond(self, index1, index2):
+    def _add_bond(self, index1, index2):
         self._bonds.append((index1 - 1, index2 - 1))
+
+    def _add_node_property(self, node_index, key, value):
+        props_for_node = self._node_attributes.setdefault(node_index, {})
+
+        if key in props_for_node:
+            raise TucanParserException(
+                f'Atom {node_index}: Property "{key}" was already defined.'
+            )
+        props_for_node[key] = value
 
 
 class RaisingErrorListener(ErrorListener):

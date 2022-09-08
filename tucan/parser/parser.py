@@ -1,6 +1,9 @@
 from antlr4 import InputStream, CommonTokenStream
 from antlr4.error.ErrorListener import ErrorListener
+from antlr4.tree.Tree import ParseTreeWalker
+from tucan.element_properties import ELEMENT_PROPS
 from tucan.parser.tucanLexer import tucanLexer
+from tucan.parser.tucanListener import tucanListener
 from tucan.parser.tucanParser import tucanParser
 
 
@@ -23,6 +26,45 @@ def _prepare_parser(s):
     parser.addErrorListener(ParserErrorListener())
 
     return parser
+
+
+def _walk_tree(tree):
+    walker = ParseTreeWalker()
+    listener = TucanListenerImpl()
+    walker.walk(listener, tree)
+    return listener
+
+
+class TucanListenerImpl(tucanListener):
+    def __init__(self):
+        self._atoms = []
+
+    def enterWith_carbon(self, ctx: tucanParser.With_carbonContext):
+        self._parse_sum_formula(ctx)
+
+    def enterWithout_carbon(self, ctx: tucanParser.Without_carbonContext):
+        self._parse_sum_formula(ctx)
+
+    def _parse_sum_formula(self, formula_ctx):
+        if formula_ctx.getChildCount() == 0:
+            return
+
+        for symbol_count_tuple in formula_ctx.children:
+            symbol = symbol_count_tuple.getChild(0).getText()
+            count = 1
+            if symbol_count_tuple.getChildCount() > 1:
+                count = int(symbol_count_tuple.getChild(1).getText())
+            self._add_atoms(symbol, count)
+
+    def _add_atoms(self, element, count):
+        atom_props = {
+            "element_symbol": element,
+            "atomic_number": ELEMENT_PROPS[element]["atomic_number"],
+            "partition": 0,
+        }
+
+        for _ in range(count):
+            self._atoms.append(atom_props)
 
 
 class RaisingErrorListener(ErrorListener):

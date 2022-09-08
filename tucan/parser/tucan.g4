@@ -156,9 +156,7 @@ node_attributes_start : node_attributes EOF ; // for testing only
 
 node_attributes : node_attribute* ;
 
-node_attribute : '(' node_index ':' node_properties ')' ;
-
-node_properties : node_property (',' node_property)* ;
+node_attribute : '(' node_index ':' node_property (',' node_property)* ')' ;
 
 node_property : node_property_key '=' node_property_value ;
 

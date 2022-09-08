@@ -125,8 +125,7 @@ tuples              ::= tuple*
 tuple               ::= "(" node_index "-" node_index ")"
 node_index          ::= gte_one
 node_attributes     ::= node_attribute*
-node_attribute      ::= "(" node_index ":" node_properties ")"
-node_properties     ::= node_property ("," node_property)*
+node_attribute      ::= "(" node_index ":" node_property ("," node_property)* ")"
 node_property       ::= node_property_key "=" node_property_value
 node_property_key   ::= "mass" | "rad"
 node_property_value ::= gte_one

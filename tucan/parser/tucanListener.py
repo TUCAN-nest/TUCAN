@@ -1187,15 +1187,6 @@ class tucanListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by tucanParser#node_properties.
-    def enterNode_properties(self, ctx:tucanParser.Node_propertiesContext):
-        pass
-
-    # Exit a parse tree produced by tucanParser#node_properties.
-    def exitNode_properties(self, ctx:tucanParser.Node_propertiesContext):
-        pass
-
-
     # Enter a parse tree produced by tucanParser#node_property.
     def enterNode_property(self, ctx:tucanParser.Node_propertyContext):
         pass

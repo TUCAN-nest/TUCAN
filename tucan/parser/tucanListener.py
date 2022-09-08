@@ -17,105 +17,6 @@ class tucanListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by tucanParser#node_attributes_start.
-    def enterNode_attributes_start(self, ctx:tucanParser.Node_attributes_startContext):
-        pass
-
-    # Exit a parse tree produced by tucanParser#node_attributes_start.
-    def exitNode_attributes_start(self, ctx:tucanParser.Node_attributes_startContext):
-        pass
-
-
-    # Enter a parse tree produced by tucanParser#node_attributes.
-    def enterNode_attributes(self, ctx:tucanParser.Node_attributesContext):
-        pass
-
-    # Exit a parse tree produced by tucanParser#node_attributes.
-    def exitNode_attributes(self, ctx:tucanParser.Node_attributesContext):
-        pass
-
-
-    # Enter a parse tree produced by tucanParser#node_attribute.
-    def enterNode_attribute(self, ctx:tucanParser.Node_attributeContext):
-        pass
-
-    # Exit a parse tree produced by tucanParser#node_attribute.
-    def exitNode_attribute(self, ctx:tucanParser.Node_attributeContext):
-        pass
-
-
-    # Enter a parse tree produced by tucanParser#node_properties.
-    def enterNode_properties(self, ctx:tucanParser.Node_propertiesContext):
-        pass
-
-    # Exit a parse tree produced by tucanParser#node_properties.
-    def exitNode_properties(self, ctx:tucanParser.Node_propertiesContext):
-        pass
-
-
-    # Enter a parse tree produced by tucanParser#node_property.
-    def enterNode_property(self, ctx:tucanParser.Node_propertyContext):
-        pass
-
-    # Exit a parse tree produced by tucanParser#node_property.
-    def exitNode_property(self, ctx:tucanParser.Node_propertyContext):
-        pass
-
-
-    # Enter a parse tree produced by tucanParser#node_property_key.
-    def enterNode_property_key(self, ctx:tucanParser.Node_property_keyContext):
-        pass
-
-    # Exit a parse tree produced by tucanParser#node_property_key.
-    def exitNode_property_key(self, ctx:tucanParser.Node_property_keyContext):
-        pass
-
-
-    # Enter a parse tree produced by tucanParser#node_property_value.
-    def enterNode_property_value(self, ctx:tucanParser.Node_property_valueContext):
-        pass
-
-    # Exit a parse tree produced by tucanParser#node_property_value.
-    def exitNode_property_value(self, ctx:tucanParser.Node_property_valueContext):
-        pass
-
-
-    # Enter a parse tree produced by tucanParser#tuples_start.
-    def enterTuples_start(self, ctx:tucanParser.Tuples_startContext):
-        pass
-
-    # Exit a parse tree produced by tucanParser#tuples_start.
-    def exitTuples_start(self, ctx:tucanParser.Tuples_startContext):
-        pass
-
-
-    # Enter a parse tree produced by tucanParser#tuples.
-    def enterTuples(self, ctx:tucanParser.TuplesContext):
-        pass
-
-    # Exit a parse tree produced by tucanParser#tuples.
-    def exitTuples(self, ctx:tucanParser.TuplesContext):
-        pass
-
-
-    # Enter a parse tree produced by tucanParser#tuple.
-    def enterTuple(self, ctx:tucanParser.TupleContext):
-        pass
-
-    # Exit a parse tree produced by tucanParser#tuple.
-    def exitTuple(self, ctx:tucanParser.TupleContext):
-        pass
-
-
-    # Enter a parse tree produced by tucanParser#node_index.
-    def enterNode_index(self, ctx:tucanParser.Node_indexContext):
-        pass
-
-    # Exit a parse tree produced by tucanParser#node_index.
-    def exitNode_index(self, ctx:tucanParser.Node_indexContext):
-        pass
-
-
     # Enter a parse tree produced by tucanParser#sum_formula_start.
     def enterSum_formula_start(self, ctx:tucanParser.Sum_formula_startContext):
         pass
@@ -1220,6 +1121,105 @@ class tucanListener(ParseTreeListener):
 
     # Exit a parse tree produced by tucanParser#count.
     def exitCount(self, ctx:tucanParser.CountContext):
+        pass
+
+
+    # Enter a parse tree produced by tucanParser#tuples_start.
+    def enterTuples_start(self, ctx:tucanParser.Tuples_startContext):
+        pass
+
+    # Exit a parse tree produced by tucanParser#tuples_start.
+    def exitTuples_start(self, ctx:tucanParser.Tuples_startContext):
+        pass
+
+
+    # Enter a parse tree produced by tucanParser#tuples.
+    def enterTuples(self, ctx:tucanParser.TuplesContext):
+        pass
+
+    # Exit a parse tree produced by tucanParser#tuples.
+    def exitTuples(self, ctx:tucanParser.TuplesContext):
+        pass
+
+
+    # Enter a parse tree produced by tucanParser#tuple.
+    def enterTuple(self, ctx:tucanParser.TupleContext):
+        pass
+
+    # Exit a parse tree produced by tucanParser#tuple.
+    def exitTuple(self, ctx:tucanParser.TupleContext):
+        pass
+
+
+    # Enter a parse tree produced by tucanParser#node_index.
+    def enterNode_index(self, ctx:tucanParser.Node_indexContext):
+        pass
+
+    # Exit a parse tree produced by tucanParser#node_index.
+    def exitNode_index(self, ctx:tucanParser.Node_indexContext):
+        pass
+
+
+    # Enter a parse tree produced by tucanParser#node_attributes_start.
+    def enterNode_attributes_start(self, ctx:tucanParser.Node_attributes_startContext):
+        pass
+
+    # Exit a parse tree produced by tucanParser#node_attributes_start.
+    def exitNode_attributes_start(self, ctx:tucanParser.Node_attributes_startContext):
+        pass
+
+
+    # Enter a parse tree produced by tucanParser#node_attributes.
+    def enterNode_attributes(self, ctx:tucanParser.Node_attributesContext):
+        pass
+
+    # Exit a parse tree produced by tucanParser#node_attributes.
+    def exitNode_attributes(self, ctx:tucanParser.Node_attributesContext):
+        pass
+
+
+    # Enter a parse tree produced by tucanParser#node_attribute.
+    def enterNode_attribute(self, ctx:tucanParser.Node_attributeContext):
+        pass
+
+    # Exit a parse tree produced by tucanParser#node_attribute.
+    def exitNode_attribute(self, ctx:tucanParser.Node_attributeContext):
+        pass
+
+
+    # Enter a parse tree produced by tucanParser#node_properties.
+    def enterNode_properties(self, ctx:tucanParser.Node_propertiesContext):
+        pass
+
+    # Exit a parse tree produced by tucanParser#node_properties.
+    def exitNode_properties(self, ctx:tucanParser.Node_propertiesContext):
+        pass
+
+
+    # Enter a parse tree produced by tucanParser#node_property.
+    def enterNode_property(self, ctx:tucanParser.Node_propertyContext):
+        pass
+
+    # Exit a parse tree produced by tucanParser#node_property.
+    def exitNode_property(self, ctx:tucanParser.Node_propertyContext):
+        pass
+
+
+    # Enter a parse tree produced by tucanParser#node_property_key.
+    def enterNode_property_key(self, ctx:tucanParser.Node_property_keyContext):
+        pass
+
+    # Exit a parse tree produced by tucanParser#node_property_key.
+    def exitNode_property_key(self, ctx:tucanParser.Node_property_keyContext):
+        pass
+
+
+    # Enter a parse tree produced by tucanParser#node_property_value.
+    def enterNode_property_value(self, ctx:tucanParser.Node_property_valueContext):
+        pass
+
+    # Exit a parse tree produced by tucanParser#node_property_value.
+    def exitNode_property_value(self, ctx:tucanParser.Node_property_valueContext):
         pass
 
 

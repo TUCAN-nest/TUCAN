@@ -6,34 +6,6 @@ grammar tucan;
 tucan : sum_formula '/' tuples ('/' node_attributes)? EOF ;
 
 /*
- * Node attributes
- */
-node_attributes_start : node_attributes EOF ; // for testing only
-
-node_attributes : node_attribute* ;
-
-node_attribute : '(' node_index ':' node_properties ')' ;
-
-node_properties : node_property (',' node_property)* ;
-
-node_property : node_property_key '=' node_property_value ;
-
-node_property_key : 'mass' | 'rad' ;
-
-node_property_value : gte_one ;
-
-/*
- * Tuples
- */
-tuples_start : tuples EOF ; // for testing only
-
-tuples : tuple* ;
-
-tuple : '(' node_index '-' node_index ')' ;
-
-node_index : gte_one ;
-
-/*
  * Hill system formula
  */
 sum_formula_start : sum_formula EOF ; // for testing only
@@ -166,6 +138,37 @@ og : 'Og' count? ;
 
 count : gt_one ;
 
+/*
+ * Tuples
+ */
+tuples_start : tuples EOF ; // for testing only
+
+tuples : tuple* ;
+
+tuple : '(' node_index '-' node_index ')' ;
+
+node_index : gte_one ;
+
+/*
+ * Node attributes
+ */
+node_attributes_start : node_attributes EOF ; // for testing only
+
+node_attributes : node_attribute* ;
+
+node_attribute : '(' node_index ':' node_properties ')' ;
+
+node_properties : node_property (',' node_property)* ;
+
+node_property : node_property_key '=' node_property_value ;
+
+node_property_key : 'mass' | 'rad' ;
+
+node_property_value : gte_one ;
+
+/*
+ * Numbers
+ */
 gte_one : '1' | gt_one ;
 gt_one : '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | GREATER_THAN_NINE ;
 GREATER_THAN_NINE : [1-9] [0-9]+ ;

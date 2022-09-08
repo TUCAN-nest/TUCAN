@@ -1,6 +1,6 @@
 import pytest
 
-from tucan.parser.parser import _prepare_parser, _walk_tree
+from tucan.parser.parser import _prepare_parser, _walk_tree, TucanParserException
 
 
 def _extract_atoms_from_sum_formula(s):
@@ -48,3 +48,33 @@ def _extract_atoms_from_sum_formula(s):
 )
 def test_atoms_from_sum_formula(sum_formula, expected_atoms):
     assert _extract_atoms_from_sum_formula(sum_formula) == expected_atoms
+
+
+def _extract_bonds_from_tuples(s):
+    parser = _prepare_parser(s)
+    tree = parser.tuples_start()
+    listener = _walk_tree(tree)
+    return listener._bonds
+
+
+@pytest.mark.parametrize(
+    "tuples, expected_bonds",
+    [
+        ("", []),
+        (
+            "(1-2)(3-4)(5-6)(7-8)(9-10)(11-12)",
+            [(0, 1), (2, 3), (4, 5), (6, 7), (8, 9), (10, 11)],
+        ),
+        ("(2-1)(1-2)", [(1, 0), (0, 1)]),
+        ("(1-2)(1-2)", [(0, 1), (0, 1)]),
+        ("(987654321-123456789)", [(987654320, 123456788)]),
+    ],
+)
+def test_bonds_from_tuples(tuples, expected_bonds):
+    assert _extract_bonds_from_tuples(tuples) == expected_bonds
+
+
+def test_self_loop_in_tuples_raises_exception():
+    with pytest.raises(TucanParserException) as excinfo:
+        _extract_bonds_from_tuples("(1-2)(1-1)(2-2)")
+    assert str(excinfo.value) == 'Error in tuple "(1-1)": Self-loops are not allowed.'

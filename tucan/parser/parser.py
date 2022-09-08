@@ -38,12 +38,22 @@ def _walk_tree(tree):
 class TucanListenerImpl(tucanListener):
     def __init__(self):
         self._atoms = []
+        self._bonds = []
 
     def enterWith_carbon(self, ctx: tucanParser.With_carbonContext):
         self._parse_sum_formula(ctx)
 
     def enterWithout_carbon(self, ctx: tucanParser.Without_carbonContext):
         self._parse_sum_formula(ctx)
+
+    def enterTuple(self, ctx: tucanParser.TupleContext):
+        index1 = int(ctx.node_index(0).getText())
+        index2 = int(ctx.node_index(1).getText())
+        if index1 == index2:
+            raise TucanParserException(
+                f'Error in tuple "{ctx.getText()}": Self-loops are not allowed.'
+            )
+        self._addBond(index1, index2)
 
     def _parse_sum_formula(self, formula_ctx):
         if formula_ctx.getChildCount() == 0:
@@ -65,6 +75,9 @@ class TucanListenerImpl(tucanListener):
 
         for _ in range(count):
             self._atoms.append(atom_props)
+
+    def _addBond(self, index1, index2):
+        self._bonds.append((index1 - 1, index2 - 1))
 
 
 class RaisingErrorListener(ErrorListener):

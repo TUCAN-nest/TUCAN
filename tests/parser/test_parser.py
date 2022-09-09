@@ -1,3 +1,4 @@
+import re
 import pytest
 from tucan.canonicalization import canonicalize_molecule
 from tucan.serialization import serialize_molecule
@@ -81,9 +82,11 @@ def test_bonds_from_tuples(tuples, expected_bonds):
 
 
 def test_self_loop_in_tuples_raises_exception():
-    with pytest.raises(TucanParserException) as excinfo:
+    expected_error_msg = re.escape(
+        'Error in tuple "(1-1)": Self-loops are not allowed.'
+    )
+    with pytest.raises(TucanParserException, match=expected_error_msg):
         _extract_bonds_from_tuples("(1-2)(1-1)(2-2)")
-    assert str(excinfo.value) == 'Error in tuple "(1-1)": Self-loops are not allowed.'
 
 
 def _extract_node_attributes(s):
@@ -121,12 +124,9 @@ def test_node_attributes(node_attributes, expected_node_attributes):
 def test_overriding_node_property_raises_exception(
     node_attributes, offending_node_index, offending_key
 ):
-    with pytest.raises(TucanParserException) as excinfo:
+    expected_error_msg = f'^Atom {offending_node_index}: Property "{offending_key}" was already defined.$'
+    with pytest.raises(TucanParserException, match=expected_error_msg) as excinfo:
         _extract_node_attributes(node_attributes)
-    assert (
-        str(excinfo.value)
-        == f'Atom {offending_node_index}: Property "{offending_key}" was already defined.'
-    )
 
 
 @pytest.mark.parametrize(
@@ -230,8 +230,6 @@ def test_roundtrip_molfile_graph_tucan_graph_tucan_graph(m):
     ],
 )
 def test_parse_tucan_invalid_node_index_raises_exception(tucan, offending_node_index):
-    with pytest.raises(TucanParserException) as excinfo:
+    expected_error_msg = f"^Atom with index {offending_node_index} does not exist.$"
+    with pytest.raises(TucanParserException, match=expected_error_msg):
         graph = parse_tucan(tucan)
-    assert (
-        str(excinfo.value) == f"Atom with index {offending_node_index} does not exist."
-    )

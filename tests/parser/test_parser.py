@@ -125,7 +125,7 @@ def test_overriding_node_property_raises_exception(
     node_attributes, offending_node_index, offending_key
 ):
     expected_error_msg = f'^Atom {offending_node_index}: Property "{offending_key}" was already defined.$'
-    with pytest.raises(TucanParserException, match=expected_error_msg) as excinfo:
+    with pytest.raises(TucanParserException, match=expected_error_msg):
         _extract_node_attributes(node_attributes)
 
 

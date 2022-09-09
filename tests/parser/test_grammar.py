@@ -58,7 +58,7 @@ def test_grammar_has_all_element_symbols(symbol):
     try:
         _parse_sum_formula(symbol)
     except TucanParserException:
-        pytest.fail('Unknown element symbol "' + symbol + '"')
+        pytest.fail(f'Unknown element symbol "{symbol}"')
 
 
 def test_element_order_is_correct():

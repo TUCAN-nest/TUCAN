@@ -1,6 +1,12 @@
 import pytest
-
-from tucan.parser.parser import _prepare_parser, _walk_tree, TucanParserException
+from tucan.canonicalization import canonicalize_molecule
+from tucan.serialization import serialize_molecule
+from tucan.parser.parser import (
+    _prepare_parser,
+    _walk_tree,
+    TucanParserException,
+    parse_tucan,
+)
 
 
 def _extract_atoms_from_sum_formula(s):
@@ -91,13 +97,13 @@ def _extract_node_attributes(s):
     "node_attributes, expected_node_attributes",
     [
         ("", {}),
-        ("(1:mass=2)", {1: {"mass": 2}}),
-        ("(2:rad=5)", {2: {"rad": 5}}),
-        ("(1234:rad=5,mass=10)", {1234: {"mass": 10, "rad": 5}}),
-        ("(1:mass=10)(2:rad=1)", {1: {"mass": 10}, 2: {"rad": 1}}),
+        ("(1:mass=2)", {0: {"mass": 2}}),
+        ("(2:rad=5)", {1: {"rad": 5}}),
+        ("(1234:rad=5,mass=10)", {1233: {"mass": 10, "rad": 5}}),
+        ("(1:mass=10)(2:rad=1)", {0: {"mass": 10}, 1: {"rad": 1}}),
         (
             "(1:mass=123456789)(1:rad=987654321)",
-            {1: {"mass": 123456789, "rad": 987654321}},
+            {0: {"mass": 123456789, "rad": 987654321}},
         ),
     ],
 )
@@ -120,4 +126,116 @@ def test_overriding_node_property_raises_exception(
     assert (
         str(excinfo.value)
         == f'Atom {offending_node_index}: Property "{offending_key}" was already defined.'
+    )
+
+
+@pytest.mark.parametrize(
+    "tucan, expected_atoms, expected_bonds",
+    [
+        ("/", {}, []),
+        ("//", {}, []),
+        (
+            "C2H6O/(1-7)(2-7)(3-7)(4-8)(5-8)(6-9)(7-8)(8-9)",
+            {
+                0: {"atomic_number": 1, "element_symbol": "H", "partition": 0},
+                1: {"atomic_number": 1, "element_symbol": "H", "partition": 0},
+                2: {"atomic_number": 1, "element_symbol": "H", "partition": 0},
+                3: {"atomic_number": 1, "element_symbol": "H", "partition": 0},
+                4: {"atomic_number": 1, "element_symbol": "H", "partition": 0},
+                5: {"atomic_number": 1, "element_symbol": "H", "partition": 0},
+                6: {"atomic_number": 6, "element_symbol": "C", "partition": 0},
+                7: {"atomic_number": 6, "element_symbol": "C", "partition": 0},
+                8: {"atomic_number": 8, "element_symbol": "O", "partition": 0},
+            },
+            [(0, 6), (1, 6), (2, 6), (3, 7), (4, 7), (5, 8), (6, 7), (7, 8)],
+        ),
+        (
+            "Xe/",
+            {0: {"atomic_number": 54, "element_symbol": "Xe", "partition": 0}},
+            [],
+        ),
+        (
+            "C2H4O/(1-5)(2-5)(3-5)(4-7)(5-6)(6-7)/(4:mass=2)(5:mass=14)(6:rad=3)(7:mass=17)",
+            {
+                0: {"atomic_number": 1, "element_symbol": "H", "partition": 0},
+                1: {"atomic_number": 1, "element_symbol": "H", "partition": 0},
+                2: {"atomic_number": 1, "element_symbol": "H", "partition": 0},
+                3: {
+                    "atomic_number": 1,
+                    "element_symbol": "H",
+                    "partition": 0,
+                    "mass": 2,
+                },
+                4: {
+                    "atomic_number": 6,
+                    "element_symbol": "C",
+                    "partition": 0,
+                    "mass": 14,
+                },
+                5: {
+                    "atomic_number": 6,
+                    "element_symbol": "C",
+                    "partition": 0,
+                    "rad": 3,
+                },
+                6: {
+                    "atomic_number": 8,
+                    "element_symbol": "O",
+                    "partition": 0,
+                    "mass": 17,
+                },
+            },
+            [(0, 4), (1, 4), (2, 4), (3, 6), (4, 5), (5, 6)],
+        ),
+        (
+            "CH/(2-1)(1-2)/(2:rad=3,mass=13)",
+            {
+                0: {"atomic_number": 1, "element_symbol": "H", "partition": 0},
+                1: {
+                    "atomic_number": 6,
+                    "element_symbol": "C",
+                    "partition": 0,
+                    "mass": 13,
+                    "rad": 3,
+                },
+            },
+            [(0, 1)],
+        ),
+    ],
+)
+def test_parse_tucan(tucan, expected_atoms, expected_bonds):
+    graph = parse_tucan(tucan)
+    assert dict(graph.nodes(data=True)) == expected_atoms
+    assert list(graph.edges) == expected_bonds
+
+
+def test_roundtrip_graph_tucan_graph(m):
+    m_serialized = serialize_molecule(canonicalize_molecule(m.copy()))
+    graph = parse_tucan(m_serialized)
+
+    # for n, d in m.nodes(data=True):
+    #     del d["x_coord"]
+    #     del d["y_coord"]
+    #     del d["z_coord"]
+    #     del d["chg"] # TODO: not always present ...
+    #
+    # assert dict(graph.nodes(data=True)) == dict(m.nodes(data=True))
+    # assert list(graph.edges) == list(m.edges)
+
+
+@pytest.mark.parametrize(
+    "tucan, offending_node_index",
+    [
+        ("CH/(1-3)", 3),
+        ("CH/(1-2)(5-1)", 5),
+        ("CH//(3:mass=1)", 3),
+        ("CH3//(1:mass=13)(5:rad=3)", 5),
+    ],
+)
+def test_parse_tucan_invalid_node_index_raises_exception(tucan, offending_node_index):
+    with pytest.raises(TucanParserException) as excinfo:
+        graph = parse_tucan(tucan)
+        print(graph)
+    assert (
+        str(excinfo.value) == f"Atom with index {offending_node_index} does not exist."
     )

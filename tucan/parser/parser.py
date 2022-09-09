@@ -1,3 +1,4 @@
+import networkx as nx
 from antlr4 import InputStream, CommonTokenStream
 from antlr4.error.ErrorListener import ErrorListener
 from antlr4.tree.Tree import ParseTreeWalker
@@ -7,10 +8,11 @@ from tucan.parser.tucanListener import tucanListener
 from tucan.parser.tucanParser import tucanParser
 
 
-def parse_tucan(s):
-    parser = _prepare_parser(s)
+def parse_tucan(tucan: str) -> nx.Graph:
+    parser = _prepare_parser(tucan)
     tree = parser.tucan()
-    # TODO: extract graph
+    listener = _walk_tree(tree)
+    return listener.to_graph()
 
 
 def _prepare_parser(s):
@@ -81,19 +83,49 @@ class TucanListenerImpl(tucanListener):
         }
 
         for _ in range(count):
-            self._atoms.append(atom_props)
+            self._atoms.append(atom_props.copy())
 
     def _add_bond(self, index1, index2):
         self._bonds.append((index1 - 1, index2 - 1))
 
     def _add_node_property(self, node_index, key, value):
-        props_for_node = self._node_attributes.setdefault(node_index, {})
+        props_for_node = self._node_attributes.setdefault(node_index - 1, {})
 
         if key in props_for_node:
             raise TucanParserException(
                 f'Atom {node_index}: Property "{key}" was already defined.'
             )
         props_for_node[key] = value
+
+    def to_graph(self) -> nx.Graph:
+        # node index validation
+        for i1, i2 in self._bonds:
+            self._validate_atom_index(i1)
+            self._validate_atom_index(i2)
+
+        sorted_atoms = sorted(self._atoms, key=lambda a: a["atomic_number"])
+
+        # dict of dict (atom_index -> dict of atom properties)
+        atoms_dict = {i: sorted_atoms[i] for i in range(len(sorted_atoms))}
+
+        # join in additional atom properties
+        for index, props in self._node_attributes.items():
+            self._validate_atom_index(index)
+
+            atom_props = atoms_dict[index]
+            atom_props.update(props)
+
+        # construct graph
+        graph = nx.Graph()
+        graph.add_nodes_from(list(atoms_dict.keys()))
+        nx.set_node_attributes(graph, atoms_dict)
+        graph.add_edges_from(self._bonds)
+
+        return graph
+
+    def _validate_atom_index(self, index):
+        if index >= len(self._atoms):
+            raise TucanParserException(f"Atom with index {index + 1} does not exist.")
 
 
 class RaisingErrorListener(ErrorListener):

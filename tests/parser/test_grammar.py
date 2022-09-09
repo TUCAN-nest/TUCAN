@@ -1,8 +1,7 @@
 import pytest
-from tucan.canonicalization import canonicalize_molecule
+
 from tucan.element_properties import element_symbols
 from tucan.parser.parser import _prepare_parser, TucanParserException, parse_tucan
-from tucan.serialization import serialize_molecule
 
 
 def _parse_sum_formula(s):
@@ -205,8 +204,3 @@ def test_can_parse_tucan(tucan):
 def test_cannot_parse_tucan(tucan):
     with pytest.raises(TucanParserException):
         parse_tucan(tucan)
-
-
-def test_roundtrip_graph_tucan_graph(m):
-    m_serialized = serialize_molecule(canonicalize_molecule(m))
-    parse_tucan(m_serialized)

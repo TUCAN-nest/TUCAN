@@ -232,7 +232,6 @@ def test_roundtrip_molfile_graph_tucan_graph_tucan_graph(m):
 def test_parse_tucan_invalid_node_index_raises_exception(tucan, offending_node_index):
     with pytest.raises(TucanParserException) as excinfo:
         graph = parse_tucan(tucan)
-        print(graph)
     assert (
         str(excinfo.value) == f"Atom with index {offending_node_index} does not exist."
     )

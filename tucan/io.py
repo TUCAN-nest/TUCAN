@@ -36,6 +36,17 @@ def graph_from_molfile_text(molfile: str) -> nx.Graph:
 
 
 def graph_from_tucan(tucan: str) -> nx.Graph:
+    """Instantiate a NetworkX graph from a TUCAN string.
+
+    Parameters
+    ----------
+    tucan: str
+        TUCAN string to be deserialized.
+
+    Returns
+    -------
+    NetworkX Graph
+    """
     return parse_tucan()
 
 

@@ -209,18 +209,15 @@ def test_parse_tucan(tucan, expected_atoms, expected_bonds):
     assert list(graph.edges) == expected_bonds
 
 
-def test_roundtrip_graph_tucan_graph(m):
-    m_serialized = serialize_molecule(canonicalize_molecule(m.copy()))
-    graph = parse_tucan(m_serialized)
+def test_roundtrip_molfile_graph_tucan_graph_tucan_graph(m):
+    m_serialized = serialize_molecule(canonicalize_molecule(m))
+    g1 = parse_tucan(m_serialized)
+    g1_serialized = serialize_molecule(canonicalize_molecule(g1.copy()))
+    g2 = parse_tucan(g1_serialized)
 
-    # for n, d in m.nodes(data=True):
-    #     del d["x_coord"]
-    #     del d["y_coord"]
-    #     del d["z_coord"]
-    #     del d["chg"] # TODO: not always present ...
-    #
-    # assert dict(graph.nodes(data=True)) == dict(m.nodes(data=True))
-    # assert list(graph.edges) == list(m.edges)
+    assert m_serialized == g1_serialized
+    assert dict(g1.nodes(data=True)) == dict(g2.nodes(data=True))
+    assert list(g1.edges) == list(g2.edges)
 
 
 @pytest.mark.parametrize(

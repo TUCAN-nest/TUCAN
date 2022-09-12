@@ -15,8 +15,8 @@ def parse_tucan(tucan: str) -> nx.Graph:
     return listener.to_graph()
 
 
-def _prepare_parser(s):
-    stream = InputStream(s)
+def _prepare_parser(to_parse: str) -> nx.Graph:
+    stream = InputStream(to_parse)
     lexer = tucanLexer(stream)
     token_stream = CommonTokenStream(lexer)
     parser = tucanParser(token_stream)
@@ -82,8 +82,7 @@ class TucanListenerImpl(tucanListener):
             "partition": 0,
         }
 
-        for _ in range(count):
-            self._atoms.append(atom_props.copy())
+        self._atoms.extend([atom_props.copy() for _ in range(count)])
 
     def _add_bond(self, index1, index2):
         self._bonds.append((index1 - 1, index2 - 1))

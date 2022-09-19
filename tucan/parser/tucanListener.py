@@ -1214,21 +1214,21 @@ class tucanListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by tucanParser#gte_one.
-    def enterGte_one(self, ctx:tucanParser.Gte_oneContext):
+    # Enter a parse tree produced by tucanParser#greater_than_zero.
+    def enterGreater_than_zero(self, ctx:tucanParser.Greater_than_zeroContext):
         pass
 
-    # Exit a parse tree produced by tucanParser#gte_one.
-    def exitGte_one(self, ctx:tucanParser.Gte_oneContext):
+    # Exit a parse tree produced by tucanParser#greater_than_zero.
+    def exitGreater_than_zero(self, ctx:tucanParser.Greater_than_zeroContext):
         pass
 
 
-    # Enter a parse tree produced by tucanParser#gt_one.
-    def enterGt_one(self, ctx:tucanParser.Gt_oneContext):
+    # Enter a parse tree produced by tucanParser#greater_than_one.
+    def enterGreater_than_one(self, ctx:tucanParser.Greater_than_oneContext):
         pass
 
-    # Exit a parse tree produced by tucanParser#gt_one.
-    def exitGt_one(self, ctx:tucanParser.Gt_oneContext):
+    # Exit a parse tree produced by tucanParser#greater_than_one.
+    def exitGreater_than_one(self, ctx:tucanParser.Greater_than_oneContext):
         pass
 
 

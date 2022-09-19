@@ -136,7 +136,7 @@ lv : 'Lv' count? ;
 ts : 'Ts' count? ;
 og : 'Og' count? ;
 
-count : gt_one ;
+count : greater_than_one ;
 
 /*
  * Tuples
@@ -147,7 +147,7 @@ tuples : tuple* ;
 
 tuple : '(' node_index '-' node_index ')' ;
 
-node_index : gte_one ;
+node_index : greater_than_zero ;
 
 /*
  * Node attributes
@@ -162,11 +162,11 @@ node_property : node_property_key '=' node_property_value ;
 
 node_property_key : 'mass' | 'rad' ;
 
-node_property_value : gte_one ;
+node_property_value : greater_than_zero ;
 
 /*
  * Numbers
  */
-gte_one : '1' | gt_one ;
-gt_one : '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | GREATER_THAN_NINE ;
+greater_than_zero : '1' | greater_than_one ;
+greater_than_one : '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | GREATER_THAN_NINE ;
 GREATER_THAN_NINE : [1-9] [0-9]+ ;

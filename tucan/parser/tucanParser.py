@@ -844,8 +844,8 @@ class tucanParser ( Parser ):
     RULE_node_property = 131
     RULE_node_property_key = 132
     RULE_node_property_value = 133
-    RULE_gte_one = 134
-    RULE_gt_one = 135
+    RULE_greater_than_zero = 134
+    RULE_greater_than_one = 135
 
     ruleNames =  [ "tucan", "sum_formula_start", "sum_formula", "with_carbon", 
                    "without_carbon", "h", "he", "li", "be", "b", "c", "n", 
@@ -864,7 +864,7 @@ class tucanParser ( Parser ):
                    "og", "count", "tuples_start", "tuples", "tuple", "node_index", 
                    "node_attributes_start", "node_attributes", "node_attribute", 
                    "node_property", "node_property_key", "node_property_value", 
-                   "gte_one", "gt_one" ]
+                   "greater_than_zero", "greater_than_one" ]
 
     EOF = Token.EOF
     T__0=1
@@ -10103,8 +10103,8 @@ class tucanParser ( Parser ):
             super().__init__(parent, invokingState)
             self.parser = parser
 
-        def gt_one(self):
-            return self.getTypedRuleContext(tucanParser.Gt_oneContext,0)
+        def greater_than_one(self):
+            return self.getTypedRuleContext(tucanParser.Greater_than_oneContext,0)
 
 
         def getRuleIndex(self):
@@ -10128,7 +10128,7 @@ class tucanParser ( Parser ):
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 1463
-            self.gt_one()
+            self.greater_than_one()
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -10299,8 +10299,8 @@ class tucanParser ( Parser ):
             super().__init__(parent, invokingState)
             self.parser = parser
 
-        def gte_one(self):
-            return self.getTypedRuleContext(tucanParser.Gte_oneContext,0)
+        def greater_than_zero(self):
+            return self.getTypedRuleContext(tucanParser.Greater_than_zeroContext,0)
 
 
         def getRuleIndex(self):
@@ -10324,7 +10324,7 @@ class tucanParser ( Parser ):
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 1480
-            self.gte_one()
+            self.greater_than_zero()
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -10607,8 +10607,8 @@ class tucanParser ( Parser ):
             super().__init__(parent, invokingState)
             self.parser = parser
 
-        def gte_one(self):
-            return self.getTypedRuleContext(tucanParser.Gte_oneContext,0)
+        def greater_than_zero(self):
+            return self.getTypedRuleContext(tucanParser.Greater_than_zeroContext,0)
 
 
         def getRuleIndex(self):
@@ -10632,7 +10632,7 @@ class tucanParser ( Parser ):
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 1510
-            self.gte_one()
+            self.greater_than_zero()
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -10642,35 +10642,35 @@ class tucanParser ( Parser ):
         return localctx
 
 
-    class Gte_oneContext(ParserRuleContext):
+    class Greater_than_zeroContext(ParserRuleContext):
         __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
             self.parser = parser
 
-        def gt_one(self):
-            return self.getTypedRuleContext(tucanParser.Gt_oneContext,0)
+        def greater_than_one(self):
+            return self.getTypedRuleContext(tucanParser.Greater_than_oneContext,0)
 
 
         def getRuleIndex(self):
-            return tucanParser.RULE_gte_one
+            return tucanParser.RULE_greater_than_zero
 
         def enterRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "enterGte_one" ):
-                listener.enterGte_one(self)
+            if hasattr( listener, "enterGreater_than_zero" ):
+                listener.enterGreater_than_zero(self)
 
         def exitRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "exitGte_one" ):
-                listener.exitGte_one(self)
+            if hasattr( listener, "exitGreater_than_zero" ):
+                listener.exitGreater_than_zero(self)
 
 
 
 
-    def gte_one(self):
+    def greater_than_zero(self):
 
-        localctx = tucanParser.Gte_oneContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 268, self.RULE_gte_one)
+        localctx = tucanParser.Greater_than_zeroContext(self, self._ctx, self.state)
+        self.enterRule(localctx, 268, self.RULE_greater_than_zero)
         try:
             self.state = 1514
             self._errHandler.sync(self)
@@ -10683,7 +10683,7 @@ class tucanParser ( Parser ):
             elif token in [129, 130, 131, 132, 133, 134, 135, 136, 137]:
                 self.enterOuterAlt(localctx, 2)
                 self.state = 1513
-                self.gt_one()
+                self.greater_than_one()
                 pass
             else:
                 raise NoViableAltException(self)
@@ -10697,7 +10697,7 @@ class tucanParser ( Parser ):
         return localctx
 
 
-    class Gt_oneContext(ParserRuleContext):
+    class Greater_than_oneContext(ParserRuleContext):
         __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -10708,23 +10708,23 @@ class tucanParser ( Parser ):
             return self.getToken(tucanParser.GREATER_THAN_NINE, 0)
 
         def getRuleIndex(self):
-            return tucanParser.RULE_gt_one
+            return tucanParser.RULE_greater_than_one
 
         def enterRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "enterGt_one" ):
-                listener.enterGt_one(self)
+            if hasattr( listener, "enterGreater_than_one" ):
+                listener.enterGreater_than_one(self)
 
         def exitRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "exitGt_one" ):
-                listener.exitGt_one(self)
+            if hasattr( listener, "exitGreater_than_one" ):
+                listener.exitGreater_than_one(self)
 
 
 
 
-    def gt_one(self):
+    def greater_than_one(self):
 
-        localctx = tucanParser.Gt_oneContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 270, self.RULE_gt_one)
+        localctx = tucanParser.Greater_than_oneContext(self, self._ctx, self.state)
+        self.enterRule(localctx, 270, self.RULE_greater_than_one)
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)

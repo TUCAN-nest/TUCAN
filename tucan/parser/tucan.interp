@@ -413,8 +413,8 @@ node_attribute
 node_property
 node_property_key
 node_property_value
-gte_one
-gt_one
+greater_than_zero
+greater_than_one
 
 
 atn:

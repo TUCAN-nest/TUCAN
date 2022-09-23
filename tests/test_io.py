@@ -290,6 +290,17 @@ def test_parse_bond_block_molfile3000_raises_exception(molfile, expected_error_m
                 "M  V30 3 H 0 0 0 0",
             ],
         ),
+        # non-CTAB lines are not concatenated
+        (
+            [
+                "abc-",
+                "M  V30 def",
+            ],
+            [
+                "abc-",
+                "M  V30 def",
+            ],
+        ),
         # example from BIOVIA's CTFile specification
         (
             [

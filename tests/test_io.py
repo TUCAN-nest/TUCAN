@@ -282,3 +282,26 @@ def test_molfile_with_invalid_version_raises_exception(molfile):
         match='Invalid Molfile version: Expected "V3000", found "V2000"',
     ):
         graph_from_molfile_text(molfile)
+
+
+@pytest.mark.parametrize(
+    "molfile, expected_error_msg",
+    [
+        # missing COUNTS line
+        (
+            "\n\n\n  0  0  0     0  0            999 V3000\nM  V30 BEGIN CTAB\nM  V30 BEGIN ATOM",
+            'Bad counts line: "M V30 BEGIN ATOM"',
+        ),
+        # number of bonds missing
+        (
+            "\n\n\n  0  0  0     0  0            999 V3000\nM  V30 BEGIN CTAB\nM  V30 COUNTS 1",
+            'Bad counts line: "M V30 COUNTS 1"',
+        ),
+    ],
+)
+def test_molfile_with_invalid_counts_line_raises_exception(molfile, expected_error_msg):
+    with pytest.raises(
+        MolfileParserException,
+        match=expected_error_msg,
+    ):
+        graph_from_molfile_text(molfile)

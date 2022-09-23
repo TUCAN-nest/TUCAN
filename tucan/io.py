@@ -87,6 +87,7 @@ def _read_file(filepath: str) -> List[List[str]]:
 
 def _graph_from_tokenized_lines(lines: List[List[str]]) -> nx.Graph:
     _validate_molfile_version(lines, "V3000")
+    _validate_counts_line(lines)
 
     atom_props = _parse_atom_block_molfile3000(lines)
     bonds = _parse_bond_block_molfile3000(lines)
@@ -104,6 +105,12 @@ def _validate_molfile_version(lines: List[List[str]], expected_version: str):
         raise MolfileParserException(
             f'Invalid Molfile version: Expected "{expected_version}", found "{version}"'
         )
+
+
+def _validate_counts_line(lines: List[List[str]]):
+    if lines[5][2] != "COUNTS" or len(lines[5]) < 5:
+        badline = " ".join(lines[5])
+        raise MolfileParserException(f'Bad counts line: "{badline}"')
 
 
 def _parse_atom_block_molfile3000(lines: List[List[str]]) -> Dict:

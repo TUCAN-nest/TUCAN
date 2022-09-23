@@ -53,8 +53,8 @@ def graph_from_tucan(tucan: str) -> nx.Graph:
 def _split_into_tokenized_lines(string: str) -> List[List[str]]:
     lines = string.splitlines()
     lines = _concat_lines_with_dash(lines)
-    splitted_lines = [line.rstrip().split(" ") for line in lines]
-    return [[value for value in line if value != ""] for line in splitted_lines]
+    split_lines = [line.rstrip().split(" ") for line in lines]
+    return [[value for value in line if value != ""] for line in split_lines]
 
 
 def _concat_lines_with_dash(lines: List[str]) -> List[str]:

@@ -178,7 +178,7 @@ def test_parsing_atom_block():
             "M  V30 BEGIN CTAB\n"
             "M  V30 COUNTS 1 1\n"
             "M  V30 1 H 0 0 0 0\n",
-            'Expected "BEGIN ATOM" in line 7, found "1 H 0 0 0 0"',
+            'Expected "BEGIN ATOM" on line 7, found "1 H 0 0 0 0"',
         ),
         # missing "END ATOM"
         (
@@ -189,7 +189,7 @@ def test_parsing_atom_block():
             "M  V30 1 H 0 0 0 0\n"
             "M  V30 2 H 0 0 0 0\n"
             "M  V30 3 H 0 0 0 0\n",
-            'Expected "END ATOM" in line 10, found "3 H 0 0 0 0"',
+            'Expected "END ATOM" on line 10, found "3 H 0 0 0 0"',
         ),
     ],
 )
@@ -239,7 +239,7 @@ def test_parsing_bond_block():
             "M  V30 2 H 0 0 0 0\n"
             "M  V30 END ATOM\n"
             "M  V30 1 1 1 2",
-            'Expected "BEGIN BOND" in line 11, found "1 1 1 2"',
+            'Expected "BEGIN BOND" on line 11, found "1 1 1 2"',
         ),
         # missing "END BOND"
         (
@@ -254,7 +254,7 @@ def test_parsing_bond_block():
             "M  V30 1 1 1 2\n"
             "M  V30 1 1 2 1\n"
             "M  V30 1 1 1 1",
-            'Expected "END BOND" in line 14, found "1 1 1 1"',
+            'Expected "END BOND" on line 14, found "1 1 1 1"',
         ),
     ],
 )

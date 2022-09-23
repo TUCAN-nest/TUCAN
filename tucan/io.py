@@ -121,13 +121,13 @@ def _parse_atom_block_molfile3000(lines: List[List[str]]) -> Dict:
 
     if (begin_atom_str := " ".join(lines[atom_block_offset - 1][2:])) != "BEGIN ATOM":
         raise MolfileParserException(
-            f'Expected "BEGIN ATOM" in line {atom_block_offset}, found "{begin_atom_str}"'
+            f'Expected "BEGIN ATOM" on line {atom_block_offset}, found "{begin_atom_str}"'
         )
     if (
         end_atom_str := " ".join(lines[atom_block_offset + atom_count][2:])
     ) != "END ATOM":
         raise MolfileParserException(
-            f'Expected "END ATOM" in line {atom_block_offset + atom_count + 1}, found "{end_atom_str}"'
+            f'Expected "END ATOM" on line {atom_block_offset + atom_count + 1}, found "{end_atom_str}"'
         )
 
     atom_props = {
@@ -185,13 +185,13 @@ def _parse_bond_block_molfile3000(lines: List[List[str]]) -> List[Tuple[int, int
 
     if (begin_bond_str := " ".join(lines[bond_block_offset - 1][2:])) != "BEGIN BOND":
         raise MolfileParserException(
-            f'Expected "BEGIN BOND" in line {bond_block_offset}, found "{begin_bond_str}"'
+            f'Expected "BEGIN BOND" on line {bond_block_offset}, found "{begin_bond_str}"'
         )
     if (
         end_bond_str := " ".join(lines[bond_block_offset + bond_count][2:])
     ) != "END BOND":
         raise MolfileParserException(
-            f'Expected "END BOND" in line {bond_block_offset + bond_count + 1}, found "{end_bond_str}"'
+            f'Expected "END BOND" on line {bond_block_offset + bond_count + 1}, found "{end_bond_str}"'
         )
 
     bonds = [

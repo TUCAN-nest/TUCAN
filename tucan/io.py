@@ -117,15 +117,22 @@ def _parse_atom_block_molfile3000(lines: List[List[str]]) -> Dict:
     atom_count = int(lines[5][3])
     atom_block_offset = 7
 
+    if (begin_atom_str := " ".join(lines[atom_block_offset - 1][2:])) != "BEGIN ATOM":
+        raise MolfileParserException(
+            f'Expected "BEGIN ATOM" in line {atom_block_offset}, found "{begin_atom_str}"'
+        )
+    if (
+        end_atom_str := " ".join(lines[atom_block_offset + atom_count][2:])
+    ) != "END ATOM":
+        raise MolfileParserException(
+            f'Expected "END ATOM" in line {atom_block_offset + atom_count + 1}, found "{end_atom_str}"'
+        )
+
     atom_props = {
         int(line[2])
         - 1: _parse_atom_props(line)  # map zero-based label to property-dict
         for line in lines[atom_block_offset : atom_block_offset + atom_count]
     }
-    assert len(atom_props) == atom_count, (
-        f"Number of atoms {len(atom_props)} doesn't match atom-count specified in"
-        f" header {atom_count}."
-    )
 
     return atom_props
 

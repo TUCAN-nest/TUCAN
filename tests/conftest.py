@@ -63,6 +63,15 @@ def pytest_configure(config):
             params=testset, ids=idtestfile
         )  # automatically runs the test(s) using this fixture on all molecules in `params`
         def m(self, request):
+            # see https://stackoverflow.com/a/28198398
+            if skip_ids_marker := request.node.get_closest_marker("skip_ids"):
+                test_id = request.node.callspec.id
+                if test_id in skip_ids_marker.args[0]:
+                    pytest.skip()
+
             return filereader(request.param)
 
     config.pluginmanager.register(Plugin())
+    config.addinivalue_line(
+        "markers", "skip_ids: ignore tests that match the given ids"
+    )

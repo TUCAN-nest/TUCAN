@@ -19,8 +19,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install .[dev]
       - name: black
+        continue-on-error: true
         run: |
-          black . --check --diff
+          black . --check --diff --extend-exclude "tucan/parser/tucan.*\.py"
       - name: pytest
         run: |
           pytest

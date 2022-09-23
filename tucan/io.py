@@ -204,13 +204,13 @@ def _parse_bond_block_molfile3000(lines: List[List[str]]) -> List[Tuple[int, int
 
 def _validate_bond_indices(bonds: List[Tuple[int, int]], atom_props: Dict):
     for bond in bonds:
-        _validate_bond_index(bond[0], atom_props)
-        _validate_bond_index(bond[1], atom_props)
+        _validate_atom_index(bond[0], atom_props)
+        _validate_atom_index(bond[1], atom_props)
 
 
-def _validate_bond_index(bond: int, atom_props: Dict):
-    if bond not in atom_props:
-        raise MolfileParserException(f"Unknown atom index {bond + 1} in bond")
+def _validate_atom_index(index: int, atom_props: Dict):
+    if index not in atom_props:
+        raise MolfileParserException(f"Unknown atom index {index + 1} in bond")
 
 
 class MolfileParserException(Exception):

@@ -175,14 +175,16 @@ def test_parsing_atom_block():
         # missing "BEGIN ATOM"
         (
             "\n\n\n  0  0  0     0  0            999 V3000\n"
-            "M  V30 BEGIN CTAB\nM  V30 COUNTS 1 1\n"
+            "M  V30 BEGIN CTAB\n"
+            "M  V30 COUNTS 1 1\n"
             "M  V30 1 H 0 0 0 0\n",
             'Expected "BEGIN ATOM" in line 7, found "1 H 0 0 0 0"',
         ),
         # missing "END ATOM"
         (
             "\n\n\n  0  0  0     0  0            999 V3000\n"
-            "M  V30 BEGIN CTAB\nM  V30 COUNTS 2 0\n"
+            "M  V30 BEGIN CTAB\n"
+            "M  V30 COUNTS 2 0\n"
             "M  V30 BEGIN ATOM\n"
             "M  V30 1 H 0 0 0 0\n"
             "M  V30 2 H 0 0 0 0\n"
@@ -222,6 +224,46 @@ def test_parsing_bond_block():
         (12, 14),
         (12, 13),
     ]
+
+
+@pytest.mark.parametrize(
+    "molfile, expected_error_msg",
+    [
+        # missing "BEGIN BOND"
+        (
+            "\n\n\n  0  0  0     0  0            999 V3000\n"
+            "M  V30 BEGIN CTAB\n"
+            "M  V30 COUNTS 2 1\n"
+            "M  V30 BEGIN ATOM\n"
+            "M  V30 1 H 0 0 0 0\n"
+            "M  V30 2 H 0 0 0 0\n"
+            "M  V30 END ATOM\n"
+            "M  V30 1 1 1 2",
+            'Expected "BEGIN BOND" in line 11, found "1 1 1 2"',
+        ),
+        # missing "END BOND"
+        (
+            "\n\n\n  0  0  0     0  0            999 V3000\n"
+            "M  V30 BEGIN CTAB\n"
+            "M  V30 COUNTS 2 2\n"
+            "M  V30 BEGIN ATOM\n"
+            "M  V30 1 H 0 0 0 0\n"
+            "M  V30 2 H 0 0 0 0\n"
+            "M  V30 END ATOM\n"
+            "M  V30 BEGIN BOND\n"
+            "M  V30 1 1 1 2\n"
+            "M  V30 1 1 2 1\n"
+            "M  V30 1 1 1 1",
+            'Expected "END BOND" in line 14, found "1 1 1 1"',
+        ),
+    ],
+)
+def test_parse_bond_block_molfile3000_raises_exception(molfile, expected_error_msg):
+    with pytest.raises(
+        MolfileParserException,
+        match=expected_error_msg,
+    ):
+        graph_from_molfile_text(molfile)
 
 
 @pytest.mark.parametrize(

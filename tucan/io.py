@@ -173,17 +173,29 @@ def _parse_atom_props(line: List[str]) -> Dict:
 def _parse_bond_block_molfile3000(lines: List[List[str]]) -> List[Tuple[int, int]]:
     atom_count = int(lines[5][3])
     bond_count = int(lines[5][4])
+
+    # bond block is optional
+    if bond_count == 0:
+        return []
+
     atom_block_offset = 7
     bond_block_offset = atom_block_offset + atom_count + 2
+
+    if (begin_bond_str := " ".join(lines[bond_block_offset - 1][2:])) != "BEGIN BOND":
+        raise MolfileParserException(
+            f'Expected "BEGIN BOND" in line {bond_block_offset}, found "{begin_bond_str}"'
+        )
+    if (
+        end_bond_str := " ".join(lines[bond_block_offset + bond_count][2:])
+    ) != "END BOND":
+        raise MolfileParserException(
+            f'Expected "END BOND" in line {bond_block_offset + bond_count + 1}, found "{end_bond_str}"'
+        )
 
     bonds = [
         (int(line[4]) - 1, int(line[5]) - 1)
         for line in lines[bond_block_offset : bond_block_offset + bond_count]
     ]  # make bond-indices zero-based
-    assert len(bonds) == bond_count, (
-        f"Number of bonds {len(bonds)} doesn't match bond-count specified in header"
-        f" {bond_count}."
-    )
 
     return bonds
 

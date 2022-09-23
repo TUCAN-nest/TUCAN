@@ -8,6 +8,7 @@ from tucan.io import (
     _read_file,
     MolfileParserException,
     graph_from_molfile_text,
+    _concat_lines_with_dash,
 )
 
 
@@ -194,12 +195,88 @@ def test_parsing_bond_block():
 
 
 @pytest.mark.parametrize(
+    "lines, expected_lines",
+    [
+        # no dash, no concat
+        (
+            [
+                "M  V30 1 H 0 0 0 0",
+            ],
+            [
+                "M  V30 1 H 0 0 0 0",
+            ],
+        ),
+        (
+            [
+                "M  V30 1 H 0 0 0 0",
+                "M  V30 2 O 0 0 0 0",
+                "M  V30 3 H 0 0 0 0",
+            ],
+            [
+                "M  V30 1 H 0 0 0 0",
+                "M  V30 2 O 0 0 0 0",
+                "M  V30 3 H 0 0 0 0",
+            ],
+        ),
+        # example from BIOVIA's CTFile specification
+        (
+            [
+                'M  V30 10 20 30 "abc-',
+                'M  V30 def"',
+            ],
+            [
+                'M  V30 10 20 30 "abcdef"',
+            ],
+        ),
+        # dash in last line is silently ignored
+        (
+            [
+                "M  V30 abc-",
+            ],
+            [
+                "M  V30 abc-",
+            ],
+        ),
+        (
+            [
+                "M  V30 1 H 0 0 0 0 -",
+                "M  V30 MASS=2 -",
+                "M  V30 RAD=1 -",
+            ],
+            [
+                "M  V30 1 H 0 0 0 0 MASS=2 RAD=1 -",
+            ],
+        ),
+    ],
+)
+def test_concat_lines_with_dash(lines, expected_lines):
+    assert _concat_lines_with_dash(lines) == expected_lines
+
+
+@pytest.mark.parametrize(
+    "lines, expected_error_msg",
+    [
+        (
+            [
+                "M  V30 abc-",
+                "def",
+            ],
+            'Invalid concatenation of lines "M  V30 abc-" and "def"',
+        ),
+    ],
+)
+def test_concat_lines_with_dash_raises_exception(lines, expected_error_msg):
+    with pytest.raises(MolfileParserException, match=expected_error_msg):
+        _concat_lines_with_dash(lines)
+
+
+@pytest.mark.parametrize(
     "molfile",
     [
         "\n\n\n  0  0  0     0  0            999 V2000",
     ],
 )
-def test_molfile_with_invalid_version(molfile):
+def test_molfile_with_invalid_version_raises_exception(molfile):
     with pytest.raises(
         MolfileParserException,
         match='Invalid Molfile version: Expected "V3000", found "V2000"',

@@ -51,8 +51,32 @@ def graph_from_tucan(tucan: str) -> nx.Graph:
 
 
 def _split_into_tokenized_lines(string: str) -> List[List[str]]:
-    lines = [line.rstrip().split(" ") for line in string.splitlines()]
-    return [[value for value in line if value != ""] for line in lines]
+    lines = string.splitlines()
+    lines = _concat_lines_with_dash(lines)
+    splitted_lines = [line.rstrip().split(" ") for line in lines]
+    return [[value for value in line if value != ""] for line in splitted_lines]
+
+
+def _concat_lines_with_dash(lines: List[str]) -> List[str]:
+    result = list()
+
+    while (length := len(lines)) > 1:
+        curr_line = lines.pop()
+        prev_line = lines[length - 2]
+
+        if prev_line.endswith("-") and prev_line.startswith("M  V30 "):
+            if curr_line.startswith("M  V30 "):
+                lines[length - 2] = prev_line[0:-1] + curr_line[7:]
+            else:
+                raise MolfileParserException(
+                    f'Invalid concatenation of lines "{prev_line}" and "{curr_line}"'
+                )
+        else:
+            result.append(curr_line)
+
+    result.append(lines[0])
+    result.reverse()
+    return result
 
 
 def _read_file(filepath: str) -> List[List[str]]:

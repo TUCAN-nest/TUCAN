@@ -92,6 +92,8 @@ def _graph_from_tokenized_lines(lines: List[List[str]]) -> nx.Graph:
     atom_props = _parse_atom_block_molfile3000(lines)
     bonds = _parse_bond_block_molfile3000(lines)
 
+    _validate_bond_indices(bonds, atom_props)
+
     graph = nx.Graph()
     graph.add_nodes_from(list(atom_props.keys()))
     nx.set_node_attributes(graph, atom_props)
@@ -198,6 +200,17 @@ def _parse_bond_block_molfile3000(lines: List[List[str]]) -> List[Tuple[int, int
     ]  # make bond-indices zero-based
 
     return bonds
+
+
+def _validate_bond_indices(bonds: List[Tuple[int, int]], atom_props: Dict):
+    for bond in bonds:
+        _validate_bond_index(bond[0], atom_props)
+        _validate_bond_index(bond[1], atom_props)
+
+
+def _validate_bond_index(bond: int, atom_props: Dict):
+    if bond not in atom_props:
+        raise MolfileParserException(f"Unknown atom index {bond + 1} in bond")
 
 
 class MolfileParserException(Exception):

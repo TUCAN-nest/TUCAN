@@ -381,3 +381,42 @@ def test_molfile_with_invalid_counts_line_raises_exception(molfile, expected_err
         match=expected_error_msg,
     ):
         graph_from_molfile_text(molfile)
+
+
+@pytest.mark.parametrize(
+    "molfile, expected_error_msg",
+    [
+        (
+            "\n\n\n  0  0  0     0  0            999 V3000\n"
+            "M  V30 BEGIN CTAB\n"
+            "M  V30 COUNTS 2 1\n"
+            "M  V30 BEGIN ATOM\n"
+            "M  V30 1 H 0 0 0 0\n"
+            "M  V30 2 H 0 0 0 0\n"
+            "M  V30 END ATOM\n"
+            "M  V30 BEGIN BOND\n"
+            "M  V30 1 1 3 1\n"
+            "M  V30 END BOND",
+            "Unknown atom index 3 in bond",
+        ),
+        (
+            "\n\n\n  0  0  0     0  0            999 V3000\n"
+            "M  V30 BEGIN CTAB\n"
+            "M  V30 COUNTS 2 1\n"
+            "M  V30 BEGIN ATOM\n"
+            "M  V30 1 H 0 0 0 0\n"
+            "M  V30 2 H 0 0 0 0\n"
+            "M  V30 END ATOM\n"
+            "M  V30 BEGIN BOND\n"
+            "M  V30 1 1 2 5\n"
+            "M  V30 END BOND",
+            "Unknown atom index 5 in bond",
+        ),
+    ],
+)
+def test_molfile_with_invalid_bond_index_raises_exception(molfile, expected_error_msg):
+    with pytest.raises(
+        MolfileParserException,
+        match=expected_error_msg,
+    ):
+        graph_from_molfile_text(molfile)

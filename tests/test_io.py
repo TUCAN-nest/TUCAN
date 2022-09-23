@@ -1,8 +1,13 @@
 from typing import List
+
+import pytest
+
 from tucan.io import (
     _parse_atom_block_molfile3000,
     _parse_bond_block_molfile3000,
     _read_file,
+    MolfileParserException,
+    graph_from_molfile_text,
 )
 
 
@@ -186,3 +191,17 @@ def test_parsing_bond_block():
         (12, 14),
         (12, 13),
     ]
+
+
+@pytest.mark.parametrize(
+    "molfile",
+    [
+        "\n\n\n  0  0  0     0  0            999 V2000",
+    ],
+)
+def test_molfile_with_invalid_version(molfile):
+    with pytest.raises(
+        MolfileParserException,
+        match='Invalid Molfile version: Expected "V3000", found "V2000"',
+    ):
+        graph_from_molfile_text(molfile)

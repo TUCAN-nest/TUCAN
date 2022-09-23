@@ -62,6 +62,8 @@ def _read_file(filepath: str) -> List[List[str]]:
 
 
 def _graph_from_tokenized_lines(lines: List[List[str]]) -> nx.Graph:
+    _validate_molfile_version(lines, "V3000")
+
     atom_props = _parse_atom_block_molfile3000(lines)
     bonds = _parse_bond_block_molfile3000(lines)
 
@@ -71,6 +73,13 @@ def _graph_from_tokenized_lines(lines: List[List[str]]) -> nx.Graph:
     graph.add_edges_from(bonds)
 
     return graph
+
+
+def _validate_molfile_version(lines: List[List[str]], expected_version: str):
+    if (version := lines[3][6]) != expected_version:
+        raise MolfileParserException(
+            f'Invalid Molfile version: Expected "{expected_version}", found "{version}"'
+        )
 
 
 def _parse_atom_block_molfile3000(lines: List[List[str]]) -> Dict:
@@ -139,3 +148,7 @@ def _parse_bond_block_molfile3000(lines: List[List[str]]) -> List[Tuple[int, int
     )
 
     return bonds
+
+
+class MolfileParserException(Exception):
+    pass

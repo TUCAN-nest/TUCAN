@@ -1,3 +1,4 @@
+from collections import deque
 import networkx as nx
 from pathlib import Path
 from tucan.element_properties import ELEMENT_PROPS
@@ -58,25 +59,29 @@ def _split_into_tokenized_lines(string: str) -> List[List[str]]:
 
 
 def _concat_lines_with_dash(lines: List[str]) -> List[str]:
-    result = list()
+    final_lines = []
+    lines = deque(lines)
 
-    while (length := len(lines)) > 1:
-        curr_line = lines.pop()
-        prev_line = lines[length - 2]
+    while lines:
+        curr_line = lines.popleft()
 
-        if prev_line.endswith("-") and prev_line.startswith("M  V30 "):
-            if curr_line.startswith("M  V30 "):
-                lines[length - 2] = prev_line[0:-1] + curr_line[7:]
-            else:
-                raise MolfileParserException(
-                    f'Invalid concatenation of lines "{prev_line}" and "{curr_line}"'
-                )
-        else:
-            result.append(curr_line)
+        if not lines:
+            final_lines.append(curr_line)
+            break
 
-    result.append(lines[0])
-    result.reverse()
-    return result
+        if not (curr_line.startswith("M  V30 ") and curr_line.endswith("-")):
+            final_lines.append(curr_line)
+            continue
+
+        next_line = lines.popleft()
+        if not next_line.startswith("M  V30 "):
+            raise MolfileParserException(
+                f'Invalid concatenation of lines "{curr_line}" and "{next_line}"'
+            )
+
+        lines.appendleft(curr_line[0:-1] + next_line[7:])
+
+    return final_lines
 
 
 def _read_file(filepath: str) -> List[List[str]]:

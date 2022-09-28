@@ -1,3 +1,4 @@
+from collections import deque
 import networkx as nx
 from pathlib import Path
 from tucan.element_properties import ELEMENT_PROPS
@@ -51,8 +52,36 @@ def graph_from_tucan(tucan: str) -> nx.Graph:
 
 
 def _split_into_tokenized_lines(string: str) -> List[List[str]]:
-    lines = [line.rstrip().split(" ") for line in string.splitlines()]
-    return [[value for value in line if value != ""] for line in lines]
+    lines = string.splitlines()
+    lines = _concat_lines_with_dash(lines)
+    split_lines = [line.rstrip().split(" ") for line in lines]
+    return [[value for value in line if value != ""] for line in split_lines]
+
+
+def _concat_lines_with_dash(lines: List[str]) -> List[str]:
+    final_lines = []
+    lines = deque(lines)
+
+    while lines:
+        curr_line = lines.popleft()
+
+        if not lines:
+            final_lines.append(curr_line)
+            break
+
+        if not (curr_line.startswith("M  V30 ") and curr_line.endswith("-")):
+            final_lines.append(curr_line)
+            continue
+
+        next_line = lines.popleft()
+        if not next_line.startswith("M  V30 "):
+            raise MolfileParserException(
+                f'Invalid concatenation of lines "{curr_line}" and "{next_line}"'
+            )
+
+        lines.appendleft(curr_line[0:-1] + next_line[7:])
+
+    return final_lines
 
 
 def _read_file(filepath: str) -> List[List[str]]:
@@ -62,8 +91,13 @@ def _read_file(filepath: str) -> List[List[str]]:
 
 
 def _graph_from_tokenized_lines(lines: List[List[str]]) -> nx.Graph:
+    _validate_molfile_version(lines, "V3000")
+    _validate_counts_line(lines)
+
     atom_props = _parse_atom_block_molfile3000(lines)
     bonds = _parse_bond_block_molfile3000(lines)
+
+    _validate_bond_indices(bonds, atom_props)
 
     graph = nx.Graph()
     graph.add_nodes_from(list(atom_props.keys()))
@@ -73,19 +107,39 @@ def _graph_from_tokenized_lines(lines: List[List[str]]) -> nx.Graph:
     return graph
 
 
+def _validate_molfile_version(lines: List[List[str]], expected_version: str):
+    if (version := lines[3][6]) != expected_version:
+        raise MolfileParserException(
+            f'Invalid Molfile version: Expected "{expected_version}", found "{version}"'
+        )
+
+
+def _validate_counts_line(lines: List[List[str]]):
+    if lines[5][2] != "COUNTS" or len(lines[5]) < 5:
+        badline = " ".join(lines[5])
+        raise MolfileParserException(f'Bad counts line: "{badline}"')
+
+
 def _parse_atom_block_molfile3000(lines: List[List[str]]) -> Dict:
     atom_count = int(lines[5][3])
     atom_block_offset = 7
+
+    if (begin_atom_str := " ".join(lines[atom_block_offset - 1][2:])) != "BEGIN ATOM":
+        raise MolfileParserException(
+            f'Expected "BEGIN ATOM" on line {atom_block_offset}, found "{begin_atom_str}"'
+        )
+    if (
+        end_atom_str := " ".join(lines[atom_block_offset + atom_count][2:])
+    ) != "END ATOM":
+        raise MolfileParserException(
+            f'Expected "END ATOM" on line {atom_block_offset + atom_count + 1}, found "{end_atom_str}"'
+        )
 
     atom_props = {
         int(line[2])
         - 1: _parse_atom_props(line)  # map zero-based label to property-dict
         for line in lines[atom_block_offset : atom_block_offset + atom_count]
     }
-    assert len(atom_props) == atom_count, (
-        f"Number of atoms {len(atom_props)} doesn't match atom-count specified in"
-        f" header {atom_count}."
-    )
 
     return atom_props
 
@@ -126,16 +180,43 @@ def _parse_atom_props(line: List[str]) -> Dict:
 def _parse_bond_block_molfile3000(lines: List[List[str]]) -> List[Tuple[int, int]]:
     atom_count = int(lines[5][3])
     bond_count = int(lines[5][4])
+
+    # bond block is optional
+    if bond_count == 0:
+        return []
+
     atom_block_offset = 7
     bond_block_offset = atom_block_offset + atom_count + 2
+
+    if (begin_bond_str := " ".join(lines[bond_block_offset - 1][2:])) != "BEGIN BOND":
+        raise MolfileParserException(
+            f'Expected "BEGIN BOND" on line {bond_block_offset}, found "{begin_bond_str}"'
+        )
+    if (
+        end_bond_str := " ".join(lines[bond_block_offset + bond_count][2:])
+    ) != "END BOND":
+        raise MolfileParserException(
+            f'Expected "END BOND" on line {bond_block_offset + bond_count + 1}, found "{end_bond_str}"'
+        )
 
     bonds = [
         (int(line[4]) - 1, int(line[5]) - 1)
         for line in lines[bond_block_offset : bond_block_offset + bond_count]
     ]  # make bond-indices zero-based
-    assert len(bonds) == bond_count, (
-        f"Number of bonds {len(bonds)} doesn't match bond-count specified in header"
-        f" {bond_count}."
-    )
 
     return bonds
+
+
+def _validate_bond_indices(bonds: List[Tuple[int, int]], atom_props: Dict):
+    for bond in bonds:
+        _validate_atom_index(bond[0], atom_props)
+        _validate_atom_index(bond[1], atom_props)
+
+
+def _validate_atom_index(index: int, atom_props: Dict):
+    if index not in atom_props:
+        raise MolfileParserException(f"Unknown atom index {index + 1} in bond")
+
+
+class MolfileParserException(Exception):
+    pass

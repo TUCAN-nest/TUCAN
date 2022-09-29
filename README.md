@@ -7,6 +7,8 @@ TUCAN[^1] - A molecular identifier and descriptor for all domains of chemistry
 
 Have a look at our [demo notebook](https://github.com/TUCAN-nest/TUCAN/blob/HEAD/docs/demo.ipynb) to see TUCAN at work.
 
+There is also a paper in the [Journal of Cheminformatics](https://dx.doi.org/10.1186/s13321-022-00640-5) which describes the scientific background of this tool.
+
 # Installation
 TUCAN requires a Python installation (>=3.9), and preferably you install the package in a virtual environment (e.g., [venv](https://docs.python.org/3.10/library/venv.html)).
 

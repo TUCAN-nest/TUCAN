@@ -8,7 +8,18 @@ from tucan.parser.tucanListener import tucanListener
 from tucan.parser.tucanParser import tucanParser
 
 
-def parse_tucan(tucan: str) -> nx.Graph:
+def graph_from_tucan(tucan: str) -> nx.Graph:
+    """Instantiate a NetworkX graph from a TUCAN string.
+
+    Parameters
+    ----------
+    tucan: str
+        TUCAN string to be deserialized.
+
+    Returns
+    -------
+    NetworkX Graph
+    """
     parser = _prepare_parser(tucan)
     tree = parser.tucan()
     listener = _walk_tree(tree)

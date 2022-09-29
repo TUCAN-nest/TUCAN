@@ -1,9 +1,8 @@
-from collections import deque
 import networkx as nx
+from collections import deque
 from pathlib import Path
+from typing import List, Dict, Tuple
 from tucan.element_properties import ELEMENT_PROPS
-from tucan.parser.parser import parse_tucan
-from typing import Dict, List, Tuple
 
 
 def graph_from_file(filepath: str) -> nx.Graph:
@@ -34,21 +33,6 @@ def graph_from_file(filepath: str) -> nx.Graph:
 def graph_from_molfile_text(molfile: str) -> nx.Graph:
     lines = _split_into_tokenized_lines(molfile)
     return _graph_from_tokenized_lines(lines)
-
-
-def graph_from_tucan(tucan: str) -> nx.Graph:
-    """Instantiate a NetworkX graph from a TUCAN string.
-
-    Parameters
-    ----------
-    tucan: str
-        TUCAN string to be deserialized.
-
-    Returns
-    -------
-    NetworkX Graph
-    """
-    return parse_tucan()
 
 
 def _split_into_tokenized_lines(string: str) -> List[List[str]]:

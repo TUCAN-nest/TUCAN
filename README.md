@@ -3,11 +3,11 @@
 
 <img src="https://github.com/TUCAN-nest/TUCAN/blob/HEAD/logo.png" alt="logo" style="width:400px;"/>
 
-TUCAN[^1] - A molecular identifier and descriptor for all domains of chemistry
+TUCAN[^1] is a molecular identifier and descriptor for all domains of chemistry.
 
 Have a look at our [demo notebook](https://github.com/TUCAN-nest/TUCAN/blob/HEAD/docs/demo.ipynb) to see TUCAN at work.
 
-There is also a paper in the [Journal of Cheminformatics](https://dx.doi.org/10.1186/s13321-022-00640-5) which describes the scientific background of this tool.
+You can find details on TUCAN's scientific background in our [paper](https://dx.doi.org/10.1186/s13321-022-00640-5).
 
 # Installation
 TUCAN requires a Python installation (>=3.9), and preferably you install the package in a virtual environment (e.g., [venv](https://docs.python.org/3.10/library/venv.html)).
@@ -43,5 +43,6 @@ Have a look at the [pyproject.toml](https://github.com/TUCAN-nest/TUCAN/blob/HEA
 * Sonja Herres-Pawlis (RWTH Aachen) - concept
 * Ulrich Schatzschneider (Universität Würzburg) - concept, documentation, and software development
 * Jan C. Brammer (RWTH Aachen) - software development and documentation
+* Frank Lange (IPB Halle) - software development
 
 [^1]:TUCAN stands for **tu**ple **can**onicalization, since we're using 2-tuples to represent the bonds of our canonicalized molecules. Besides, [Wikipedia informs us](https://en.wikipedia.org/wiki/Toco_toucan) that in the tucán's native parlance, "_tu canonicalización_" expresses our hope that this software will help canonicalize _your_ molecules.

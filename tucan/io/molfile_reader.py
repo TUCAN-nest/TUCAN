@@ -1,7 +1,6 @@
 import networkx as nx
 from collections import deque
 from pathlib import Path
-from typing import List, Dict, Tuple
 from tucan.element_properties import ELEMENT_PROPS
 
 
@@ -35,14 +34,14 @@ def graph_from_molfile_text(molfile: str) -> nx.Graph:
     return _graph_from_tokenized_lines(lines)
 
 
-def _split_into_tokenized_lines(string: str) -> List[List[str]]:
+def _split_into_tokenized_lines(string: str) -> list[list[str]]:
     lines = string.splitlines()
     lines = _concat_lines_with_dash(lines)
     split_lines = [line.rstrip().split(" ") for line in lines]
     return [[value for value in line if value != ""] for line in split_lines]
 
 
-def _concat_lines_with_dash(lines: List[str]) -> List[str]:
+def _concat_lines_with_dash(lines: list[str]) -> list[str]:
     final_lines = []
     lines = deque(lines)
 
@@ -68,13 +67,13 @@ def _concat_lines_with_dash(lines: List[str]) -> List[str]:
     return final_lines
 
 
-def _read_file(filepath: str) -> List[List[str]]:
+def _read_file(filepath: str) -> list[list[str]]:
     with open(filepath) as file:
         filecontent = file.read()
     return _split_into_tokenized_lines(filecontent)
 
 
-def _graph_from_tokenized_lines(lines: List[List[str]]) -> nx.Graph:
+def _graph_from_tokenized_lines(lines: list[list[str]]) -> nx.Graph:
     _validate_molfile_version(lines, "V3000")
     _validate_counts_line(lines)
 
@@ -92,20 +91,20 @@ def _graph_from_tokenized_lines(lines: List[List[str]]) -> nx.Graph:
     return graph
 
 
-def _validate_molfile_version(lines: List[List[str]], expected_version: str):
+def _validate_molfile_version(lines: list[list[str]], expected_version: str):
     if (version := lines[3][6]) != expected_version:
         raise MolfileParserException(
             f'Invalid Molfile version: Expected "{expected_version}", found "{version}"'
         )
 
 
-def _validate_counts_line(lines: List[List[str]]):
+def _validate_counts_line(lines: list[list[str]]):
     if lines[5][2] != "COUNTS" or len(lines[5]) < 5:
         badline = " ".join(lines[5])
         raise MolfileParserException(f'Bad counts line: "{badline}"')
 
 
-def _parse_atom_block_molfile3000(lines: List[List[str]]) -> Dict:
+def _parse_atom_block_molfile3000(lines: list[list[str]]) -> dict:
     atom_count = int(lines[5][3])
     atom_block_offset = 7
 
@@ -129,7 +128,7 @@ def _parse_atom_block_molfile3000(lines: List[List[str]]) -> Dict:
     return atom_props
 
 
-def _parse_atom_props(line: List[str]) -> Dict:
+def _parse_atom_props(line: list[str]) -> dict:
     element_symbol = line[3]
     isotope_mass = None
     if element_symbol == "D":
@@ -162,7 +161,7 @@ def _parse_atom_props(line: List[str]) -> Dict:
     return atom_props
 
 
-def _parse_bond_block_molfile3000(lines: List[List[str]]) -> List[Tuple[int, int]]:
+def _parse_bond_block_molfile3000(lines: list[list[str]]) -> list[tuple[int, int]]:
     atom_count = int(lines[5][3])
     bond_count = int(lines[5][4])
 
@@ -196,17 +195,17 @@ def _parse_bond_block_molfile3000(lines: List[List[str]]) -> List[Tuple[int, int
     return bonds
 
 
-def _parse_bond_props(line: List[str]) -> Dict:
+def _parse_bond_props(line: list[str]) -> dict:
     return {"bond_type": line[3]}
 
 
-def _validate_bond_indices(bonds: List[Tuple[int, int]], atom_props: Dict):
+def _validate_bond_indices(bonds: list[tuple[int, int]], atom_props: dict):
     for bond in bonds:
         _validate_atom_index(bond[0], atom_props)
         _validate_atom_index(bond[1], atom_props)
 
 
-def _validate_atom_index(index: int, atom_props: Dict):
+def _validate_atom_index(index: int, atom_props: dict):
     if index not in atom_props:
         raise MolfileParserException(f"Unknown atom index {index + 1} in bond")
 

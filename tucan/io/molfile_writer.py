@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import List
 import networkx as nx
 import tucan
 
@@ -35,7 +34,7 @@ def graph_to_molfile(graph: nx.Graph, calc_coordinates=False) -> str:
     return "\n".join(lines)
 
 
-def _add_header(lines: List[str]):
+def _add_header(lines: list[str]):
     # molecule name
     lines.append("")
 
@@ -51,7 +50,7 @@ def _add_header(lines: List[str]):
     lines.append("  0  0  0     0  0            999 V3000")
 
 
-def _add_v30_line(lines: List[str], line: str):
+def _add_v30_line(lines: list[str], line: str):
     # The length limit of a line is 80 characters. We include '\n' in this count.
     # "M  V30 " and '\n' take 8 chars, plus one char for '-' if line wrapping occurs.
     while True:
@@ -63,7 +62,7 @@ def _add_v30_line(lines: List[str], line: str):
         lines.append(f"M  V30 {left}-")
 
 
-def _add_atom_block(lines: List[str], graph: nx.Graph, calc_coordinates: bool):
+def _add_atom_block(lines: list[str], graph: nx.Graph, calc_coordinates: bool):
     if calc_coordinates:
         coords = nx.kamada_kawai_layout(graph, dim=2, scale=10)
 
@@ -88,7 +87,7 @@ def _add_atom_block(lines: List[str], graph: nx.Graph, calc_coordinates: bool):
     _add_v30_line(lines, "END ATOM")
 
 
-def _add_bond_block(lines: List[str], graph: nx.Graph):
+def _add_bond_block(lines: list[str], graph: nx.Graph):
     if graph.number_of_edges() == 0:
         return
 

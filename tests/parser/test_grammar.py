@@ -1,7 +1,7 @@
 import pytest
-
 from tucan.element_properties import element_symbols
-from tucan.parser.parser import _prepare_parser, TucanParserException, parse_tucan
+from tucan.io import TucanParserException, graph_from_tucan
+from tucan.parser.parser import _prepare_parser
 
 
 def _parse_sum_formula(s):
@@ -190,7 +190,7 @@ def test_cannot_parse_node_attributes(node_attributes):
     ],
 )
 def test_can_parse_tucan(tucan):
-    parse_tucan(tucan)
+    graph_from_tucan(tucan)
 
 
 @pytest.mark.parametrize(
@@ -203,4 +203,4 @@ def test_can_parse_tucan(tucan):
 )
 def test_cannot_parse_tucan(tucan):
     with pytest.raises(TucanParserException):
-        parse_tucan(tucan)
+        graph_from_tucan(tucan)

@@ -1,13 +1,9 @@
 import re
 import pytest
 from tucan.canonicalization import canonicalize_molecule
+from tucan.io import graph_from_tucan, TucanParserException
 from tucan.serialization import serialize_molecule
-from tucan.parser.parser import (
-    _prepare_parser,
-    _walk_tree,
-    TucanParserException,
-    parse_tucan,
-)
+from tucan.parser.parser import _prepare_parser, _walk_tree
 
 
 def _extract_atoms_from_sum_formula(s):
@@ -203,8 +199,8 @@ def test_overriding_node_property_raises_exception(
         ),
     ],
 )
-def test_parse_tucan(tucan, expected_atoms, expected_bonds):
-    graph = parse_tucan(tucan)
+def test_graph_from_tucan(tucan, expected_atoms, expected_bonds):
+    graph = graph_from_tucan(tucan)
     assert dict(graph.nodes(data=True)) == expected_atoms
     assert list(graph.edges) == expected_bonds
 
@@ -223,9 +219,9 @@ def test_parse_tucan(tucan, expected_atoms, expected_bonds):
 )
 def test_roundtrip_molfile_graph_tucan_graph_tucan_graph(m):
     m_serialized = serialize_molecule(canonicalize_molecule(m))
-    g1 = parse_tucan(m_serialized)
+    g1 = graph_from_tucan(m_serialized)
     g1_serialized = serialize_molecule(canonicalize_molecule(g1.copy()))
-    g2 = parse_tucan(g1_serialized)
+    g2 = graph_from_tucan(g1_serialized)
 
     assert m_serialized == g1_serialized
     assert dict(g1.nodes(data=True)) == dict(g2.nodes(data=True))
@@ -241,7 +237,9 @@ def test_roundtrip_molfile_graph_tucan_graph_tucan_graph(m):
         ("CH3//(1:mass=13)(5:rad=3)", 5),
     ],
 )
-def test_parse_tucan_invalid_node_index_raises_exception(tucan, offending_node_index):
+def test_graph_from_tucan_invalid_node_index_raises_exception(
+    tucan, offending_node_index
+):
     expected_error_msg = f"^Atom with index {offending_node_index} does not exist.$"
     with pytest.raises(TucanParserException, match=expected_error_msg):
-        graph = parse_tucan(tucan)
+        graph = graph_from_tucan(tucan)

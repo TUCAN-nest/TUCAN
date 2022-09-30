@@ -1,6 +1,6 @@
 import re
 import pytest
-from tucan.parser.parser import TucanParserException, parse_tucan
+from tucan.io import TucanParserException, graph_from_tucan
 
 
 @pytest.mark.parametrize(
@@ -36,6 +36,6 @@ from tucan.parser.parser import TucanParserException, parse_tucan
         ),
     ],
 )
-def test_parse_tucan_error_msg(tucan, expected_error_msg):
+def test_graph_from_tucan_error_msg(tucan, expected_error_msg):
     with pytest.raises(TucanParserException, match=expected_error_msg):
-        parse_tucan(tucan)
+        graph_from_tucan(tucan)

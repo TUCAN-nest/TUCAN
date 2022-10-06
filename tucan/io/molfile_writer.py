@@ -64,7 +64,7 @@ def _add_v30_line(lines: list[str], line: str):
 
 def _add_atom_block(lines: list[str], graph: nx.Graph, calc_coordinates: bool):
     if calc_coordinates:
-        coords = nx.kamada_kawai_layout(graph, dim=2, scale=10)
+        coords = nx.kamada_kawai_layout(graph, dim=2)
 
     _add_v30_line(lines, "BEGIN ATOM")
 

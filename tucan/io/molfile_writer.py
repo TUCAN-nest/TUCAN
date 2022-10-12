@@ -2,8 +2,6 @@ from datetime import datetime
 import networkx as nx
 import tucan
 
-_prog_name = f'TUCAN{tucan.__version__.replace(".", "")[0:3]: <3}'
-
 
 def graph_to_molfile(graph: nx.Graph, calc_coordinates=False) -> str:
     """Generate an MDL V3000 Molfile from the given graph.
@@ -38,10 +36,12 @@ def _add_header(lines: list[str]):
     # molecule name
     lines.append("")
 
+    prog_name = f'TUCAN{tucan.__version__.replace(".", "")[0:3]: <3}'
+
     # IIPPPPPPPPMMDDYYHHmmddSSssssssssssEEEEEEEEEEEERRRRRR
     # A2<--A8--><---A10-->A2I2<--F10.5-><---F12.5--><-I6->
     # Fill until here:     ^
-    lines.append(f"  {_prog_name}{datetime.now().strftime('%m%d%y%H%M')}3D")
+    lines.append(f"  {prog_name}{datetime.now().strftime('%m%d%y%H%M')}3D")
 
     # comments line
     lines.append("")

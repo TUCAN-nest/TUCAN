@@ -81,7 +81,7 @@ def _add_atom_block(lines: list[str], graph: nx.Graph, calc_coordinates: bool):
 
         _add_v30_line(
             lines,
-            f"{index + 1} {attrs['element_symbol']} {x:.6g} {y:.6g} {z:.6g} 0{charge}{radical}{atomic_mass}",
+            f"{index + 1} {attrs['element_symbol']} {x:.6f} {y:.6f} {z:.6f} 0{charge}{radical}{atomic_mass}",
         )
 
     _add_v30_line(lines, "END ATOM")

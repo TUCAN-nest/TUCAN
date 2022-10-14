@@ -199,27 +199,27 @@ def test_parse_atom_block_molfile3000_raises_exception(molfile, expected_error_m
 
 def test_parsing_bond_block():
     filecontent = _read_file("tests/molfiles/tnt/tnt.mol")
-    bonds = _parse_bond_block_molfile3000(filecontent)
-    assert bonds == [
-        (0, 4),
-        (2, 0),
-        (0, 15),
-        (1, 2),
-        (3, 1),
-        (1, 16),
-        (2, 6),
-        (5, 3),
-        (3, 12),
-        (4, 5),
-        (4, 9),
-        (5, 17),
-        (6, 8),
-        (6, 7),
-        (9, 11),
-        (9, 10),
-        (12, 14),
-        (12, 13),
-    ]
+    bond_props = _parse_bond_block_molfile3000(filecontent)
+    assert bond_props == {
+        (0, 4): {"bond_type": "1"},
+        (0, 2): {"bond_type": "2"},
+        (0, 15): {"bond_type": "1"},
+        (1, 2): {"bond_type": "1"},
+        (1, 3): {"bond_type": "2"},
+        (1, 16): {"bond_type": "1"},
+        (2, 6): {"bond_type": "1"},
+        (3, 5): {"bond_type": "1"},
+        (3, 12): {"bond_type": "1"},
+        (4, 5): {"bond_type": "2"},
+        (4, 9): {"bond_type": "1"},
+        (5, 17): {"bond_type": "1"},
+        (6, 8): {"bond_type": "2"},
+        (6, 7): {"bond_type": "1"},
+        (9, 11): {"bond_type": "2"},
+        (9, 10): {"bond_type": "1"},
+        (12, 14): {"bond_type": "2"},
+        (12, 13): {"bond_type": "1"},
+    }
 
 
 @pytest.mark.parametrize(

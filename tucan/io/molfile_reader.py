@@ -78,14 +78,15 @@ def _graph_from_tokenized_lines(lines: list[list[str]]) -> nx.Graph:
     _validate_counts_line(lines)
 
     atom_props = _parse_atom_block_molfile3000(lines)
-    bonds = _parse_bond_block_molfile3000(lines)
+    bond_props = _parse_bond_block_molfile3000(lines)
 
-    _validate_bond_indices(bonds, atom_props)
+    _validate_bond_indices(bond_props, atom_props)
 
     graph = nx.Graph()
     graph.add_nodes_from(list(atom_props.keys()))
     nx.set_node_attributes(graph, atom_props)
-    graph.add_edges_from(bonds)
+    graph.add_edges_from(list(bond_props.keys()))
+    nx.set_edge_attributes(graph, bond_props)
 
     return graph
 
@@ -166,7 +167,7 @@ def _parse_bond_block_molfile3000(lines: list[list[str]]) -> list[tuple[int, int
 
     # bond block is optional
     if bond_count == 0:
-        return []
+        return {}
 
     atom_block_offset = 7
     bond_block_offset = atom_block_offset + atom_count + 2
@@ -182,12 +183,20 @@ def _parse_bond_block_molfile3000(lines: list[list[str]]) -> list[tuple[int, int
             f'Expected "END BOND" on line {bond_block_offset + bond_count + 1}, found "{end_bond_str}"'
         )
 
-    bonds = [
-        (int(line[4]) - 1, int(line[5]) - 1)
+    bonds = {
+        (
+            # atom-indices are zero-based
+            int(line[4]) - 1,
+            int(line[5]) - 1,
+        ): _parse_bond_props(line)
         for line in lines[bond_block_offset : bond_block_offset + bond_count]
-    ]  # make bond-indices zero-based
+    }
 
     return bonds
+
+
+def _parse_bond_props(line: list[str]) -> dict:
+    return {"bond_type": line[3]}
 
 
 def _validate_bond_indices(bonds: list[tuple[int, int]], atom_props: dict):

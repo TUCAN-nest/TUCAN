@@ -92,7 +92,7 @@ def _graph_from_tokenized_lines(lines: list[list[str]]) -> nx.Graph:
 
 
 def _validate_molfile_version(lines: list[list[str]], expected_version: str):
-    if (version := lines[3][6]) != expected_version:
+    if (version := lines[3][-1]) != expected_version:
         raise MolfileParserException(
             f'Invalid Molfile version: Expected "{expected_version}", found "{version}"'
         )

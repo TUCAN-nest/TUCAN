@@ -88,8 +88,7 @@ def _graph_from_tokenized_lines(lines: list[list[str]]) -> nx.Graph:
     graph.add_edges_from(list(bond_props.keys()))
     nx.set_edge_attributes(graph, bond_props)
 
-    mapping = {old_index: new_index for new_index, old_index in enumerate(graph.nodes)}
-    return nx.relabel_nodes(graph, mapping)
+    return nx.convert_node_labels_to_integers(graph)
 
 
 def _validate_molfile_version(lines: list[list[str]], expected_version: str):

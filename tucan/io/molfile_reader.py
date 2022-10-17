@@ -221,7 +221,7 @@ def _parse_bond_block_molfile3000(
 
 
 def _parse_bond_props(line: list[str]) -> dict:
-    return {"bond_type": line[3]}
+    return {"bond_type": int(line[3])}
 
 
 def _parse_bond_line_with_star_atom(

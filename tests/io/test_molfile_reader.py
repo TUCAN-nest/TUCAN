@@ -172,41 +172,67 @@ def test_graph_from_file_with_multi_attachment():
     graph = graph_from_file(
         "tests/molfiles/chromocene-multi-attachment/chromocene-multi-attachment.mol"
     )
-    _, elements = zip(*graph.nodes.data("element_symbol"))
+    node_indices, elements = zip(*graph.nodes.data("element_symbol"))
 
     # "star" atoms do not end up as graph nodes
     assert "".join(elements) == 10 * "C" + "Cr" + 10 * "H"
+
+    # node indices are renamed, but the nodes order still reflects the dictionary insertion order
+    assert node_indices == (
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        12,
+        11,
+        14,
+        13,
+        16,
+        15,
+        18,
+        17,
+        20,
+        19,
+    )
+
     assert list(graph.edges(data=True)) == [
-        (1, 11, {"bond_type": "1"}),
+        (0, 1, {"bond_type": "4"}),
+        (0, 4, {"bond_type": "4"}),
+        (0, 10, {"bond_type": "1"}),
+        (0, 12, {"bond_type": "1"}),
         (1, 2, {"bond_type": "4"}),
-        (1, 5, {"bond_type": "4"}),
-        (1, 14, {"bond_type": "1"}),
-        (2, 11, {"bond_type": "1"}),
+        (1, 10, {"bond_type": "1"}),
+        (1, 11, {"bond_type": "1"}),
         (2, 3, {"bond_type": "4"}),
-        (2, 13, {"bond_type": "1"}),
-        (3, 11, {"bond_type": "1"}),
+        (2, 10, {"bond_type": "1"}),
+        (2, 20, {"bond_type": "1"}),
         (3, 4, {"bond_type": "4"}),
-        (3, 22, {"bond_type": "1"}),
-        (4, 11, {"bond_type": "1"}),
-        (4, 5, {"bond_type": "4"}),
-        (4, 16, {"bond_type": "1"}),
-        (5, 11, {"bond_type": "1"}),
+        (3, 10, {"bond_type": "1"}),
+        (3, 14, {"bond_type": "1"}),
+        (4, 10, {"bond_type": "1"}),
+        (4, 13, {"bond_type": "1"}),
+        (5, 6, {"bond_type": "4"}),
+        (5, 9, {"bond_type": "4"}),
+        (5, 10, {"bond_type": "1"}),
         (5, 15, {"bond_type": "1"}),
         (6, 7, {"bond_type": "4"}),
-        (6, 10, {"bond_type": "4"}),
-        (6, 11, {"bond_type": "1"}),
-        (6, 17, {"bond_type": "1"}),
+        (6, 10, {"bond_type": "1"}),
+        (6, 18, {"bond_type": "1"}),
         (7, 8, {"bond_type": "4"}),
-        (7, 11, {"bond_type": "1"}),
-        (7, 20, {"bond_type": "1"}),
+        (7, 10, {"bond_type": "1"}),
+        (7, 19, {"bond_type": "1"}),
         (8, 9, {"bond_type": "4"}),
-        (8, 11, {"bond_type": "1"}),
-        (8, 21, {"bond_type": "1"}),
-        (9, 10, {"bond_type": "4"}),
-        (9, 11, {"bond_type": "1"}),
-        (9, 19, {"bond_type": "1"}),
-        (10, 11, {"bond_type": "1"}),
-        (10, 18, {"bond_type": "1"}),
+        (8, 10, {"bond_type": "1"}),
+        (8, 17, {"bond_type": "1"}),
+        (9, 10, {"bond_type": "1"}),
+        (9, 16, {"bond_type": "1"}),
     ]
 
 

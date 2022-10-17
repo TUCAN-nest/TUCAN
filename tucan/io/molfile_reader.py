@@ -88,6 +88,9 @@ def _graph_from_tokenized_lines(lines: list[list[str]]) -> nx.Graph:
     graph.add_edges_from(list(bond_props.keys()))
     nx.set_edge_attributes(graph, bond_props)
 
+    mapping = {old_index: new_index for new_index, old_index in enumerate(graph.nodes)}
+    nx.relabel_nodes(graph, mapping, copy=False)
+
     return graph
 
 

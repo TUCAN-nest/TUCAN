@@ -224,15 +224,13 @@ def _parse_bond_props(line: list[str]) -> dict:
 def _parse_bond_line_with_star_atom(
     line: list[str], start_atom_index: int
 ) -> list[tuple[int, int]]:
-    endpts_index = None
     for index, token in enumerate(line):
         if token.startswith("ENDPTS=("):
             endpts_index = index
             number_of_endpts = int(token.split("=(")[1])
             break
-
     # silently ignore everything that has no ENDPTS (e.g. use of star atoms in polymers)
-    if endpts_index is None:
+    else:
         return []
 
     endpoints = [

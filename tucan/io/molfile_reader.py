@@ -242,11 +242,6 @@ def _parse_bond_line_with_star_atom(
         raise MolfileParserException("Expected end of ENDPTS block")
     endpoints.append(int(line[endpts_index + number_of_endpts][:-1]))
 
-    attach = [token.split("=")[1] for token in line if token.startswith("ATTACH=")][0]
-    # silently ignore any ENDPTS without "ATTACH=ANY"
-    if attach != "ANY":
-        return []
-
     return [(start_atom_index, end_atom_index - 1) for end_atom_index in endpoints]
 
 

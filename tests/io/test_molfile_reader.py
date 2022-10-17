@@ -175,9 +175,7 @@ def test_graph_from_file_with_multi_attachment():
     _, elements = zip(*graph.nodes.data("element_symbol"))
 
     # "star" atoms do not end up as graph nodes
-    assert (
-        "".join(elements) == 10 * "C" + "Cr" + 10 * "H"
-    )
+    assert "".join(elements) == 10 * "C" + "Cr" + 10 * "H"
     assert list(graph.edges(data=True)) == [
         (1, 11, {"bond_type": "1"}),
         (1, 2, {"bond_type": "4"}),
@@ -503,7 +501,7 @@ def test_molfile_with_invalid_bond_index_raises_exception(molfile, expected_erro
             "M  V30 4 H 0 0 0 0\n"
             "M  V30 END ATOM\n"
             "M  V30 BEGIN BOND\n"
-            "M  V30 1 1 1 2 ENDPTS=(1 3 4) ATTACH=ANY\n"
+            "M  V30 1 1 1 2 ENDPTS=(1 3 4)\n"
             "M  V30 END BOND",
             "Expected end of ENDPTS block",
         ),

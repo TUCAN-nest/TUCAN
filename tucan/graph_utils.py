@@ -4,9 +4,8 @@ import random
 
 def sort_molecule_by_attribute(m, attribute):
     """Sort atoms by attribute."""
-    attr_sequence = [attribute_sequence(atom, m, attribute) for atom in m]
     attr_with_labels = [
-        (i, j) for i, j in zip(attr_sequence, list(m.nodes))
+        (attribute_sequence(atom, m, attribute), atom) for atom in m
     ]  # [(A, 0), (C, 1), (B, 2)]
     sorted_attr, labels_sorted_by_attr = zip(
         *sorted(attr_with_labels)

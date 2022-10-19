@@ -6,8 +6,9 @@ from itertools import pairwise
 
 def partition_molecule_by_attribute(m, attribute):
     m_sorted = sort_molecule_by_attribute(m, attribute)
+    sorted_indices = sorted(m_sorted)
     attribute_sequences = [
-        attribute_sequence(a, m_sorted, attribute) for a in sorted(m_sorted)
+        attribute_sequence(a, m_sorted, attribute) for a in sorted_indices
     ]
     updated_partitions = [0]
     for i, j in pairwise(attribute_sequences):
@@ -16,7 +17,7 @@ def partition_molecule_by_attribute(m, attribute):
             current_partition += 1
         updated_partitions.append(current_partition)
     nx.set_node_attributes(
-        m_sorted, dict(zip(sorted(m_sorted), updated_partitions)), "partition"
+        m_sorted, dict(zip(sorted_indices, updated_partitions)), "partition"
     )
     return m_sorted
 

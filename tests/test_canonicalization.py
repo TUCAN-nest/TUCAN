@@ -30,10 +30,19 @@ def test_invariance(m, n_runs=10, random_seed=random.random()):
         assert m_serialized == m_permu_serialized
 
 
-def test_bijection():
+@pytest.mark.parametrize(
+    "excludes",
+    [
+        "water-d1_3",  # duplicate of water-d1_1
+    ],
+)
+def test_bijection(excludes):
     """Eineindeutigkeit."""
     serializations = set()
     for f in pytest.testset:
+        if f.stem in excludes:
+            continue
+
         m = pytest.filereader(f)
         m_serialized = serialize_molecule(canonicalize_molecule(m))
         assert m_serialized not in serializations, f"duplicate: {f.stem}"

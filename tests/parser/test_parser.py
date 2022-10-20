@@ -212,9 +212,6 @@ def test_graph_from_tucan(tucan, expected_atoms, expected_bonds):
         "n16_a77sad1_in_P2_1",
         "q17_a37sadm_in_P1_New_P21",
         "qv043_in_P2_1_New_Pca21",
-        # isotope mass is not yet part of the canonicalization procedure
-        "water-d1_1",
-        "water-d1_3",
     ]
 )
 def test_roundtrip_molfile_graph_tucan_graph_tucan_graph(m):

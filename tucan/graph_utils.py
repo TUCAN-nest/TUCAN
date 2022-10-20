@@ -48,8 +48,22 @@ def permute_molecule(m, random_seed=1.0):
     return m_permu
 
 
+def _sorted_labels(m):
+    nodes = list(m.nodes(data=True))
+    n = nx.Graph()
+    n.add_nodes_from(sorted(nodes))
+    n.add_edges_from(m.edges(data=True))
+    return n
+
+
 def _permute_molecule(m):
     labels = list(m.nodes)
     permuted_labels = list(labels)  # shallow copy
     random.shuffle(permuted_labels)
-    return relabel_molecule(m, permuted_labels, labels)
+    relabeled_graph = relabel_molecule(m, permuted_labels, labels)
+
+    # NetworkX's relabel_nodes function does not change the iteration order of
+    # the graph's internal node dictionary, which reflects the initial insert
+    # order of nodes. _sorted_labels() rebuilds a Graph object from scratch with
+    # a node iteration order identical to the label order.
+    return _sorted_labels(relabeled_graph)

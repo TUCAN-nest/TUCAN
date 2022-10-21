@@ -12,8 +12,17 @@ def test_permutation(m):
         pytest.skip("Skipping graph with less than two edges.")
     if nx.density(m) == 1:
         pytest.skip("Skipping fully connected graph.")
-    permutation_seed = 0.42
-    m_permu = permute_molecule(m, random_seed=permutation_seed)
+
+    identity = {label: label for label in m}
+    nx.set_node_attributes(m, identity, "original_label")
+
+    m_permu = permute_molecule(m, random_seed=0.42)
+    original_labels = [data for _, data in m.nodes("original_label")]
+    permuted_labels = [data for _, data in m_permu.nodes("original_label")]
+
+    # checks that iteration order of the graph nodes has indeed changed
+    assert original_labels != permuted_labels
+
     assert m.edges != m_permu.edges
 
 
@@ -33,7 +42,9 @@ def test_invariance(m, n_runs=10, random_seed=random.random()):
 @pytest.mark.parametrize(
     "excludes",
     [
-        "water-d1_3",  # duplicate of water-d1_1
+        [
+            "water-d1_3",  # duplicate of water-d1_1
+        ]
     ],
 )
 def test_bijection(excludes):

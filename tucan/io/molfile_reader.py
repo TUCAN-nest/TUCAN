@@ -1,4 +1,5 @@
 import networkx as nx
+import re
 from collections import deque
 from pathlib import Path
 from tucan.element_properties import ELEMENT_PROPS
@@ -224,23 +225,18 @@ def _parse_bond_props(line: list[str]) -> dict:
 def _parse_bond_line_with_star_atom(
     line: list[str], start_atom_index: int
 ) -> list[tuple[int, int]]:
-    for index, token in enumerate(line):
-        if token.startswith("ENDPTS=("):
-            endpts_index = index
-            number_of_endpts = int(token.split("=(")[1])
-            break
-    # silently ignore everything that has no ENDPTS (e.g. use of star atoms in polymers)
-    else:
+    endpts_pattern = re.compile(r"ENDPTS=\(.+\)")
+    endpts_match = endpts_pattern.search(" ".join(line))
+    if endpts_match is None:
+        # silently ignore everything that has no ENDPTS (e.g. use of star atoms in polymers)
         return []
-
-    endpoints = [
-        int(token) for token in line[endpts_index + 1 : endpts_index + number_of_endpts]
-    ]
-    if not line[endpts_index + number_of_endpts].endswith(")"):
-        raise MolfileParserException("Expected end of ENDPTS block")
-    endpoints.append(int(line[endpts_index + number_of_endpts][:-1]))
-
-    return [(start_atom_index, end_atom_index - 1) for end_atom_index in endpoints]
+    endpts_token = endpts_match.group()
+    numbers = [int(num) for num in endpts_token[8:-1].split()]
+    if (expected_n_endpts := numbers[0]) != (n_endpts := len(numbers) - 1):
+        raise MolfileParserException(
+            f'Error in "{endpts_token}": Expected {expected_n_endpts} endpoints, found {n_endpts}'
+        )
+    return [(start_atom_index, end_atom_index - 1) for end_atom_index in numbers[1:]]
 
 
 def _validate_bond_indices(bonds: dict[tuple[int, int]], atom_props: dict):

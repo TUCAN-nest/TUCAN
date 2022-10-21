@@ -507,7 +507,7 @@ def test_molfile_with_invalid_bond_index_raises_exception(molfile, expected_erro
             "M  V30 BEGIN BOND\n"
             "M  V30 1 1 1 2 ENDPTS=(1 3 4)\n"
             "M  V30 END BOND",
-            "Expected end of ENDPTS block",
+            re.escape('Error in "ENDPTS=(1 3 4)": Expected 1 endpoints, found 2'),
         ),
     ],
 )

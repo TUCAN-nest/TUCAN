@@ -1,16 +1,18 @@
 import pytest
+import re
 from tucan.io import graph_from_molfile_text, MolfileParserException
 from tucan.io.molfile_reader import (
     _concat_lines_with_dash,
     _parse_atom_block_molfile3000,
     _parse_bond_block_molfile3000,
     _read_file,
+    graph_from_file,
 )
 
 
 def test_parsing_atom_block():
     filecontent = _read_file("tests/molfiles/tnt/tnt.mol")
-    atom_props = _parse_atom_block_molfile3000(filecontent)
+    atom_props, star_atoms = _parse_atom_block_molfile3000(filecontent)
     assert atom_props == {
         0: {
             "element_symbol": "C",
@@ -163,6 +165,53 @@ def test_parsing_atom_block():
             "z_coord": 0.0,
         },
     }
+    assert len(star_atoms) == 0
+
+
+def test_graph_from_file_with_multi_attachment():
+    graph = graph_from_file(
+        "tests/molfiles/chromocene-multi-attachment/chromocene-multi-attachment.mol"
+    )
+    node_indices, elements = zip(*graph.nodes.data("element_symbol"))
+
+    # "star" atoms do not end up as graph nodes
+    assert "".join(elements) == 10 * "C" + "Cr" + 10 * "H"
+
+    # node indices are renamed to achieve sequential order
+    assert node_indices == tuple(range(21))
+
+    assert list(graph.edges(data=True)) == [
+        (0, 10, {"bond_type": 1}),
+        (0, 1, {"bond_type": 4}),
+        (0, 4, {"bond_type": 4}),
+        (0, 12, {"bond_type": 1}),
+        (1, 10, {"bond_type": 1}),
+        (1, 2, {"bond_type": 4}),
+        (1, 11, {"bond_type": 1}),
+        (2, 10, {"bond_type": 1}),
+        (2, 3, {"bond_type": 4}),
+        (2, 20, {"bond_type": 1}),
+        (3, 10, {"bond_type": 1}),
+        (3, 4, {"bond_type": 4}),
+        (3, 14, {"bond_type": 1}),
+        (4, 10, {"bond_type": 1}),
+        (4, 13, {"bond_type": 1}),
+        (5, 6, {"bond_type": 4}),
+        (5, 9, {"bond_type": 4}),
+        (5, 10, {"bond_type": 1}),
+        (5, 15, {"bond_type": 1}),
+        (6, 7, {"bond_type": 4}),
+        (6, 10, {"bond_type": 1}),
+        (6, 18, {"bond_type": 1}),
+        (7, 8, {"bond_type": 4}),
+        (7, 10, {"bond_type": 1}),
+        (7, 19, {"bond_type": 1}),
+        (8, 9, {"bond_type": 4}),
+        (8, 10, {"bond_type": 1}),
+        (8, 17, {"bond_type": 1}),
+        (9, 10, {"bond_type": 1}),
+        (9, 16, {"bond_type": 1}),
+    ]
 
 
 @pytest.mark.parametrize(
@@ -199,26 +248,26 @@ def test_parse_atom_block_molfile3000_raises_exception(molfile, expected_error_m
 
 def test_parsing_bond_block():
     filecontent = _read_file("tests/molfiles/tnt/tnt.mol")
-    bond_props = _parse_bond_block_molfile3000(filecontent)
+    bond_props = _parse_bond_block_molfile3000(filecontent, [])
     assert bond_props == {
-        (0, 4): {"bond_type": "1"},
-        (0, 2): {"bond_type": "2"},
-        (0, 15): {"bond_type": "1"},
-        (1, 2): {"bond_type": "1"},
-        (1, 3): {"bond_type": "2"},
-        (1, 16): {"bond_type": "1"},
-        (2, 6): {"bond_type": "1"},
-        (3, 5): {"bond_type": "1"},
-        (3, 12): {"bond_type": "1"},
-        (4, 5): {"bond_type": "2"},
-        (4, 9): {"bond_type": "1"},
-        (5, 17): {"bond_type": "1"},
-        (6, 8): {"bond_type": "2"},
-        (6, 7): {"bond_type": "1"},
-        (9, 11): {"bond_type": "2"},
-        (9, 10): {"bond_type": "1"},
-        (12, 14): {"bond_type": "2"},
-        (12, 13): {"bond_type": "1"},
+        (0, 4): {"bond_type": 1},
+        (0, 2): {"bond_type": 2},
+        (0, 15): {"bond_type": 1},
+        (1, 2): {"bond_type": 1},
+        (1, 3): {"bond_type": 2},
+        (1, 16): {"bond_type": 1},
+        (2, 6): {"bond_type": 1},
+        (3, 5): {"bond_type": 1},
+        (3, 12): {"bond_type": 1},
+        (4, 5): {"bond_type": 2},
+        (4, 9): {"bond_type": 1},
+        (5, 17): {"bond_type": 1},
+        (6, 8): {"bond_type": 2},
+        (6, 7): {"bond_type": 1},
+        (9, 11): {"bond_type": 2},
+        (9, 10): {"bond_type": 1},
+        (12, 14): {"bond_type": 2},
+        (12, 13): {"bond_type": 1},
     }
 
 
@@ -422,6 +471,47 @@ def test_molfile_with_invalid_counts_line_raises_exception(molfile, expected_err
     ],
 )
 def test_molfile_with_invalid_bond_index_raises_exception(molfile, expected_error_msg):
+    with pytest.raises(
+        MolfileParserException,
+        match=expected_error_msg,
+    ):
+        graph_from_molfile_text(molfile)
+
+
+@pytest.mark.parametrize(
+    "molfile, expected_error_msg",
+    [
+        (
+            "\n\n\n  0  0  0     0  0            999 V3000\n"
+            "M  V30 BEGIN CTAB\n"
+            "M  V30 COUNTS 2 1\n"
+            "M  V30 BEGIN ATOM\n"
+            "M  V30 1 * 0 0 0 0\n"
+            "M  V30 2 * 0 0 0 0\n"
+            "M  V30 END ATOM\n"
+            "M  V30 BEGIN BOND\n"
+            "M  V30 1 1 1 2\n"
+            "M  V30 END BOND",
+            re.escape('Two "star" atoms (index 1 and 2) may not be connected'),
+        ),
+        (
+            "\n\n\n  0  0  0     0  0            999 V3000\n"
+            "M  V30 BEGIN CTAB\n"
+            "M  V30 COUNTS 4 1\n"
+            "M  V30 BEGIN ATOM\n"
+            "M  V30 1 * 0 0 0 0\n"
+            "M  V30 2 H 0 0 0 0\n"
+            "M  V30 3 H 0 0 0 0\n"
+            "M  V30 4 H 0 0 0 0\n"
+            "M  V30 END ATOM\n"
+            "M  V30 BEGIN BOND\n"
+            "M  V30 1 1 1 2 ENDPTS=(1 3 4)\n"
+            "M  V30 END BOND",
+            re.escape('Error in "ENDPTS=(1 3 4)": Expected 1 endpoints, found 2'),
+        ),
+    ],
+)
+def test_molfile_with_star_atoms_raises_exception(molfile, expected_error_msg):
     with pytest.raises(
         MolfileParserException,
         match=expected_error_msg,

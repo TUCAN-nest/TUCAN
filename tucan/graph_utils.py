@@ -48,22 +48,47 @@ def permute_molecule(m, random_seed=1.0):
     return m_permu
 
 
-def _sorted_labels(m):
-    nodes = list(m.nodes(data=True))
-    n = nx.Graph()
-    n.add_nodes_from(sorted(nodes))
-    n.add_edges_from(m.edges(data=True))
-    return n
-
-
 def _permute_molecule(m):
     labels = list(m.nodes)
     permuted_labels = list(labels)  # shallow copy
     random.shuffle(permuted_labels)
-    relabeled_graph = relabel_molecule(m, permuted_labels, labels)
+    m_relabeled = relabel_molecule(m, permuted_labels, labels)
+    return _sort_molecule_by_label(m_relabeled)
 
-    # NetworkX's relabel_nodes function does not change the iteration order of
-    # the graph's internal node dictionary, which reflects the initial insert
-    # order of nodes. _sorted_labels() rebuilds a Graph object from scratch with
-    # a node iteration order identical to the label order.
-    return _sorted_labels(relabeled_graph)
+
+def _sort_molecule_by_label(m):
+    """Sort molecule by label.
+
+    Ensure that the graph's node iteration order is identical to the label order.
+    In a NetworkX graph, the iteration order of the nodes depends on the initial
+    insertion order of the nodes. There's a crucial difference to `nx.relabel_nodes()`.
+    The latter only changes the labels, without changing the iteration order.
+
+    Original nodes:
+        label | attribute
+        -----------------
+        0     | A
+        1     | B
+        2     | C
+
+    Nodes relabeled with `nx.relabel_nodes()`:
+        label | attribute
+        -----------------
+        1     | A
+        2     | B
+        0     | C
+
+    In contrast, the present function changes the labels _and_ iteration order:
+        label | attribute
+        -----------------
+        0     | C
+        1     | A
+        2     | B
+    """
+    nodes_sorted_by_label = sorted(list(m.nodes(data=True)))
+
+    m_sorted_by_label = nx.Graph()
+    m_sorted_by_label.add_nodes_from(nodes_sorted_by_label)
+    m_sorted_by_label.add_edges_from(m.edges(data=True))
+
+    return m_sorted_by_label

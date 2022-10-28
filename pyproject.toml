@@ -28,7 +28,7 @@ dev = [
     "black",
     "flake8",
     "pytest",
-    "snapshottest"
+    "syrupy"
 ]
 
 [tool.pytest.ini_options]

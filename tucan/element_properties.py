@@ -374,5 +374,7 @@ element_names = [
 
 ELEMENT_PROPS = {
     s: {"atomic_number": n, "element_name": e, "element_color": c}
-    for s, n, e, c in zip(element_symbols, atomic_numbers, element_names, element_colors)
+    for s, n, e, c in zip(
+        element_symbols, atomic_numbers, element_names, element_colors
+    )
 }

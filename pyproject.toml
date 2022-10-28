@@ -39,3 +39,6 @@ addopts = """
 testpaths = [
     "tests",
 ]
+
+[tool.black]    # https://lyz-code.github.io/blue-book/devops/black/
+extend-exclude = 'tucan/parser/tucan.*\.py'

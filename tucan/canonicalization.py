@@ -6,8 +6,9 @@ from itertools import pairwise
 
 def partition_molecule_by_attribute(m, attribute):
     m_sorted = sort_molecule_by_attribute(m, attribute)
+    sorted_indices = sorted(m_sorted)
     attribute_sequences = [
-        attribute_sequence(a, m_sorted, attribute) for a in sorted(m_sorted)
+        attribute_sequence(a, m_sorted, attribute) for a in sorted_indices
     ]
     updated_partitions = [0]
     for i, j in pairwise(attribute_sequences):
@@ -16,7 +17,7 @@ def partition_molecule_by_attribute(m, attribute):
             current_partition += 1
         updated_partitions.append(current_partition)
     nx.set_node_attributes(
-        m_sorted, dict(zip(sorted(m_sorted), updated_partitions)), "partition"
+        m_sorted, dict(zip(sorted_indices, updated_partitions)), "partition"
     )
     return m_sorted
 
@@ -64,16 +65,42 @@ def assign_canonical_labels(m):
     return dict(zip(old_labels, canonical_labels))
 
 
-def _add_invariant_code(m):
+def _add_invariant_code(m, invariant_code_definitions):
     """Assign an invariant code to each atom (mutates graph)."""
-    atomic_numbers = list(nx.get_node_attributes(m, "atomic_number").values())
+    invariant_codes = [
+        tuple(
+            attributes[icd["key"]]
+            if (default_value := icd["default_value"]) is None
+            else attributes.get(icd["key"], default_value)
+            for icd in invariant_code_definitions
+        )
+        for _, attributes in m.nodes(data=True)
+    ]
+
     nx.set_node_attributes(
-        m, dict(zip(list(m.nodes), atomic_numbers)), "invariant_code"
+        m, dict(zip(list(m.nodes), invariant_codes)), "invariant_code"
     )
 
 
+def _invariant_code_definition(attribute_key, default_value=None):
+    """
+    Returns an invariant code definition ("icd") to be used in the _add_invariant_code function.
+    Parameters
+    ----------
+    attribute_key Node attribute key
+    default_value Default value to be used if the node attribute does not exist. Use None to indicate that the attribute is mandatory.
+    """
+    return {"key": attribute_key, "default_value": default_value}
+
+
 def canonicalize_molecule(m):
-    _add_invariant_code(m)
+    invariant_code_definitions = [
+        _invariant_code_definition("atomic_number"),
+        _invariant_code_definition("mass", 0),
+        _invariant_code_definition("rad", 0),
+    ]
+    _add_invariant_code(m, invariant_code_definitions)
+
     m_partitioned_by_invariant_code = partition_molecule_by_attribute(
         m, "invariant_code"
     )

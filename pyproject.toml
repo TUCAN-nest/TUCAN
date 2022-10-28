@@ -27,7 +27,8 @@ drawing = [
 dev = [
     "black",
     "flake8",
-    "pytest"
+    "pytest",
+    "syrupy"
 ]
 
 [tool.pytest.ini_options]

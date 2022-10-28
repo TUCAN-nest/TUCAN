@@ -23,4 +23,4 @@ jobs:
           pytest
       - name: black
         run: |
-          black . --check --diff --extend-exclude "tucan/parser/tucan.*\.py"
+          black . --check --diff

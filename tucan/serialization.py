@@ -1,4 +1,4 @@
-from collections import Counter
+from collections import Counter, deque
 from tucan.graph_utils import sort_molecule_by_attribute
 from operator import gt, lt, eq
 import networkx as nx
@@ -83,7 +83,7 @@ def _assign_final_labels(
     # outer loop iterates over all fragments of the graph (= graph components),
     # starting with the lowest unexplored node label
     while unexplored := sorted([k for k, v in m.nodes(data="explored") if not v]):
-        atom_queue = [unexplored[0]]
+        atom_queue = deque([unexplored[0]])
 
         # inner loop reaches out to all atoms in a fragment
         while atom_queue:
@@ -106,8 +106,7 @@ def _assign_final_labels(
                 neighbor_traversal_order.extend(sorted(neighbors_this_priority))
             m.nodes[a]["explored"] = True
 
-            for n in neighbor_traversal_order:
-                atom_queue.insert(0, n)
+            atom_queue.extendleft(neighbor_traversal_order)
 
     assert len(final_labels) == len(m.nodes)
 

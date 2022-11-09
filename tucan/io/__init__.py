@@ -1,6 +1,6 @@
 """TUCAN IO package"""
 
-from tucan.io.molfile_reader import (
+from tucan.io.molfile_v3000_reader import (
     graph_from_file,
     graph_from_molfile_text,
     MolfileParserException,

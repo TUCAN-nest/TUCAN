@@ -1,7 +1,7 @@
 import pytest
 import re
 from tucan.io import graph_from_molfile_text, MolfileParserException
-from tucan.io.molfile_reader import (
+from tucan.io.molfile_v3000_reader import (
     _concat_lines_with_dash,
     _parse_atom_block_molfile3000,
     _parse_bond_block_molfile3000,

@@ -1,42 +1,15 @@
 import networkx as nx
 import re
 from collections import deque
-from pathlib import Path
 from tucan.element_properties import ELEMENT_PROPS
+from tucan.io.exception import MolfileParserException
 
 
-def graph_from_file(filepath: str) -> nx.Graph:
-    """Instantiate a NetworkX graph from an MDL molfile.
-
-    Parameters
-    ----------
-    filepath: str
-        Path pointing to a file containing a v3000 MDL (now BIOVIA) connection
-        table [1].
-
-    Returns
-    -------
-    NetworkX Graph
-
-    References
-    ----------
-    [1] https://en.wikipedia.org/wiki/Chemical_table_file
-    """
-    filepath = Path(filepath)
-    if filepath.suffix != ".mol":
-        raise IOError(f"The file must be in '.mol' format, not {filepath.suffix}.")
-    filecontent = _read_file(filepath)
-
-    return _graph_from_tokenized_lines(filecontent)
+def graph_from_molfile_v3000(lines: list[str]) -> nx.Graph:
+    return _graph_from_tokenized_lines(_tokenize_lines(lines))
 
 
-def graph_from_molfile_text(molfile: str) -> nx.Graph:
-    lines = _split_into_tokenized_lines(molfile)
-    return _graph_from_tokenized_lines(lines)
-
-
-def _split_into_tokenized_lines(string: str) -> list[list[str]]:
-    lines = string.splitlines()
+def _tokenize_lines(lines: list[str]) -> list[list[str]]:
     lines = _concat_lines_with_dash(lines)
     split_lines = [line.rstrip().split(" ") for line in lines]
     return [[value for value in line if value != ""] for line in split_lines]
@@ -68,14 +41,7 @@ def _concat_lines_with_dash(lines: list[str]) -> list[str]:
     return final_lines
 
 
-def _read_file(filepath: str) -> list[list[str]]:
-    with open(filepath) as file:
-        filecontent = file.read()
-    return _split_into_tokenized_lines(filecontent)
-
-
 def _graph_from_tokenized_lines(lines: list[list[str]]) -> nx.Graph:
-    _validate_molfile_version(lines, "V3000")
     _validate_counts_line(lines)
 
     atom_props, star_atoms = _parse_atom_block_molfile3000(lines)
@@ -90,13 +56,6 @@ def _graph_from_tokenized_lines(lines: list[list[str]]) -> nx.Graph:
     nx.set_edge_attributes(graph, bond_props)
 
     return nx.convert_node_labels_to_integers(graph)
-
-
-def _validate_molfile_version(lines: list[list[str]], expected_version: str):
-    if (version := lines[3][-1]) != expected_version:
-        raise MolfileParserException(
-            f'Invalid Molfile version: Expected "{expected_version}", found "{version}"'
-        )
 
 
 def _validate_counts_line(lines: list[list[str]]):
@@ -248,7 +207,3 @@ def _validate_bond_indices(bonds: dict[tuple[int, int]], atom_props: dict):
 def _validate_atom_index(index: int, atom_props: dict):
     if index not in atom_props:
         raise MolfileParserException(f"Unknown atom index {index + 1} in bond")
-
-
-class MolfileParserException(Exception):
-    pass

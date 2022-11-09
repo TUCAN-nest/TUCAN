@@ -1,13 +1,19 @@
 import pytest
 import re
-from tucan.io import graph_from_molfile_text, MolfileParserException
+from tucan.io import graph_from_file, graph_from_molfile_text
+from tucan.io.exception import MolfileParserException
 from tucan.io.molfile_v3000_reader import (
     _concat_lines_with_dash,
     _parse_atom_block_molfile3000,
     _parse_bond_block_molfile3000,
-    _read_file,
-    graph_from_file,
+    _tokenize_lines,
 )
+
+
+def _read_file(filepath: str) -> list[list[str]]:
+    with open(filepath) as file:
+        filecontent = file.read()
+    return _tokenize_lines(filecontent.splitlines())
 
 
 def test_parsing_atom_block():
@@ -396,20 +402,6 @@ def test_concat_lines_with_dash(lines, expected_lines):
 def test_concat_lines_with_dash_raises_exception(lines, expected_error_msg):
     with pytest.raises(MolfileParserException, match=expected_error_msg):
         _concat_lines_with_dash(lines)
-
-
-@pytest.mark.parametrize(
-    "molfile",
-    [
-        "\n\n\n  0  0  0     0  0            999 V2000",
-    ],
-)
-def test_molfile_with_invalid_version_raises_exception(molfile):
-    with pytest.raises(
-        MolfileParserException,
-        match='Invalid Molfile version: Expected "V3000", found "V2000"',
-    ):
-        graph_from_molfile_text(molfile)
 
 
 @pytest.mark.parametrize(

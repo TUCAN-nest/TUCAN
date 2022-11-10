@@ -3,7 +3,7 @@ from tucan.element_properties import ELEMENT_PROPS
 from tucan.io.exception import MolfileParserException
 
 
-def graph_from_molfile_v2000(lines: list[str]) -> nx.Graph:
+def graph_props_from_molfile_v2000(lines: list[str]) -> (dict, dict):
     # counts line: aaabbblllfffcccsssxxxrrrpppiiimmmvvvvvv
     atom_count = _to_int(lines[3][0:3])  # aaa
     bond_count = _to_int(lines[3][3:6])  # bbb
@@ -21,13 +21,7 @@ def graph_from_molfile_v2000(lines: list[str]) -> nx.Graph:
     )
     _parse_properties_block(lines[properies_block_offset:], atom_props)
 
-    graph = nx.Graph()
-    graph.add_nodes_from(list(atom_props.keys()))
-    nx.set_node_attributes(graph, atom_props)
-    graph.add_edges_from(list(bond_props.keys()))
-    nx.set_edge_attributes(graph, bond_props)
-
-    return graph
+    return atom_props, bond_props
 
 
 def _parse_atom_block(lines: list[str]) -> dict:

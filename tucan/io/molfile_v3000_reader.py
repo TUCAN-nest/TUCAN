@@ -5,8 +5,15 @@ from tucan.element_properties import ELEMENT_PROPS
 from tucan.io.exception import MolfileParserException
 
 
-def graph_from_molfile_v3000(lines: list[str]) -> nx.Graph:
-    return _graph_from_tokenized_lines(_tokenize_lines(lines))
+def graph_props_from_molfile_v3000(lines: list[str]) -> (dict, dict):
+    tokenized_lines = _tokenize_lines(lines)
+
+    _validate_counts_line(tokenized_lines)
+    atom_props, star_atoms = _parse_atom_block_molfile3000(tokenized_lines)
+    bond_props = _parse_bond_block_molfile3000(tokenized_lines, star_atoms)
+    _validate_bond_indices(bond_props, atom_props)
+
+    return atom_props, bond_props
 
 
 def _tokenize_lines(lines: list[str]) -> list[list[str]]:
@@ -39,23 +46,6 @@ def _concat_lines_with_dash(lines: list[str]) -> list[str]:
         lines.appendleft(curr_line[0:-1] + next_line[7:])
 
     return final_lines
-
-
-def _graph_from_tokenized_lines(lines: list[list[str]]) -> nx.Graph:
-    _validate_counts_line(lines)
-
-    atom_props, star_atoms = _parse_atom_block_molfile3000(lines)
-    bond_props = _parse_bond_block_molfile3000(lines, star_atoms)
-
-    _validate_bond_indices(bond_props, atom_props)
-
-    graph = nx.Graph()
-    graph.add_nodes_from(list(atom_props.keys()))
-    nx.set_node_attributes(graph, atom_props)
-    graph.add_edges_from(list(bond_props.keys()))
-    nx.set_edge_attributes(graph, bond_props)
-
-    return nx.convert_node_labels_to_integers(graph)
 
 
 def _validate_counts_line(lines: list[list[str]]):

@@ -6,14 +6,13 @@ from tucan.io.molfile_v3000_reader import graph_props_from_molfile_v3000
 
 
 def graph_from_file(filepath: str) -> nx.Graph:
-    """Instantiate a NetworkX graph from an MDL molfile. The parser supports both
-    V3000 and V2000 connection tables.
+    """Instantiate a NetworkX graph from an MDL molfile as specified by [1]. The
+    parser supports both V3000 and V2000 connection tables (CTABs).
 
     Parameters
     ----------
     filepath: str
-        Path pointing to a file containing an MDL (now BIOVIA) connection
-        table [1,2].
+        Path pointing to a molfile (.mol file extension)
 
     Returns
     -------
@@ -21,8 +20,7 @@ def graph_from_file(filepath: str) -> nx.Graph:
 
     References
     ----------
-    [1] https://en.wikipedia.org/wiki/Chemical_table_file
-    [2] https://discover.3ds.com/sites/default/files/2020-08/biovia_ctfileformats_2020.pdf
+    [1] https://discover.3ds.com/sites/default/files/2020-08/biovia_ctfileformats_2020.pdf
     """
     filepath = Path(filepath)
     if filepath.suffix != ".mol":
@@ -34,6 +32,22 @@ def graph_from_file(filepath: str) -> nx.Graph:
 
 
 def graph_from_molfile_text(molfile: str) -> nx.Graph:
+    """Instantiate a NetworkX graph from an MDL molfile as specified by [1]. The
+    parser supports both V3000 and V2000 connection tables (CTABs).
+
+    Parameters
+    ----------
+    molfile: str
+        the molfile as string
+
+    Returns
+    -------
+    NetworkX Graph
+
+    References
+    ----------
+    [1] https://discover.3ds.com/sites/default/files/2020-08/biovia_ctfileformats_2020.pdf
+    """
     lines = molfile.splitlines()
 
     molfile_version = lines[3].rstrip().split(" ")[-1]
@@ -42,9 +56,7 @@ def graph_from_molfile_text(molfile: str) -> nx.Graph:
     elif molfile_version == "V2000":
         atom_props, bond_props = graph_props_from_molfile_v2000(lines)
     else:
-        raise MolfileParserException(
-            f'Unsupported Molfile version "{molfile_version}"'
-        )
+        raise MolfileParserException(f'Unsupported Molfile version "{molfile_version}"')
 
     graph = nx.Graph()
     graph.add_nodes_from(list(atom_props.keys()))

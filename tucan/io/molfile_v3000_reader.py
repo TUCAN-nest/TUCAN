@@ -1,4 +1,3 @@
-import networkx as nx
 import re
 from collections import deque
 from tucan.element_properties import ELEMENT_PROPS

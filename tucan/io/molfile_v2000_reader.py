@@ -1,4 +1,3 @@
-import networkx as nx
 from tucan.element_properties import ELEMENT_PROPS
 from tucan.io.exception import MolfileParserException
 
@@ -51,7 +50,7 @@ def _parse_atom_line(line: str) -> dict:
     atom_props |= _parse_atom_block_charge(line[36:39])  # ccc
 
     # Field "dd" (mass difference) is ignored. Only consider hydrogen
-    # isotopes here and "M  ISO" in the properties block (later).
+    # isotopes (D and T) here and "M  ISO" in the properties block (later).
     if isotope_mass:
         atom_props["mass"] = isotope_mass
 

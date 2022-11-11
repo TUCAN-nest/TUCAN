@@ -1,4 +1,4 @@
-from tucan.element_properties import ELEMENT_PROPS
+from tucan.element_properties import ELEMENT_PROPS, detect_hydrogen_isotopes
 from tucan.io.exception import MolfileParserException
 
 
@@ -31,13 +31,7 @@ def _parse_atom_line(line: str) -> dict:
     # atom line: xxxxx.xxxxyyyyy.yyyyzzzzz.zzzz aaaddcccssshhhbbbvvvHHHrrriiimmmnnneee
     element_symbol = line[31:34].strip(" ")  # aaa
 
-    isotope_mass = None
-    if element_symbol == "D":
-        element_symbol = "H"
-        isotope_mass = 2
-    elif element_symbol == "T":
-        element_symbol = "H"
-        isotope_mass = 3
+    element_symbol, isotope_mass = detect_hydrogen_isotopes(element_symbol)
 
     atom_props = {
         "element_symbol": element_symbol,

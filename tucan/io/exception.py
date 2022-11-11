@@ -1,0 +1,2 @@
+class MolfileParserException(Exception):
+    pass

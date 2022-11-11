@@ -8,8 +8,8 @@ def graph_props_from_molfile_v3000(lines: list[str]) -> (dict, dict):
     tokenized_lines = _tokenize_lines(lines)
 
     _validate_counts_line(tokenized_lines)
-    atom_props, star_atoms = _parse_atom_block_molfile3000(tokenized_lines)
-    bond_props = _parse_bond_block_molfile3000(tokenized_lines, star_atoms)
+    atom_props, star_atoms = _parse_atom_block(tokenized_lines)
+    bond_props = _parse_bond_block(tokenized_lines, star_atoms)
     _validate_bond_indices(bond_props, atom_props)
 
     return atom_props, bond_props
@@ -53,7 +53,7 @@ def _validate_counts_line(lines: list[list[str]]):
         raise MolfileParserException(f'Bad counts line: "{badline}"')
 
 
-def _parse_atom_block_molfile3000(lines: list[list[str]]) -> tuple[dict, list[int]]:
+def _parse_atom_block(lines: list[list[str]]) -> tuple[dict, list[int]]:
     atom_count = int(lines[5][3])
     atom_block_offset = 7
 
@@ -117,7 +117,7 @@ def _parse_atom_props(line: list[str]) -> tuple[dict, bool]:
     return atom_props, False
 
 
-def _parse_bond_block_molfile3000(
+def _parse_bond_block(
     lines: list[list[str]], star_atoms: list[int]
 ) -> dict[tuple[int, int]]:
     atom_count = int(lines[5][3])

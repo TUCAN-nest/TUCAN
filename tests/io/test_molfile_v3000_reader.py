@@ -4,8 +4,8 @@ from tucan.io import graph_from_file, graph_from_molfile_text
 from tucan.io.exception import MolfileParserException
 from tucan.io.molfile_v3000_reader import (
     _concat_lines_with_dash,
-    _parse_atom_block_molfile3000,
-    _parse_bond_block_molfile3000,
+    _parse_atom_block,
+    _parse_bond_block,
     _tokenize_lines,
 )
 
@@ -18,7 +18,7 @@ def _read_file(filepath: str) -> list[list[str]]:
 
 def test_parsing_atom_block():
     filecontent = _read_file("tests/molfiles/tnt/tnt.mol")
-    atom_props, star_atoms = _parse_atom_block_molfile3000(filecontent)
+    atom_props, star_atoms = _parse_atom_block(filecontent)
     assert atom_props == {
         0: {
             "element_symbol": "C",
@@ -254,7 +254,7 @@ def test_parse_atom_block_molfile3000_raises_exception(molfile, expected_error_m
 
 def test_parsing_bond_block():
     filecontent = _read_file("tests/molfiles/tnt/tnt.mol")
-    bond_props = _parse_bond_block_molfile3000(filecontent, [])
+    bond_props = _parse_bond_block(filecontent, [])
     assert bond_props == {
         (0, 4): {"bond_type": 1},
         (0, 2): {"bond_type": 2},

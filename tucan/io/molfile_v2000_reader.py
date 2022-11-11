@@ -10,7 +10,7 @@ def graph_props_from_molfile_v2000(lines: list[str]) -> (dict, dict):
 
     atom_block_offset = 4
     bond_block_offset = atom_block_offset + atom_count
-    properies_block_offset = bond_block_offset + atom_lists_count
+    properties_block_offset = bond_block_offset + atom_lists_count
 
     atom_props = _parse_atom_block(
         lines[atom_block_offset : atom_block_offset + atom_count]
@@ -18,7 +18,7 @@ def graph_props_from_molfile_v2000(lines: list[str]) -> (dict, dict):
     bond_props = _parse_bond_block(
         lines[bond_block_offset : bond_block_offset + bond_count], atom_props
     )
-    _parse_properties_block(lines[properies_block_offset:], atom_props)
+    _parse_properties_block(lines[properties_block_offset:], atom_props)
 
     return atom_props, bond_props
 

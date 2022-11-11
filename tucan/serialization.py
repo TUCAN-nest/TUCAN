@@ -1,4 +1,4 @@
-from collections import Counter
+from collections import Counter, deque
 from tucan.graph_utils import sort_molecule_by_attribute
 from operator import gt, lt, eq
 import networkx as nx
@@ -77,35 +77,40 @@ def _assign_final_labels(
     The re-labeling is for cosmetic purposes."""
     partitions = m.nodes.data("partition")
     labels_by_partition = _labels_by_partition(m)
-    atom_queue = [0]
     final_labels = {}
     nx.set_node_attributes(m, False, "explored")
 
-    while atom_queue:
-        a = atom_queue.pop()
-        if m.nodes[a]["explored"]:
-            continue
-        a_final = labels_by_partition[
-            partitions[a]
-        ].pop()  # assign smallest label available in this partition
-        final_labels[a] = a_final
+    # outer loop iterates over all fragments of the graph (= graph components),
+    # starting with the lowest unexplored node label
+    while unexplored := sorted([k for k, v in m.nodes(data="explored") if not v]):
+        atom_queue = deque([unexplored[0]])
 
-        neighbors = list(m.neighbors(a))
-        neighbor_traversal_order = []
-        for priority in reversed(
-            traversal_priorities
-        ):  # reverse to preserve order of traversal priorities in queue
-            neighbors_this_priority = [
-                n for n in neighbors if priority(partitions[a], partitions[n])
-            ]
-            neighbor_traversal_order.extend(sorted(neighbors_this_priority))
-        m.nodes[a]["explored"] = True
+        # inner loop reaches out to all atoms in a fragment
+        while atom_queue:
+            a = atom_queue.pop()
+            if m.nodes[a]["explored"]:
+                continue
+            a_final = labels_by_partition[
+                partitions[a]
+            ].pop()  # assign smallest label available in this partition
+            final_labels[a] = a_final
 
-        for n in neighbor_traversal_order:
-            atom_queue.insert(0, n)
+            neighbors = list(m.neighbors(a))
+            neighbor_traversal_order = []
+            for priority in reversed(
+                traversal_priorities
+            ):  # reverse to preserve order of traversal priorities in queue
+                neighbors_this_priority = [
+                    n for n in neighbors if priority(partitions[a], partitions[n])
+                ]
+                neighbor_traversal_order.extend(sorted(neighbors_this_priority))
+            m.nodes[a]["explored"] = True
+
+            atom_queue.extendleft(neighbor_traversal_order)
+
+    assert len(final_labels) == len(m.nodes)
 
     nx.set_node_attributes(m, False, "explored")
-
     return nx.relabel_nodes(m, final_labels, copy=True)
 
 

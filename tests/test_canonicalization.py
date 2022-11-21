@@ -1,8 +1,8 @@
 from tucan.canonicalization import canonicalize_molecule
 from tucan.serialization import serialize_molecule
 from tucan.graph_utils import permute_molecule
+from tucan.tests import permutation_invariance
 import networkx as nx
-import random
 import pytest
 
 
@@ -26,17 +26,8 @@ def test_permutation(m):
     assert m.edges != m_permu.edges
 
 
-def test_invariance(m, n_runs=10, random_seed=random.random()):
-    """Eindeutigkeit."""
-    m_canon = canonicalize_molecule(m)
-    m_serialized = serialize_molecule(m_canon)
-    random.seed(random_seed)
-    for _ in range(n_runs):
-        permutation_seed = random.random()
-        m_permu = permute_molecule(m, random_seed=permutation_seed)
-        m_permu_canon = canonicalize_molecule(m_permu)
-        m_permu_serialized = serialize_molecule(m_permu_canon)
-        assert m_serialized == m_permu_serialized
+def test_permutation_invariance(m):
+    permutation_invariance(m)
 
 
 @pytest.mark.parametrize(

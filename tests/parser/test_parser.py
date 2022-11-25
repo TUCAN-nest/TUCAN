@@ -1,9 +1,8 @@
-import re
 import pytest
-from tucan.canonicalization import canonicalize_molecule
+import re
 from tucan.io import graph_from_tucan, TucanParserException
-from tucan.serialization import serialize_molecule
 from tucan.parser.parser import _prepare_parser, _walk_tree
+from tucan.test_utils import roundtrip_graph_tucan_graph_tucan_graph
 
 
 def _extract_atoms_from_sum_formula(s):
@@ -206,14 +205,7 @@ def test_graph_from_tucan(tucan, expected_atoms, expected_bonds):
 
 
 def test_roundtrip_molfile_graph_tucan_graph_tucan_graph(m):
-    m_serialized = serialize_molecule(canonicalize_molecule(m))
-    g1 = graph_from_tucan(m_serialized)
-    g1_serialized = serialize_molecule(canonicalize_molecule(g1.copy()))
-    g2 = graph_from_tucan(g1_serialized)
-
-    assert m_serialized == g1_serialized
-    assert dict(g1.nodes(data=True)) == dict(g2.nodes(data=True))
-    assert list(g1.edges) == list(g2.edges)
+    roundtrip_graph_tucan_graph_tucan_graph(m)
 
 
 @pytest.mark.parametrize(

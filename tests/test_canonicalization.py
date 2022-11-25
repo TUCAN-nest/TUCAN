@@ -1,7 +1,7 @@
 from tucan.canonicalization import canonicalize_molecule
 from tucan.serialization import serialize_molecule
 from tucan.graph_utils import permute_molecule
-from tucan.tests import permutation_invariance
+from tucan.test_utils import permutation_invariance
 import networkx as nx
 import pytest
 

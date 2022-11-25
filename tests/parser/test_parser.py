@@ -2,7 +2,7 @@ import pytest
 import re
 from tucan.io import graph_from_tucan, TucanParserException
 from tucan.parser.parser import _prepare_parser, _walk_tree
-from tucan.tests import roundtrip_graph_tucan_graph_tucan_graph
+from tucan.test_utils import roundtrip_graph_tucan_graph_tucan_graph
 
 
 def _extract_atoms_from_sum_formula(s):

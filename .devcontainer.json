@@ -2,7 +2,7 @@
 // https://github.com/microsoft/vscode-dev-containers/tree/v0.205.2/containers/docker-existing-dockerfile
 {
     "name": "TUCAN",
-    "image": "mcr.microsoft.com/vscode/devcontainers/python:3.10",
+    "image": "mcr.microsoft.com/vscode/devcontainers/python:3.11",
     // Add the IDs of extensions you want installed when the container is created.
     "extensions": [
         "ms-toolsai.jupyter",
@@ -14,9 +14,8 @@
         "marp-team.marp-vscode",
         "bungcip.better-toml",
     ],
-    "postCreateCommand": "pip install -e .[dev,io,drawing]",
-
+    "postCreateCommand": "pip install -e .[dev,drawing]",
     "features": {
-		"java": "lts"
-	}
+        "java": "lts"
+    }
 }

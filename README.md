@@ -10,7 +10,7 @@ Have a look at our [demo notebook](https://github.com/TUCAN-nest/TUCAN/blob/HEAD
 You can find details on TUCAN's scientific background in our [paper](https://dx.doi.org/10.1186/s13321-022-00640-5).
 
 # Installation
-TUCAN requires a Python installation (>=3.9), and preferably you install the package in a virtual environment (e.g., [venv](https://docs.python.org/3.10/library/venv.html)).
+TUCAN requires a Python installation (>=3.10), and preferably you install the package in a virtual environment (e.g., [venv](https://docs.python.org/3.11/library/venv.html)).
 
 You can install TUCAN locally using [pip](https://pip.pypa.io/en/stable/) by first [cloning the repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository), and then running
 ```

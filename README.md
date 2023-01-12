@@ -43,7 +43,9 @@ it computes a serialized, canonical representation of your molecule:
 
 Have a look at our [demo notebook](https://github.com/TUCAN-nest/TUCAN/blob/HEAD/docs/demo.ipynb) to see TUCAN at work.
 
-You can find details on TUCAN's scientific background in our [paper](https://dx.doi.org/10.1186/s13321-022-00640-5).
+You can explore TUCAN interactively on our [website](https://tucan-nest.github.io),
+
+and find details on TUCAN's scientific background in our [paper](https://dx.doi.org/10.1186/s13321-022-00640-5).
 
 # Installation
 TUCAN requires a Python installation (>=3.10), and preferably you install the package in a virtual environment (e.g., [venv](https://docs.python.org/3.11/library/venv.html)).

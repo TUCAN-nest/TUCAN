@@ -22,10 +22,10 @@ def graph_from_file(filepath: str) -> nx.Graph:
     ----------
     [1] https://discover.3ds.com/sites/default/files/2020-08/biovia_ctfileformats_2020.pdf
     """
-    filepath = Path(filepath)
-    if filepath.suffix != ".mol":
-        raise IOError(f"The file must be in '.mol' format, not {filepath.suffix}.")
-    with open(filepath) as file:
+    filepath_object = Path(filepath)
+    if filepath_object.suffix != ".mol":
+        raise IOError(f"The file must be in '.mol' format, not {filepath_object.suffix}.")
+    with open(filepath_object) as file:
         filecontent = file.read()
 
     return graph_from_molfile_text(filecontent)

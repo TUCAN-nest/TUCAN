@@ -381,7 +381,7 @@ ELEMENT_PROPS = {
 
 
 def detect_hydrogen_isotopes(element_symbol: str) -> tuple[str, int]:
-    isotope_mass = None
+    isotope_mass = 0
     if element_symbol == "D":
         element_symbol = "H"
         isotope_mass = 2

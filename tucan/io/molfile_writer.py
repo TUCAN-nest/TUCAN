@@ -17,7 +17,7 @@ def graph_to_molfile(graph: nx.Graph, calc_coordinates=False) -> str:
     -------
     MDL V3000 Molfile
     """
-    lines = []
+    lines: list = []
 
     _add_header(lines)
     _add_v30_line(lines, "BEGIN CTAB")

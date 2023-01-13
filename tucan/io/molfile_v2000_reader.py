@@ -2,7 +2,7 @@ from tucan.element_properties import ELEMENT_PROPS, detect_hydrogen_isotopes
 from tucan.io.exception import MolfileParserException
 
 
-def graph_props_from_molfile_v2000(lines: list[str]) -> (dict, dict):
+def graph_props_from_molfile_v2000(lines: list[str]) -> tuple[dict, dict]:
     # counts line: aaabbblllfffcccsssxxxrrrpppiiimmmvvvvvv
     atom_count = _to_int(lines[3][0:3])  # aaa
     bond_count = _to_int(lines[3][3:6])  # bbb
@@ -75,7 +75,7 @@ def _parse_bond_block(lines: list[str], atom_props: dict) -> dict:
     return dict([_parse_bond_line(line, atom_props) for line in lines])
 
 
-def _parse_bond_line(line: str, atom_props: dict) -> tuple:
+def _parse_bond_line(line: str, atom_props: dict) -> tuple[tuple[int, int], dict[str, int]]:
     # bond line: 111222tttsssxxxrrrccc
     index1 = _to_int(line[0:3]) - 1  # 111
     index2 = _to_int(line[3:6]) - 1  # 222
@@ -92,7 +92,7 @@ def _parse_properties_block(lines: list[str], atom_props: dict):
     reset_chg_and_rad = False
     reset_mass = False
 
-    additional_props = {}
+    additional_props: dict = {}
     for line in lines:
         if line.startswith("M  CHG"):
             # M  CHGnn8 aaa vvv ...

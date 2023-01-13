@@ -4,7 +4,7 @@ from tucan.element_properties import ELEMENT_PROPS, detect_hydrogen_isotopes
 from tucan.io.exception import MolfileParserException
 
 
-def graph_props_from_molfile_v3000(lines: list[str]) -> (dict, dict):
+def graph_props_from_molfile_v3000(lines: list[str]) -> tuple[dict, dict]:
     tokenized_lines = _tokenize_lines(lines)
 
     _validate_counts_line(tokenized_lines)
@@ -21,14 +21,14 @@ def _tokenize_lines(lines: list[str]) -> list[list[str]]:
     return [[value for value in line if value != ""] for line in split_lines]
 
 
-def _concat_lines_with_dash(lines: list[str]) -> list[str]:
+def _concat_lines_with_dash(line: list[str]) -> list[str]:
     final_lines = []
-    lines = deque(lines)
+    line_deque = deque(line)
 
-    while lines:
-        curr_line = lines.popleft()
+    while line_deque:
+        curr_line = line_deque.popleft()
 
-        if not lines:
+        if not line_deque:
             final_lines.append(curr_line)
             break
 
@@ -36,13 +36,13 @@ def _concat_lines_with_dash(lines: list[str]) -> list[str]:
             final_lines.append(curr_line)
             continue
 
-        next_line = lines.popleft()
+        next_line = line_deque.popleft()
         if not next_line.startswith("M  V30 "):
             raise MolfileParserException(
                 f'Invalid concatenation of lines "{curr_line}" and "{next_line}"'
             )
 
-        lines.appendleft(curr_line[0:-1] + next_line[7:])
+        line_deque.appendleft(curr_line[0:-1] + next_line[7:])
 
     return final_lines
 
@@ -84,7 +84,7 @@ def _parse_atom_block(lines: list[list[str]]) -> tuple[dict, list[int]]:
 def _parse_atom_props(line: list[str]) -> tuple[dict, bool]:
     element_symbol = line[3]
     if element_symbol == "*":
-        return None, True
+        return {}, True
 
     element_symbol, isotope_mass = detect_hydrogen_isotopes(element_symbol)
 
@@ -100,7 +100,7 @@ def _parse_atom_props(line: list[str]) -> tuple[dict, bool]:
     optional_props = {
         "chg": [int(i.split("=")[1]) for i in line if "CHG" in i],
         "mass": [int(i.split("=")[1]) for i in line if "MASS" in i]
-        if isotope_mass is None
+        if not isotope_mass
         else [isotope_mass],
         "rad": [int(i.split("=")[1]) for i in line if "RAD" in i],
     }
@@ -113,7 +113,7 @@ def _parse_atom_props(line: list[str]) -> tuple[dict, bool]:
 
 def _parse_bond_block(
     lines: list[list[str]], star_atoms: list[int]
-) -> dict[tuple[int, int]]:
+) -> dict[tuple[int, int], dict[str, int]]:
     atom_count = int(lines[5][3])
     bond_count = int(lines[5][4])
 
@@ -181,7 +181,7 @@ def _parse_bond_line_with_star_atom(
     return [(start_atom_index, end_atom_index - 1) for end_atom_index in numbers[1:]]
 
 
-def _validate_bond_indices(bonds: dict[tuple[int, int]], atom_props: dict):
+def _validate_bond_indices(bonds: dict[tuple[int, int], dict[str, int]], atom_props: dict):
     for bond in bonds.keys():
         _validate_atom_index(bond[0], atom_props)
         _validate_atom_index(bond[1], atom_props)

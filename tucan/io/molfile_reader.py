@@ -24,7 +24,9 @@ def graph_from_file(filepath: str) -> nx.Graph:
     """
     filepath_object = Path(filepath)
     if filepath_object.suffix != ".mol":
-        raise IOError(f"The file must be in '.mol' format, not {filepath_object.suffix}.")
+        raise IOError(
+            f"The file must be in '.mol' format, not {filepath_object.suffix}."
+        )
     with open(filepath_object) as file:
         filecontent = file.read()
 

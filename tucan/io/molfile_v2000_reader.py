@@ -75,7 +75,9 @@ def _parse_bond_block(lines: list[str], atom_props: dict) -> dict:
     return dict([_parse_bond_line(line, atom_props) for line in lines])
 
 
-def _parse_bond_line(line: str, atom_props: dict) -> tuple[tuple[int, int], dict[str, int]]:
+def _parse_bond_line(
+    line: str, atom_props: dict
+) -> tuple[tuple[int, int], dict[str, int]]:
     # bond line: 111222tttsssxxxrrrccc
     index1 = _to_int(line[0:3]) - 1  # 111
     index2 = _to_int(line[3:6]) - 1  # 222

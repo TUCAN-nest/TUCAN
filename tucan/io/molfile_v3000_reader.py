@@ -181,7 +181,9 @@ def _parse_bond_line_with_star_atom(
     return [(start_atom_index, end_atom_index - 1) for end_atom_index in numbers[1:]]
 
 
-def _validate_bond_indices(bonds: dict[tuple[int, int], dict[str, int]], atom_props: dict):
+def _validate_bond_indices(
+    bonds: dict[tuple[int, int], dict[str, int]], atom_props: dict
+):
     for bond in bonds.keys():
         _validate_atom_index(bond[0], atom_props)
         _validate_atom_index(bond[1], atom_props)

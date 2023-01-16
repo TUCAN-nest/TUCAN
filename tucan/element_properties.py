@@ -372,7 +372,7 @@ element_names = [
     "oganesson",
 ]
 
-ELEMENT_PROPS = {
+ELEMENT_PROPS: dict[str, dict[str, str | int]] = {
     s: {"atomic_number": n, "element_name": e, "element_color": c}
     for s, n, e, c in zip(
         element_symbols, atomic_numbers, element_names, element_colors

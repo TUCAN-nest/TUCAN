@@ -2,10 +2,10 @@ import networkx as nx
 import random
 
 
-def sort_molecule_by_attribute(m, attribute):
+def sort_molecule_by_attribute(m: nx.Graph, attribute: str) -> nx.Graph:
     """Sort atoms by attribute."""
     attr_with_labels = [
-        (attribute_sequence(atom, m, attribute), atom) for atom in m
+        (attribute_sequence(m, atom, attribute), atom) for atom in m
     ]  # [(A, 0), (C, 1), (B, 2)]
     sorted_attr, labels_sorted_by_attr = zip(
         *sorted(attr_with_labels)
@@ -13,7 +13,9 @@ def sort_molecule_by_attribute(m, attribute):
     return relabel_molecule(m, labels_sorted_by_attr, list(range(m.number_of_nodes())))
 
 
-def attribute_sequence(atom, m, attribute):
+def attribute_sequence(
+    m: nx.Graph, atom: int, attribute: str
+) -> list[str | int | float]:
     attr_atom = m.nodes[atom][attribute]
     attr_neighbors = sorted(
         [m.nodes[n][attribute] for n in m.neighbors(atom)], reverse=True
@@ -21,12 +23,14 @@ def attribute_sequence(atom, m, attribute):
     return [attr_atom] + attr_neighbors
 
 
-def relabel_molecule(m, old_labels, new_labels):
+def relabel_molecule(
+    m: nx.Graph, old_labels: list[int], new_labels: list[int]
+) -> nx.Graph:
     """Relabel the atoms of a molecular graph."""
     return nx.relabel_nodes(m, dict(zip(old_labels, new_labels)), copy=True)
 
 
-def permute_molecule(m, random_seed=1.0):
+def permute_molecule(m: nx.Graph, random_seed: float = 1.0) -> nx.Graph:
     """Randomly permute the atom-labels of a molecular graph.
 
     Parameters
@@ -48,7 +52,7 @@ def permute_molecule(m, random_seed=1.0):
     return m_permu
 
 
-def _permute_molecule(m):
+def _permute_molecule(m: nx.Graph) -> nx.Graph:
     labels = list(m.nodes)
     permuted_labels = list(labels)  # shallow copy
     random.shuffle(permuted_labels)
@@ -56,7 +60,7 @@ def _permute_molecule(m):
     return _sort_molecule_by_label(m_relabeled)
 
 
-def _sort_molecule_by_label(m):
+def _sort_molecule_by_label(m: nx.Graph) -> nx.Graph:
     """Sort molecule by label.
 
     Ensure that the graph's node iteration order is identical to the label order.

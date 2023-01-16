@@ -2,13 +2,14 @@ from tucan.graph_utils import sort_molecule_by_attribute, attribute_sequence
 import networkx as nx
 from igraph import Graph as iGraph
 from itertools import pairwise
+from typing import Iterator, Any
 
 
-def partition_molecule_by_attribute(m, attribute):
+def partition_molecule_by_attribute(m: nx.Graph, attribute: str) -> nx.Graph:
     m_sorted = sort_molecule_by_attribute(m, attribute)
     sorted_indices = sorted(m_sorted)
     attribute_sequences = [
-        attribute_sequence(a, m_sorted, attribute) for a in sorted_indices
+        attribute_sequence(m_sorted, atom, attribute) for atom in sorted_indices
     ]
     updated_partitions = [0]
     for i, j in pairwise(attribute_sequences):
@@ -22,7 +23,7 @@ def partition_molecule_by_attribute(m, attribute):
     return m_sorted
 
 
-def refine_partitions(m):
+def refine_partitions(m: nx.Graph) -> Iterator[nx.Graph]:
     current_partitions = list(
         nx.get_node_attributes(
             sort_molecule_by_attribute(m, "partition"), "partition"
@@ -40,7 +41,7 @@ def refine_partitions(m):
         )
 
 
-def assign_canonical_labels(m):
+def assign_canonical_labels(m: nx.Graph) -> dict[int, int]:
     """Canonicalize node-labels of a graph.
 
     The canonical labels are computed using the igraph [1] implementation of
@@ -65,7 +66,9 @@ def assign_canonical_labels(m):
     return dict(zip(old_labels, canonical_labels))
 
 
-def _add_invariant_code(m, invariant_code_definitions):
+def _add_invariant_code(
+    m: nx.Graph, invariant_code_definitions: list[dict[str, Any]]
+) -> None:
     """Assign an invariant code to each atom (mutates graph)."""
     invariant_codes = [
         tuple(
@@ -82,7 +85,9 @@ def _add_invariant_code(m, invariant_code_definitions):
     )
 
 
-def _invariant_code_definition(attribute_key, default_value=None):
+def _invariant_code_definition(
+    attribute_key: str, default_value: Any = None
+) -> dict[str, Any]:
     """
     Returns an invariant code definition ("icd") to be used in the _add_invariant_code function.
     Parameters
@@ -93,7 +98,7 @@ def _invariant_code_definition(attribute_key, default_value=None):
     return {"key": attribute_key, "default_value": default_value}
 
 
-def canonicalize_molecule(m):
+def canonicalize_molecule(m: nx.Graph) -> nx.Graph:
     invariant_code_definitions = [
         _invariant_code_definition("atomic_number"),
         _invariant_code_definition("mass", 0),

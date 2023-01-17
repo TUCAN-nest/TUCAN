@@ -1,10 +1,11 @@
 from collections import Counter, deque
 from tucan.graph_utils import sort_molecule_by_attribute
 from operator import gt, lt, eq
+from typing import Callable
 import networkx as nx
 
 
-def serialize_molecule(m):
+def serialize_molecule(m: nx.Graph) -> str:
     """Serialize a molecule."""
     m_sorted = sort_molecule_by_attribute(_assign_final_labels(m), "atomic_number")
     serialization = _write_sum_formula(m_sorted)
@@ -15,7 +16,7 @@ def serialize_molecule(m):
     return serialization
 
 
-def _write_edge_list(m):
+def _write_edge_list(m: nx.Graph) -> str:
     sorted_edges = sorted([sorted(edge) for edge in m.edges()])
     edge_list_string = "".join(
         [f"({edge[0] + 1}-{edge[1] + 1})" for edge in sorted_edges]
@@ -24,7 +25,7 @@ def _write_edge_list(m):
     return edge_list_string
 
 
-def _write_node_properties(m):
+def _write_node_properties(m: nx.Graph) -> str:
     node_properties = ["mass", "rad"]
     node_property_string = ""
     for node in sorted(m.nodes(data=True)):
@@ -40,7 +41,7 @@ def _write_node_properties(m):
     return node_property_string
 
 
-def _write_sum_formula(m):
+def _write_sum_formula(m: nx.Graph) -> str:
     """Write the sum formula of a molecule.
 
     In the sum formula the elements are ordered according to Hill system [1]:
@@ -68,9 +69,9 @@ def _write_sum_formula(m):
 
 
 def _assign_final_labels(
-    m,
-    traversal_priorities=[lt, gt, eq],
-):
+    m: nx.Graph,
+    traversal_priorities: tuple[Callable, Callable, Callable] = (lt, gt, eq),
+) -> nx.Graph:
     """Re-label nodes such that each node is connected to neighbors with the
     smallest possible labels.
     This is not part of (and not required for) the canonicalization.
@@ -114,12 +115,12 @@ def _assign_final_labels(
     return nx.relabel_nodes(m, final_labels, copy=True)
 
 
-def _labels_by_partition(m):
+def _labels_by_partition(m: nx.Graph) -> dict[int, list[int]]:
     """Create dictionary of partitions to node labels."""
     partitions = set(sorted([v for _, v in m.nodes.data("partition")]))
-    labels_by_partition = {p: set() for p in partitions}
+    labels_by_partition: dict[int, list[int]] = {p: [] for p in partitions}
     for a in m:
-        labels_by_partition[m.nodes[a]["partition"]].add(a)
+        labels_by_partition[m.nodes[a]["partition"]].append(a)
     labels_by_partition.update(
         (k, sorted(list(v), reverse=True)) for k, v in labels_by_partition.items()
     )

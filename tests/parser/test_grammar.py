@@ -1,5 +1,5 @@
 import pytest
-from tucan.element_properties import element_symbols
+from tucan.element_attributes import element_symbols
 from tucan.io import TucanParserException, graph_from_tucan
 from tucan.parser.parser import _prepare_parser
 

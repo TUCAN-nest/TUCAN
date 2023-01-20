@@ -18,8 +18,8 @@ def _read_file(filepath: str) -> list[list[str]]:
 
 def test_parsing_atom_block():
     filecontent = _read_file("tests/molfiles/tnt/tnt.mol")
-    atom_props, star_atoms = _parse_atom_block(filecontent)
-    assert atom_props == {
+    atom_attrs, star_atoms = _parse_atom_block(filecontent)
+    assert atom_attrs == {
         0: {
             "element_symbol": "C",
             "atomic_number": 6,
@@ -254,8 +254,8 @@ def test_parse_atom_block_molfile3000_raises_exception(molfile, expected_error_m
 
 def test_parsing_bond_block():
     filecontent = _read_file("tests/molfiles/tnt/tnt.mol")
-    bond_props = _parse_bond_block(filecontent, [])
-    assert bond_props == {
+    bond_attrs = _parse_bond_block(filecontent, [])
+    assert bond_attrs == {
         (0, 4): {"bond_type": 1},
         (0, 2): {"bond_type": 2},
         (0, 15): {"bond_type": 1},

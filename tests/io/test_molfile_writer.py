@@ -6,7 +6,7 @@ from tucan.io.molfile_writer import _add_header, _add_v30_line
 @pytest.mark.parametrize(
     "molfile",
     [
-        # molfiles with additional atom properties
+        # molfiles with additional atom attributes
         "tests/molfiles/tnt/tnt.mol",  # CHG
         "tests/molfiles/TEMPO/TEMPO.mol",  # RAD
         "tests/molfiles/water-d1_3/water-d1_3.mol",  # MASS
@@ -33,9 +33,9 @@ def test_recalculate_atom_coordinates():
             graph_to_molfile(graph, calc_coordinates=True)
         ).nodes(data=True)
 
-        for key, orig_atom_props in atoms_with_orig_coords:
-            assert orig_atom_props["x_coord"] != atoms_with_new_coords[key]["x_coord"]
-            assert orig_atom_props["y_coord"] != atoms_with_new_coords[key]["y_coord"]
+        for key, orig_atom_attrs in atoms_with_orig_coords:
+            assert orig_atom_attrs["x_coord"] != atoms_with_new_coords[key]["x_coord"]
+            assert orig_atom_attrs["y_coord"] != atoms_with_new_coords[key]["y_coord"]
             assert atoms_with_new_coords[key]["z_coord"] == 0.0
 
 

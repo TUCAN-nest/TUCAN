@@ -3,7 +3,7 @@ from pathlib import Path
 from tucan.io import graph_from_file
 from tucan.io.exception import MolfileParserException
 from tucan.io.molfile_v2000_reader import (
-    _merge_tuples_into_additional_props,
+    _merge_tuples_into_additional_attributes,
     _parse_atom_value_assignments,
     _to_int,
     _to_float,
@@ -28,13 +28,13 @@ def test_graphs_from_v2000_and_v3000_molfiles_match(mol):
 
 
 @pytest.mark.parametrize(
-    "tuples, additional_props, expected_additional_props_after_merge",
+    "tuples, additional_attrs, expected_additional_attrs_after_merge",
     [
         (
             [
                 (0, 2),
                 (1, 13),
-                (2, 3),  # atom index is not in additional_props yet
+                (2, 3),  # atom index is not in additional_attrs yet
             ],
             {
                 0: {"chg": 2},  # will add new key
@@ -48,15 +48,15 @@ def test_graphs_from_v2000_and_v3000_molfiles_match(mol):
         ),
     ],
 )
-def test_merge_tuples_into_additional_props(
-    tuples, additional_props, expected_additional_props_after_merge
+def test_merge_tuples_into_additional_attributes(
+    tuples, additional_attrs, expected_additional_attrs_after_merge
 ):
-    _merge_tuples_into_additional_props(tuples, "mass", additional_props)
-    assert additional_props == expected_additional_props_after_merge
+    _merge_tuples_into_additional_attributes(tuples, "mass", additional_attrs)
+    assert additional_attrs == expected_additional_attrs_after_merge
 
 
 @pytest.mark.parametrize(
-    "line, atom_props, expected_tuples",
+    "line, atom_attrs, expected_tuples",
     [
         (
             "M  CHG  2  10   2   2 -15",
@@ -71,12 +71,12 @@ def test_merge_tuples_into_additional_props(
         ),
     ],
 )
-def test_parse_atom_value_assignments(line, atom_props, expected_tuples):
-    assert _parse_atom_value_assignments(line, atom_props) == expected_tuples
+def test_parse_atom_value_assignments(line, atom_attrs, expected_tuples):
+    assert _parse_atom_value_assignments(line, atom_attrs) == expected_tuples
 
 
 @pytest.mark.parametrize(
-    "line, atom_props, expected_error_msg",
+    "line, atom_attrs, expected_error_msg",
     [
         (
             "M  CHG  1   5   2",
@@ -86,13 +86,13 @@ def test_parse_atom_value_assignments(line, atom_props, expected_tuples):
     ],
 )
 def test_parse_atom_value_assignments_unknown_atom_index_raises_exception(
-    line, atom_props, expected_error_msg
+    line, atom_attrs, expected_error_msg
 ):
     with pytest.raises(
         MolfileParserException,
         match=expected_error_msg,
     ):
-        _parse_atom_value_assignments(line, atom_props)
+        _parse_atom_value_assignments(line, atom_attrs)
 
 
 @pytest.mark.parametrize(

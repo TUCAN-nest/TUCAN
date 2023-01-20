@@ -10,8 +10,8 @@ def serialize_molecule(m: nx.Graph) -> str:
     m_sorted = sort_molecule_by_attribute(_assign_final_labels(m), "atomic_number")
     serialization = _write_sum_formula(m_sorted)
     serialization += f"/{_write_edge_list(m_sorted)}"
-    node_properties = _write_node_properties(m_sorted)
-    serialization += f"/{node_properties}" if node_properties else ""
+    node_attributes = _write_node_attributes(m_sorted)
+    serialization += f"/{node_attributes}" if node_attributes else ""
 
     return serialization
 
@@ -25,20 +25,19 @@ def _write_edge_list(m: nx.Graph) -> str:
     return edge_list_string
 
 
-def _write_node_properties(m: nx.Graph) -> str:
-    node_properties = ["mass", "rad"]
-    node_property_string = ""
+def _write_node_attributes(m: nx.Graph) -> str:
+    node_attribute_string = ""
     for node in sorted(m.nodes(data=True)):
-        label, props = node
-        available_props = [
-            f"{prop}={props[prop]}" for prop in node_properties if prop in props
+        label, attrs = node
+        available_attrs = [
+            f"{attr}={attrs[attr]}" for attr in ("mass", "rad") if attr in attrs
         ]
-        if not available_props:
+        if not available_attrs:
             continue
-        node_property_string += f"({label + 1}:"
-        node_property_string += f"{','.join(available_props)})"
+        node_attribute_string += f"({label + 1}:"
+        node_attribute_string += f"{','.join(available_attrs)})"
 
-    return node_property_string
+    return node_attribute_string
 
 
 def _write_sum_formula(m: nx.Graph) -> str:

@@ -2,7 +2,7 @@ import networkx as nx
 from antlr4 import InputStream, CommonTokenStream
 from antlr4.error.ErrorListener import ErrorListener
 from antlr4.tree.Tree import ParseTreeWalker
-from tucan.element_properties import ELEMENT_PROPS
+from tucan.element_attributes import ELEMENT_ATTRS
 from tucan.parser.tucanLexer import tucanLexer
 from tucan.parser.tucanListener import tucanListener
 from tucan.parser.tucanParser import tucanParser
@@ -73,7 +73,7 @@ class TucanListenerImpl(tucanListener):
         node_index = int(ctx.parentCtx.node_index().getText())
         key = ctx.node_property_key().getText()
         value = int(ctx.node_property_value().getText())
-        self._add_node_property(node_index, key, value)
+        self._add_node_attribute(node_index, key, value)
 
     def _parse_sum_formula(self, formula_ctx):
         if formula_ctx.getChildCount() == 0:
@@ -87,25 +87,25 @@ class TucanListenerImpl(tucanListener):
             self._add_atoms(symbol, count)
 
     def _add_atoms(self, element, count):
-        atom_props = {
+        atom_attrs = {
             "element_symbol": element,
-            "atomic_number": ELEMENT_PROPS[element]["atomic_number"],
+            "atomic_number": ELEMENT_ATTRS[element]["atomic_number"],
             "partition": 0,
         }
 
-        self._atoms.extend([atom_props.copy() for _ in range(count)])
+        self._atoms.extend([atom_attrs.copy() for _ in range(count)])
 
     def _add_bond(self, index1, index2):
         self._bonds.append((index1 - 1, index2 - 1))
 
-    def _add_node_property(self, node_index, key, value):
-        props_for_node = self._node_attributes.setdefault(node_index - 1, {})
+    def _add_node_attribute(self, node_index, key, value):
+        attrs_for_node = self._node_attributes.setdefault(node_index - 1, {})
 
-        if key in props_for_node:
+        if key in attrs_for_node:
             raise TucanParserException(
-                f'Atom {node_index}: Property "{key}" was already defined.'
+                f'Atom {node_index}: Attribute "{key}" was already defined.'
             )
-        props_for_node[key] = value
+        attrs_for_node[key] = value
 
     def to_graph(self) -> nx.Graph:
         # node index validation
@@ -115,15 +115,15 @@ class TucanListenerImpl(tucanListener):
 
         sorted_atoms = sorted(self._atoms, key=lambda a: a["atomic_number"])
 
-        # dict of dict (atom_index -> dict of atom properties)
+        # dict of dict (atom_index -> dict of atom attributes)
         atoms_dict = {i: sorted_atoms[i] for i in range(len(sorted_atoms))}
 
-        # join in additional atom properties
-        for index, props in self._node_attributes.items():
+        # join in additional atom attributes
+        for index, attrs in self._node_attributes.items():
             self._validate_atom_index(index)
 
-            atom_props = atoms_dict[index]
-            atom_props.update(props)
+            atom_attrs = atoms_dict[index]
+            atom_attrs.update(attrs)
 
         # construct graph
         graph = nx.Graph()

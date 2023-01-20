@@ -1,18 +1,18 @@
 import re
 from collections import deque
-from tucan.element_properties import ELEMENT_PROPS, detect_hydrogen_isotopes
+from tucan.element_attributes import ELEMENT_ATTRS, detect_hydrogen_isotopes
 from tucan.io.exception import MolfileParserException
 
 
-def graph_props_from_molfile_v3000(lines: list[str]) -> tuple[dict, dict]:
+def graph_attributes_from_molfile_v3000(lines: list[str]) -> tuple[dict, dict]:
     tokenized_lines = _tokenize_lines(lines)
 
     _validate_counts_line(tokenized_lines)
-    atom_props, star_atoms = _parse_atom_block(tokenized_lines)
-    bond_props = _parse_bond_block(tokenized_lines, star_atoms)
-    _validate_bond_indices(bond_props, atom_props)
+    atom_attrs, star_atoms = _parse_atom_block(tokenized_lines)
+    bond_attrs = _parse_bond_block(tokenized_lines, star_atoms)
+    _validate_bond_indices(bond_attrs, atom_attrs)
 
-    return atom_props, bond_props
+    return atom_attrs, bond_attrs
 
 
 def _tokenize_lines(lines: list[str]) -> list[list[str]]:
@@ -68,47 +68,47 @@ def _parse_atom_block(lines: list[list[str]]) -> tuple[dict, list[int]]:
             f'Expected "END ATOM" on line {atom_block_offset + atom_count + 1}, found "{end_atom_str}"'
         )
 
-    atom_props = {}
+    atom_attrs = {}
     star_atoms = []
     for line in lines[atom_block_offset : atom_block_offset + atom_count]:
         atom_index = int(line[2]) - 1
-        props, is_star_atom = _parse_atom_props(line)
+        attrs, is_star_atom = _parse_atom_attributes(line)
         if is_star_atom:
             star_atoms.append(atom_index)
             continue
-        atom_props[atom_index] = props
+        atom_attrs[atom_index] = attrs
 
-    return atom_props, star_atoms
+    return atom_attrs, star_atoms
 
 
-def _parse_atom_props(line: list[str]) -> tuple[dict, bool]:
+def _parse_atom_attributes(line: list[str]) -> tuple[dict, bool]:
     element_symbol = line[3]
     if element_symbol == "*":
         return {}, True
 
     element_symbol, isotope_mass = detect_hydrogen_isotopes(element_symbol)
 
-    atom_props = {
+    atom_attrs = {
         "element_symbol": element_symbol,
-        "atomic_number": ELEMENT_PROPS[element_symbol]["atomic_number"],
+        "atomic_number": ELEMENT_ATTRS[element_symbol]["atomic_number"],
         "partition": 0,
         "x_coord": float(line[4]),
         "y_coord": float(line[5]),
         "z_coord": float(line[6]),
     }
 
-    optional_props = {
+    optional_attrs = {
         "chg": [int(i.split("=")[1]) for i in line if "CHG" in i],
         "mass": [int(i.split("=")[1]) for i in line if "MASS" in i]
         if not isotope_mass
         else [isotope_mass],
         "rad": [int(i.split("=")[1]) for i in line if "RAD" in i],
     }
-    for key, val in optional_props.items():
+    for key, val in optional_attrs.items():
         if val:
-            atom_props[key] = val.pop()
+            atom_attrs[key] = val.pop()
 
-    return atom_props, False
+    return atom_attrs, False
 
 
 def _parse_bond_block(
@@ -139,7 +139,7 @@ def _parse_bond_block(
     for line in lines[bond_block_offset : bond_block_offset + bond_count]:
         atom1_index = int(line[4]) - 1
         atom2_index = int(line[5]) - 1
-        bond_props = _parse_bond_props(line)
+        bond_attrs = _parse_bond_attributes(line)
 
         atom1_is_star = atom1_index in star_atoms
         atom2_is_star = atom2_index in star_atoms
@@ -155,12 +155,12 @@ def _parse_bond_block(
             bond_tuples = [(atom1_index, atom2_index)]
 
         for t in bond_tuples:
-            bonds[t] = bond_props.copy()
+            bonds[t] = bond_attrs.copy()
 
     return bonds
 
 
-def _parse_bond_props(line: list[str]) -> dict:
+def _parse_bond_attributes(line: list[str]) -> dict:
     return {"bond_type": int(line[3])}
 
 
@@ -182,13 +182,13 @@ def _parse_bond_line_with_star_atom(
 
 
 def _validate_bond_indices(
-    bonds: dict[tuple[int, int], dict[str, int]], atom_props: dict
+    bonds: dict[tuple[int, int], dict[str, int]], atom_attrs: dict
 ):
     for bond in bonds.keys():
-        _validate_atom_index(bond[0], atom_props)
-        _validate_atom_index(bond[1], atom_props)
+        _validate_atom_index(bond[0], atom_attrs)
+        _validate_atom_index(bond[1], atom_attrs)
 
 
-def _validate_atom_index(index: int, atom_props: dict):
-    if index not in atom_props:
+def _validate_atom_index(index: int, atom_attrs: dict):
+    if index not in atom_attrs:
         raise MolfileParserException(f"Unknown atom index {index + 1} in bond")

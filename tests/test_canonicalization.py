@@ -1,9 +1,55 @@
-from tucan.canonicalization import canonicalize_molecule
+from tucan.canonicalization import (
+    canonicalize_molecule,
+    partition_molecule_by_attribute,
+    refine_partitions,
+)
 from tucan.serialization import serialize_molecule
 from tucan.graph_utils import permute_molecule
 from tucan.test_utils import permutation_invariance
+from tucan.io import graph_from_file
+from itertools import pairwise
 import networkx as nx
 import pytest
+
+
+@pytest.mark.parametrize(
+    "m, expected_partitions",
+    [
+        ("tnt", [0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 4, 4, 4]),
+        ("favipiravir_1", [0, 1, 1, 2, 3, 4, 5, 5, 6, 7, 8, 8, 9, 10, 11]),
+    ],
+)
+def test_partition_molecule_by_attribute(m, expected_partitions):
+    m_partitioned = partition_molecule_by_attribute(
+        graph_from_file(f"tests/molfiles/{m}/{m}.mol"), "atomic_number"
+    )
+    partitions = sorted(nx.get_node_attributes(m_partitioned, "partition").values())
+
+    assert partitions == expected_partitions
+
+
+def test_partition_molecule_by_attribute_is_stable(m):
+    m_partitioned = partition_molecule_by_attribute(m, "atomic_number")
+    m_re_partitioned = partition_molecule_by_attribute(m_partitioned, "atomic_number")
+
+    assert sorted(
+        nx.get_node_attributes(m_partitioned, "partition").values()
+    ) == sorted(nx.get_node_attributes(m_re_partitioned, "partition").values())
+
+
+def test_refine_partitions(m):
+    m_partitioned = partition_molecule_by_attribute(m, "atomic_number")
+    m_refined = list(refine_partitions(m_partitioned))
+
+    assert all(
+        max_p_i < max_p_j
+        for max_p_i, max_p_j in pairwise(
+            (
+                max(nx.get_node_attributes(m_rfnd, "partition").values())
+                for m_rfnd in m_refined
+            )
+        )
+    )
 
 
 def test_permutation(m):

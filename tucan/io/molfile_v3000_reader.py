@@ -4,7 +4,11 @@ from tucan.element_attributes import ELEMENT_ATTRS, detect_hydrogen_isotopes
 from tucan.io.exception import MolfileParserException
 
 
-def graph_attributes_from_molfile_v3000(lines: list[str]) -> tuple[dict, dict]:
+def graph_attributes_from_molfile_v3000(
+    lines: list[str],
+) -> tuple[
+    dict[int, dict[str, int | float | str]], dict[tuple[int, int], dict[str, int]]
+]:
     tokenized_lines = _tokenize_lines(lines)
 
     _validate_counts_line(tokenized_lines)
@@ -18,6 +22,7 @@ def graph_attributes_from_molfile_v3000(lines: list[str]) -> tuple[dict, dict]:
 def _tokenize_lines(lines: list[str]) -> list[list[str]]:
     lines = _concat_lines_with_dash(lines)
     split_lines = [line.rstrip().split(" ") for line in lines]
+
     return [[value for value in line if value != ""] for line in split_lines]
 
 
@@ -38,6 +43,7 @@ def _concat_lines_with_dash(line: list[str]) -> list[str]:
 
         next_line = line_deque.popleft()
         if not next_line.startswith("M  V30 "):
+
             raise MolfileParserException(
                 f'Invalid concatenation of lines "{curr_line}" and "{next_line}"'
             )
@@ -47,23 +53,28 @@ def _concat_lines_with_dash(line: list[str]) -> list[str]:
     return final_lines
 
 
-def _validate_counts_line(lines: list[list[str]]):
+def _validate_counts_line(lines: list[list[str]]) -> None:
     if lines[5][2] != "COUNTS" or len(lines[5]) < 5:
         badline = " ".join(lines[5])
+
         raise MolfileParserException(f'Bad counts line: "{badline}"')
 
 
-def _parse_atom_block(lines: list[list[str]]) -> tuple[dict, list[int]]:
+def _parse_atom_block(
+    lines: list[list[str]],
+) -> tuple[dict[int, dict[str, int | float | str]], list[int]]:
     atom_count = int(lines[5][3])
     atom_block_offset = 7
 
     if (begin_atom_str := " ".join(lines[atom_block_offset - 1][2:])) != "BEGIN ATOM":
+
         raise MolfileParserException(
             f'Expected "BEGIN ATOM" on line {atom_block_offset}, found "{begin_atom_str}"'
         )
     if (
         end_atom_str := " ".join(lines[atom_block_offset + atom_count][2:])
     ) != "END ATOM":
+
         raise MolfileParserException(
             f'Expected "END ATOM" on line {atom_block_offset + atom_count + 1}, found "{end_atom_str}"'
         )
@@ -81,9 +92,12 @@ def _parse_atom_block(lines: list[list[str]]) -> tuple[dict, list[int]]:
     return atom_attrs, star_atoms
 
 
-def _parse_atom_attributes(line: list[str]) -> tuple[dict, bool]:
+def _parse_atom_attributes(
+    line: list[str],
+) -> tuple[dict[str, int | float | str], bool]:
     element_symbol = line[3]
     if element_symbol == "*":
+
         return {}, True
 
     element_symbol, isotope_mass = detect_hydrogen_isotopes(element_symbol)
@@ -119,18 +133,21 @@ def _parse_bond_block(
 
     # bond block is optional
     if bond_count == 0:
+
         return {}
 
     atom_block_offset = 7
     bond_block_offset = atom_block_offset + atom_count + 2
 
     if (begin_bond_str := " ".join(lines[bond_block_offset - 1][2:])) != "BEGIN BOND":
+
         raise MolfileParserException(
             f'Expected "BEGIN BOND" on line {bond_block_offset}, found "{begin_bond_str}"'
         )
     if (
         end_bond_str := " ".join(lines[bond_block_offset + bond_count][2:])
     ) != "END BOND":
+
         raise MolfileParserException(
             f'Expected "END BOND" on line {bond_block_offset + bond_count + 1}, found "{end_bond_str}"'
         )
@@ -144,6 +161,7 @@ def _parse_bond_block(
         atom1_is_star = atom1_index in star_atoms
         atom2_is_star = atom2_index in star_atoms
         if atom1_is_star and atom2_is_star:
+
             raise MolfileParserException(
                 f'Two "star" atoms (index {atom1_index + 1} and {atom2_index + 1}) may not be connected'
             )
@@ -160,7 +178,8 @@ def _parse_bond_block(
     return bonds
 
 
-def _parse_bond_attributes(line: list[str]) -> dict:
+def _parse_bond_attributes(line: list[str]) -> dict[str, int]:
+
     return {"bond_type": int(line[3])}
 
 
@@ -178,17 +197,22 @@ def _parse_bond_line_with_star_atom(
         raise MolfileParserException(
             f'Error in "{endpts_token}": Expected {expected_n_endpts} endpoints, found {n_endpts}'
         )
+
     return [(start_atom_index, end_atom_index - 1) for end_atom_index in numbers[1:]]
 
 
 def _validate_bond_indices(
-    bonds: dict[tuple[int, int], dict[str, int]], atom_attrs: dict
-):
-    for bond in bonds.keys():
+    bond_attrs: dict[tuple[int, int], dict[str, int]],
+    atom_attrs: dict[int, dict[str, int | float | str]],
+) -> None:
+    for bond in bond_attrs.keys():
         _validate_atom_index(bond[0], atom_attrs)
         _validate_atom_index(bond[1], atom_attrs)
 
 
-def _validate_atom_index(index: int, atom_attrs: dict):
+def _validate_atom_index(
+    index: int, atom_attrs: dict[int, dict[str, int | float | str]]
+) -> None:
     if index not in atom_attrs:
+
         raise MolfileParserException(f"Unknown atom index {index + 1} in bond")

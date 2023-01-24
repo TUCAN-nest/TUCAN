@@ -2,7 +2,11 @@ from tucan.element_attributes import ELEMENT_ATTRS, detect_hydrogen_isotopes
 from tucan.io.exception import MolfileParserException
 
 
-def graph_attributes_from_molfile_v2000(lines: list[str]) -> tuple[dict, dict]:
+def graph_attributes_from_molfile_v2000(
+    lines: list[str],
+) -> tuple[
+    dict[int, dict[str, int | float | str]], dict[tuple[int, int], dict[str, int]]
+]:
     # counts line: aaabbblllfffcccsssxxxrrrpppiiimmmvvvvvv
     atom_count = _to_int(lines[3][0:3])  # aaa
     bond_count = _to_int(lines[3][3:6])  # bbb
@@ -23,11 +27,12 @@ def graph_attributes_from_molfile_v2000(lines: list[str]) -> tuple[dict, dict]:
     return atom_attrs, bond_attrs
 
 
-def _parse_atom_block(lines: list[str]) -> dict:
+def _parse_atom_block(lines: list[str]) -> dict[int, dict[str, int | float | str]]:
+
     return {atom_index: _parse_atom_line(line) for atom_index, line in enumerate(lines)}
 
 
-def _parse_atom_line(line: str) -> dict:
+def _parse_atom_line(line: str) -> dict[str, int | float | str]:
     # atom line: xxxxx.xxxxyyyyy.yyyyzzzzz.zzzz aaaddcccssshhhbbbvvvHHHrrriiimmmnnneee
     element_symbol = line[31:34].strip(" ")  # aaa
 
@@ -51,7 +56,7 @@ def _parse_atom_line(line: str) -> dict:
     return atom_attrs
 
 
-def _parse_atom_block_charge(s: str) -> dict:
+def _parse_atom_block_charge(s: str) -> dict[str, int]:
     match _to_int(s):
         case 1:
             return {"chg": 3}
@@ -71,12 +76,15 @@ def _parse_atom_block_charge(s: str) -> dict:
             return {}  # ignore silently
 
 
-def _parse_bond_block(lines: list[str], atom_attrs: dict) -> dict:
+def _parse_bond_block(
+    lines: list[str], atom_attrs: dict[int, dict[str, int | float | str]]
+) -> dict[tuple[int, int], dict[str, int]]:
+
     return dict([_parse_bond_line(line, atom_attrs) for line in lines])
 
 
 def _parse_bond_line(
-    line: str, atom_attrs: dict
+    line: str, atom_attrs: dict[int, dict[str, int | float | str]]
 ) -> tuple[tuple[int, int], dict[str, int]]:
     # bond line: 111222tttsssxxxrrrccc
     index1 = _to_int(line[0:3]) - 1  # 111
@@ -90,7 +98,9 @@ def _parse_bond_line(
     return (index1, index2), bond_attrs
 
 
-def _parse_attribute_block(lines: list[str], atom_attrs: dict):
+def _parse_attribute_block(
+    lines: list[str], atom_attrs: dict[int, dict[str, int | float | str]]
+) -> None:
     reset_chg_and_rad = False
     reset_mass = False
 
@@ -119,6 +129,7 @@ def _parse_attribute_block(lines: list[str], atom_attrs: dict):
         elif line == "M  END":
             break  # else of this for loop is not entered
     else:
+
         raise MolfileParserException('Could not find end of attribute block ("M  END")')
 
     if reset_chg_and_rad:
@@ -134,7 +145,7 @@ def _parse_attribute_block(lines: list[str], atom_attrs: dict):
 
 def _merge_tuples_into_additional_attributes(
     atom_index_and_value_tuples: list[tuple[int, int]], key: str, additional_attrs: dict
-):
+) -> None:
     for atom_index, value in atom_index_and_value_tuples:
         if atom_index in additional_attrs:
             additional_attrs[atom_index][key] = value
@@ -142,7 +153,9 @@ def _merge_tuples_into_additional_attributes(
             additional_attrs[atom_index] = {key: value}
 
 
-def _parse_atom_value_assignments(line: str, atom_attrs: dict) -> list[tuple[int, int]]:
+def _parse_atom_value_assignments(
+    line: str, atom_attrs: dict[int, dict[str, int | float | str]]
+) -> list[tuple[int, int]]:
     # attribute line example: M  CHGnn8 aaa vvv ...
     number_of_entries = _to_int(line[6:9])  # nn8
     tuple_offset = 10
@@ -160,20 +173,25 @@ def _parse_atom_value_assignments(line: str, atom_attrs: dict) -> list[tuple[int
     return assignments
 
 
-def _validate_atom_index(index: int, atom_attrs: dict, line: str):
+def _validate_atom_index(
+    index: int, atom_attrs: dict[int, dict[str, int | float | str]], line: str
+) -> None:
     if index not in atom_attrs:
+
         raise MolfileParserException(f'Unknown atom index {index + 1} in line "{line}"')
 
 
-def _clear_atom_attribute(key: str, atom_attrs: dict):
+def _clear_atom_attribute(
+    key: str, atom_attrs: dict[int, dict[str, int | float | str]]
+) -> None:
     for atom_attr in atom_attrs.values():
         # Remove key from dict, but don't raise KeyError if it doesn't exist.
         atom_attr.pop(key, None)
 
 
 def _merge_atom_attributes_and_additional_attributes(
-    atom_attrs: dict, additional_attrs: dict
-):
+    atom_attrs: dict[int, dict[str, int | float | str]], additional_attrs: dict
+) -> None:
     for atom_index, attrs in atom_attrs.items():
         if atom_index in additional_attrs:
             attrs |= additional_attrs[atom_index]
@@ -181,11 +199,15 @@ def _merge_atom_attributes_and_additional_attributes(
 
 def _to_int(s: str) -> int:
     if not s.strip(" "):
+
         return 0
+
     return int(s)
 
 
 def _to_float(s: str) -> float:
     if not s.strip(" "):
+
         return 0
+
     return float(s)

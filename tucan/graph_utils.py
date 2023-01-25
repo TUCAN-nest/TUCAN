@@ -1,5 +1,46 @@
 import networkx as nx
 import random
+from typing import Any, NamedTuple
+
+
+def graph_from_molecule(
+    atom_attrs: dict[int, dict[str, Any]],
+    bond_attrs: dict[tuple[int, int], dict[str, int]],
+) -> nx.Graph:
+    invariant_code_definitions = [
+        InvariantCodeDefinition("atomic_number"),
+        InvariantCodeDefinition("mass", 0),
+        InvariantCodeDefinition("rad", 0),
+    ]
+    _add_invariant_code(atom_attrs, invariant_code_definitions)
+
+    graph = nx.Graph()
+    graph.add_nodes_from(list(atom_attrs.keys()))
+    nx.set_node_attributes(graph, atom_attrs)
+    graph.add_edges_from(list(bond_attrs.keys()))
+    nx.set_edge_attributes(graph, bond_attrs)
+
+    return nx.convert_node_labels_to_integers(graph)
+
+
+class InvariantCodeDefinition(NamedTuple):
+
+    key: str
+    default_value: Any = None
+
+
+def _add_invariant_code(
+    atom_attrs: dict[int, dict[str, Any]],
+    invariant_code_definitions: list[InvariantCodeDefinition],
+) -> None:
+    for atom, attrs in atom_attrs.items():
+        invariant_code = tuple(
+            attrs[icd.key]
+            if (default_value := icd.default_value) is None
+            else attrs.get(icd.key, default_value)
+            for icd in invariant_code_definitions
+        )
+        atom_attrs[atom].update({"invariant_code": invariant_code})
 
 
 def sort_molecule_by_attribute(m: nx.Graph, attribute: str) -> nx.Graph:
@@ -10,6 +51,7 @@ def sort_molecule_by_attribute(m: nx.Graph, attribute: str) -> nx.Graph:
     sorted_attr, labels_sorted_by_attr = zip(
         *sorted(attr_with_labels)
     )  # (A, B, C), (0, 2, 1)
+
     return relabel_molecule(m, labels_sorted_by_attr, list(range(m.number_of_nodes())))
 
 
@@ -20,6 +62,7 @@ def attribute_sequence(
     attr_neighbors = sorted(
         [m.nodes[n][attribute] for n in m.neighbors(atom)], reverse=True
     )
+
     return [attr_atom] + attr_neighbors
 
 
@@ -27,6 +70,7 @@ def relabel_molecule(
     m: nx.Graph, old_labels: list[int], new_labels: list[int]
 ) -> nx.Graph:
     """Relabel the atoms of a molecular graph."""
+
     return nx.relabel_nodes(m, dict(zip(old_labels, new_labels)), copy=True)
 
 
@@ -49,6 +93,7 @@ def permute_molecule(m: nx.Graph, random_seed: float = 1.0) -> nx.Graph:
     if enforce_permutation:
         while m.edges == m_permu.edges:
             m_permu = _permute_molecule(m)
+
     return m_permu
 
 
@@ -57,6 +102,7 @@ def _permute_molecule(m: nx.Graph) -> nx.Graph:
     permuted_labels = list(labels)  # shallow copy
     random.shuffle(permuted_labels)
     m_relabeled = relabel_molecule(m, permuted_labels, labels)
+
     return _sort_molecule_by_label(m_relabeled)
 
 

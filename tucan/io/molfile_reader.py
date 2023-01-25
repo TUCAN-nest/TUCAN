@@ -1,5 +1,6 @@
 import networkx as nx
 from pathlib import Path
+from tucan.graph_utils import graph_from_molecule
 from tucan.io.exception import MolfileParserException
 from tucan.io.molfile_v2000_reader import graph_attributes_from_molfile_v2000
 from tucan.io.molfile_v3000_reader import graph_attributes_from_molfile_v3000
@@ -60,10 +61,4 @@ def graph_from_molfile_text(molfile: str) -> nx.Graph:
     else:
         raise MolfileParserException(f'Unsupported Molfile version "{molfile_version}"')
 
-    graph = nx.Graph()
-    graph.add_nodes_from(list(atom_attrs.keys()))
-    nx.set_node_attributes(graph, atom_attrs)
-    graph.add_edges_from(list(bond_attrs.keys()))
-    nx.set_edge_attributes(graph, bond_attrs)
-
-    return nx.convert_node_labels_to_integers(graph)
+    return graph_from_molecule(atom_attrs, bond_attrs)

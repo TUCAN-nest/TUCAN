@@ -1,8 +1,10 @@
 import networkx as nx
+from typing import Any
 from antlr4 import InputStream, CommonTokenStream
 from antlr4.error.ErrorListener import ErrorListener
 from antlr4.tree.Tree import ParseTreeWalker
 from tucan.element_attributes import ELEMENT_ATTRS
+from tucan.graph_utils import graph_from_molecule
 from tucan.parser.tucanLexer import tucanLexer
 from tucan.parser.tucanListener import tucanListener
 from tucan.parser.tucanParser import tucanParser
@@ -116,7 +118,9 @@ class TucanListenerImpl(tucanListener):
         sorted_atoms = sorted(self._atoms, key=lambda a: a["atomic_number"])
 
         # dict of dict (atom_index -> dict of atom attributes)
-        atoms_dict = {i: sorted_atoms[i] for i in range(len(sorted_atoms))}
+        atoms_dict: dict[int, dict[str, Any]] = {
+            i: sorted_atoms[i] for i in range(len(sorted_atoms))
+        }
 
         # join in additional atom attributes
         for index, attrs in self._node_attributes.items():
@@ -125,13 +129,9 @@ class TucanListenerImpl(tucanListener):
             atom_attrs = atoms_dict[index]
             atom_attrs.update(attrs)
 
-        # construct graph
-        graph = nx.Graph()
-        graph.add_nodes_from(list(atoms_dict.keys()))
-        nx.set_node_attributes(graph, atoms_dict)
-        graph.add_edges_from(self._bonds)
+        bonds_dict: dict[tuple[int, int], dict] = {bond: {} for bond in self._bonds}
 
-        return graph
+        return graph_from_molecule(atoms_dict, bonds_dict)
 
     def _validate_atom_index(self, index):
         if index >= len(self._atoms):

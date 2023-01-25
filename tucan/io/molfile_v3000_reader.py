@@ -1,14 +1,13 @@
 import re
 from collections import deque
+from typing import Any
 from tucan.element_attributes import ELEMENT_ATTRS, detect_hydrogen_isotopes
 from tucan.io.exception import MolfileParserException
 
 
 def graph_attributes_from_molfile_v3000(
     lines: list[str],
-) -> tuple[
-    dict[int, dict[str, int | float | str]], dict[tuple[int, int], dict[str, int]]
-]:
+) -> tuple[dict[int, dict[str, Any]], dict[tuple[int, int], dict[str, int]]]:
     tokenized_lines = _tokenize_lines(lines)
 
     _validate_counts_line(tokenized_lines)
@@ -62,7 +61,7 @@ def _validate_counts_line(lines: list[list[str]]) -> None:
 
 def _parse_atom_block(
     lines: list[list[str]],
-) -> tuple[dict[int, dict[str, int | float | str]], list[int]]:
+) -> tuple[dict[int, dict[str, Any]], list[int]]:
     atom_count = int(lines[5][3])
     atom_block_offset = 7
 
@@ -94,7 +93,7 @@ def _parse_atom_block(
 
 def _parse_atom_attributes(
     line: list[str],
-) -> tuple[dict[str, int | float | str], bool]:
+) -> tuple[dict[str, Any], bool]:
     element_symbol = line[3]
     if element_symbol == "*":
 
@@ -203,16 +202,14 @@ def _parse_bond_line_with_star_atom(
 
 def _validate_bond_indices(
     bond_attrs: dict[tuple[int, int], dict[str, int]],
-    atom_attrs: dict[int, dict[str, int | float | str]],
+    atom_attrs: dict[int, dict[str, Any]],
 ) -> None:
     for bond in bond_attrs.keys():
         _validate_atom_index(bond[0], atom_attrs)
         _validate_atom_index(bond[1], atom_attrs)
 
 
-def _validate_atom_index(
-    index: int, atom_attrs: dict[int, dict[str, int | float | str]]
-) -> None:
+def _validate_atom_index(index: int, atom_attrs: dict[int, dict[str, Any]]) -> None:
     if index not in atom_attrs:
 
         raise MolfileParserException(f"Unknown atom index {index + 1} in bond")

@@ -52,7 +52,9 @@ def sort_molecule_by_attribute(m: nx.Graph, attribute: str) -> nx.Graph:
         *sorted(attr_with_labels)
     )  # (A, B, C), (0, 2, 1)
 
-    return relabel_molecule(m, labels_sorted_by_attr, list(range(m.number_of_nodes())))
+    return nx.relabel_nodes(
+        m, dict(zip(labels_sorted_by_attr, list(range(m.number_of_nodes())))), copy=True
+    )
 
 
 def attribute_sequence(
@@ -64,14 +66,6 @@ def attribute_sequence(
     )
 
     return [attr_atom] + attr_neighbors
-
-
-def relabel_molecule(
-    m: nx.Graph, old_labels: list[int], new_labels: list[int]
-) -> nx.Graph:
-    """Relabel the atoms of a molecular graph."""
-
-    return nx.relabel_nodes(m, dict(zip(old_labels, new_labels)), copy=True)
 
 
 def permute_molecule(m: nx.Graph, random_seed: float = 1.0) -> nx.Graph:
@@ -101,7 +95,7 @@ def _permute_molecule(m: nx.Graph) -> nx.Graph:
     labels = list(m.nodes)
     permuted_labels = list(labels)  # shallow copy
     random.shuffle(permuted_labels)
-    m_relabeled = relabel_molecule(m, permuted_labels, labels)
+    m_relabeled = nx.relabel_nodes(m, dict(zip(permuted_labels, labels)), copy=True)
 
     return _sort_molecule_by_label(m_relabeled)
 

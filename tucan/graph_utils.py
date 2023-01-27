@@ -59,13 +59,13 @@ def sort_molecule_by_attribute(m: nx.Graph, attribute: str) -> nx.Graph:
 
 def attribute_sequence(
     m: nx.Graph, atom: int, attribute: str
-) -> list[str | int | float]:
+) -> tuple[str | int | float, ...]:
     attr_atom = m.nodes[atom][attribute]
     attr_neighbors = sorted(
         [m.nodes[n][attribute] for n in m.neighbors(atom)], reverse=True
     )
 
-    return [attr_atom] + attr_neighbors
+    return tuple([attr_atom] + attr_neighbors)
 
 
 def permute_molecule(m: nx.Graph, random_seed: float = 1.0) -> nx.Graph:

@@ -1,46 +1,36 @@
-from tucan.graph_utils import sort_molecule_by_attribute, attribute_sequence
+from tucan.graph_utils import attribute_sequence
 import networkx as nx
 from igraph import Graph as iGraph
-from itertools import pairwise
 from typing import Iterator
 
 
 def partition_molecule_by_attribute(m: nx.Graph, attribute: str) -> nx.Graph:
-    m_sorted = sort_molecule_by_attribute(m, attribute)
-    sorted_indices = sorted(m_sorted)
-    attribute_sequences = [
-        attribute_sequence(m_sorted, atom, attribute) for atom in sorted_indices
-    ]
-    updated_partitions = [0]
-    for i, j in pairwise(attribute_sequences):
-        current_partition = updated_partitions[-1]
-        if i != j:
-            current_partition += 1
-        updated_partitions.append(current_partition)
+
+    attr_seqs = [attribute_sequence(m, atom, attribute) for atom in m]
+    unique_attr_seqs = sorted(set(attr_seqs))
+    unique_attr_seqs_to_partitions = dict(
+        zip(unique_attr_seqs, range(len(unique_attr_seqs)))
+    )
+    partitions = [unique_attr_seqs_to_partitions[attr_seq] for attr_seq in attr_seqs]
+
+    m_partitioned = m.copy()
     nx.set_node_attributes(
-        m_sorted, dict(zip(sorted_indices, updated_partitions)), "partition"
+        m_partitioned, dict(zip(list(m_partitioned), partitions)), "partition"
     )
 
-    return m_sorted
+    return m_partitioned
 
 
 def refine_partitions(m: nx.Graph) -> Iterator[nx.Graph]:
-    current_partitions = list(
-        nx.get_node_attributes(
-            sort_molecule_by_attribute(m, "partition"), "partition"
-        ).values()
-    )
+    current_partitions = nx.get_node_attributes(m, "partition").values()
     m_refined = partition_molecule_by_attribute(m, "partition")
-    refined_partitions = list(nx.get_node_attributes(m_refined, "partition").values())
+    refined_partitions = nx.get_node_attributes(m_refined, "partition").values()
 
-    while current_partitions != refined_partitions:
-
+    while max(current_partitions) != max(refined_partitions):
         yield m_refined
         current_partitions = refined_partitions
         m_refined = partition_molecule_by_attribute(m_refined, "partition")
-        refined_partitions = list(
-            nx.get_node_attributes(m_refined, "partition").values()
-        )
+        refined_partitions = nx.get_node_attributes(m_refined, "partition").values()
 
 
 def assign_canonical_labels(m: nx.Graph) -> dict[int, int]:
@@ -75,6 +65,7 @@ def canonicalize_molecule(m: nx.Graph) -> nx.Graph:
     )
     m_refined = list(refine_partitions(m_partitioned_by_invariant_code))
     m_partitioned = m_refined[-1] if m_refined else m_partitioned_by_invariant_code
+
     canonical_labels = assign_canonical_labels(m_partitioned)
 
     return nx.relabel_nodes(m_partitioned, canonical_labels, copy=True)

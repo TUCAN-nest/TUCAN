@@ -6,6 +6,7 @@ as taken from http://jmol.sourceforge.net/jscolors with the exception of H,
 which was set to lightgrey for better visibility. Colors beyond meitnerium are
 not officially assigned so far and were thus set to the same value as for Mt.
 """
+from typing import Final
 
 element_symbols = [
     "H",
@@ -372,11 +373,21 @@ element_names = [
     "oganesson",
 ]
 
-ELEMENT_ATTRS: dict[str, dict[str, str | int]] = {
+ELEMENT_ATTRS: Final[dict[str, dict[str, str | int]]] = {
     s: {"atomic_number": n, "element_name": e, "element_color": c}
     for s, n, e, c in zip(
         element_symbols, atomic_numbers, element_names, element_colors
     )
+}
+
+MOLFILE_V2000_CHARGES: Final[dict[int, dict[str, int]]] = {
+    1: {"chg": 3},
+    2: {"chg": 2},
+    3: {"chg": 1},
+    4: {"rad": 2},  # doublet radical
+    5: {"chg": -1},
+    6: {"chg": -2},
+    7: {"chg": -3},
 }
 
 

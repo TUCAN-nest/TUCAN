@@ -1,5 +1,9 @@
 from typing import Any
-from tucan.element_attributes import ELEMENT_ATTRS, detect_hydrogen_isotopes
+from tucan.element_attributes import (
+    ELEMENT_ATTRS,
+    MOLFILE_V2000_CHARGES,
+    detect_hydrogen_isotopes,
+)
 from tucan.io.exception import MolfileParserException
 
 
@@ -45,7 +49,7 @@ def _parse_atom_line(line: str) -> dict[str, Any]:
         "y_coord": _to_float(line[10:20]),  # yyyyy.yyyy
         "z_coord": _to_float(line[20:30]),  # zzzzz.zzzz
     }
-    atom_attrs |= _parse_atom_block_charge(line[36:39])  # ccc
+    atom_attrs |= MOLFILE_V2000_CHARGES.get(_to_int(line[36:39]), {})  # ccc
 
     # Field "dd" (mass difference) is ignored. Only consider hydrogen
     # isotopes (D and T) here and "M  ISO" in the attribute block (later).
@@ -53,26 +57,6 @@ def _parse_atom_line(line: str) -> dict[str, Any]:
         atom_attrs["mass"] = isotope_mass
 
     return atom_attrs
-
-
-def _parse_atom_block_charge(s: str) -> dict[str, int]:
-    match _to_int(s):
-        case 1:
-            return {"chg": 3}
-        case 2:
-            return {"chg": 2}
-        case 3:
-            return {"chg": 1}
-        case 4:
-            return {"rad": 2}  # doublet radical
-        case 5:
-            return {"chg": -1}
-        case 6:
-            return {"chg": -2}
-        case 7:
-            return {"chg": -3}
-        case _:
-            return {}  # ignore silently
 
 
 def _parse_bond_block(

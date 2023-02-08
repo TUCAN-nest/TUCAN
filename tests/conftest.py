@@ -26,7 +26,7 @@ def graph_from_dimacs(filepath):
     graph = nx.Graph()
     graph.add_nodes_from(node_labels)
     nx.set_node_attributes(graph, "C", "element_symbol")
-    nx.set_node_attributes(graph, 1, "atomic_number")
+    nx.set_node_attributes(graph, 6, "atomic_number")
     graph.add_edges_from(bonds)
 
     return graph

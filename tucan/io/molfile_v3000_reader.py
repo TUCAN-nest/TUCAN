@@ -42,7 +42,6 @@ def _concat_lines_with_dash(line: list[str]) -> list[str]:
 
         next_line = line_deque.popleft()
         if not next_line.startswith("M  V30 "):
-
             raise MolfileParserException(
                 f'Invalid concatenation of lines "{curr_line}" and "{next_line}"'
             )
@@ -66,14 +65,12 @@ def _parse_atom_block(
     atom_block_offset = 7
 
     if (begin_atom_str := " ".join(lines[atom_block_offset - 1][2:])) != "BEGIN ATOM":
-
         raise MolfileParserException(
             f'Expected "BEGIN ATOM" on line {atom_block_offset}, found "{begin_atom_str}"'
         )
     if (
         end_atom_str := " ".join(lines[atom_block_offset + atom_count][2:])
     ) != "END ATOM":
-
         raise MolfileParserException(
             f'Expected "END ATOM" on line {atom_block_offset + atom_count + 1}, found "{end_atom_str}"'
         )
@@ -96,7 +93,6 @@ def _parse_atom_attributes(
 ) -> tuple[dict[str, Any], bool]:
     element_symbol = line[3]
     if element_symbol == "*":
-
         return {}, True
 
     element_symbol, isotope_mass = detect_hydrogen_isotopes(element_symbol)
@@ -132,21 +128,18 @@ def _parse_bond_block(
 
     # bond block is optional
     if bond_count == 0:
-
         return {}
 
     atom_block_offset = 7
     bond_block_offset = atom_block_offset + atom_count + 2
 
     if (begin_bond_str := " ".join(lines[bond_block_offset - 1][2:])) != "BEGIN BOND":
-
         raise MolfileParserException(
             f'Expected "BEGIN BOND" on line {bond_block_offset}, found "{begin_bond_str}"'
         )
     if (
         end_bond_str := " ".join(lines[bond_block_offset + bond_count][2:])
     ) != "END BOND":
-
         raise MolfileParserException(
             f'Expected "END BOND" on line {bond_block_offset + bond_count + 1}, found "{end_bond_str}"'
         )
@@ -160,7 +153,6 @@ def _parse_bond_block(
         atom1_is_star = atom1_index in star_atoms
         atom2_is_star = atom2_index in star_atoms
         if atom1_is_star and atom2_is_star:
-
             raise MolfileParserException(
                 f'Two "star" atoms (index {atom1_index + 1} and {atom2_index + 1}) may not be connected'
             )
@@ -178,7 +170,6 @@ def _parse_bond_block(
 
 
 def _parse_bond_attributes(line: list[str]) -> dict[str, int]:
-
     return {"bond_type": int(line[3])}
 
 
@@ -211,5 +202,4 @@ def _validate_bond_indices(
 
 def _validate_atom_index(index: int, atom_attrs: dict[int, dict[str, Any]]) -> None:
     if index not in atom_attrs:
-
         raise MolfileParserException(f"Unknown atom index {index + 1} in bond")

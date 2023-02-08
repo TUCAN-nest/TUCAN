@@ -24,7 +24,6 @@ def graph_from_molecule(
 
 
 class InvariantCodeDefinition(NamedTuple):
-
     key: str
     default_value: Any = None
 

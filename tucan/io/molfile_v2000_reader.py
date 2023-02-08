@@ -31,7 +31,6 @@ def graph_attributes_from_molfile_v2000(
 
 
 def _parse_atom_block(lines: list[str]) -> dict[int, dict[str, Any]]:
-
     return {atom_index: _parse_atom_line(line) for atom_index, line in enumerate(lines)}
 
 
@@ -62,7 +61,6 @@ def _parse_atom_line(line: str) -> dict[str, Any]:
 def _parse_bond_block(
     lines: list[str], atom_attrs: dict[int, dict[str, Any]]
 ) -> dict[tuple[int, int], dict[str, int]]:
-
     return dict([_parse_bond_line(line, atom_attrs) for line in lines])
 
 
@@ -112,7 +110,6 @@ def _parse_attribute_block(
         elif line == "M  END":
             break  # else of this for loop is not entered
     else:
-
         raise MolfileParserException('Could not find end of attribute block ("M  END")')
 
     if reset_chg_and_rad:
@@ -160,7 +157,6 @@ def _validate_atom_index(
     index: int, atom_attrs: dict[int, dict[str, Any]], line: str
 ) -> None:
     if index not in atom_attrs:
-
         raise MolfileParserException(f'Unknown atom index {index + 1} in line "{line}"')
 
 
@@ -180,7 +176,6 @@ def _merge_atom_attributes_and_additional_attributes(
 
 def _to_int(s: str) -> int:
     if not s.strip(" "):
-
         return 0
 
     return int(s)
@@ -188,7 +183,6 @@ def _to_int(s: str) -> int:
 
 def _to_float(s: str) -> float:
     if not s.strip(" "):
-
         return 0
 
     return float(s)

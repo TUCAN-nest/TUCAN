@@ -5,7 +5,6 @@ from typing import Iterator
 
 
 def partition_molecule_by_attribute(m: nx.Graph, attribute: str) -> nx.Graph:
-
     attr_seqs = [attribute_sequence(m, atom, attribute) for atom in m]
     unique_attr_seqs = sorted(set(attr_seqs))
     unique_attr_seqs_to_partitions = dict(
@@ -59,7 +58,6 @@ def assign_canonical_labels(m: nx.Graph) -> dict[int, int]:
 
 
 def canonicalize_molecule(m: nx.Graph) -> nx.Graph:
-
     m_partitioned_by_invariant_code = partition_molecule_by_attribute(
         m, "invariant_code"
     )

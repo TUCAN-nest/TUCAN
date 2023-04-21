@@ -39,7 +39,21 @@ M  END
 
 it computes a serialized, canonical representation of your molecule:
 
-`C2H4O2/(1-5)(2-5)(3-5)(4-8)(5-6)(6-7)(6-8)`.
+```Python
+from tucan.io.molfile_reader import graph_from_file
+from tucan.canonicalization import canonicalize_molecule
+from tucan.serialization import serialize_molecule
+
+molecule = graph_from_file("path/to/your/molecule.mol")
+canonical_molecule = canonicalize_molecule(molecule)
+tucan_string = serialize_molecule(canonical_molecule)
+
+print(tucan_string)
+```
+
+```bash
+C2H4O2/(1-5)(2-5)(3-5)(4-8)(5-6)(6-7)(6-8)
+```
 
 Have a look at our [demo notebook](https://github.com/TUCAN-nest/TUCAN/blob/HEAD/docs/demo.ipynb) to see TUCAN at work.
 

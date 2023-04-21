@@ -44,7 +44,7 @@ from tucan.io.molfile_reader import graph_from_file
 from tucan.canonicalization import canonicalize_molecule
 from tucan.serialization import serialize_molecule
 
-molecule = graph_from_file("path/to/your/molecule.mol")
+molecule = graph_from_file("HOAc.mol")
 canonical_molecule = canonicalize_molecule(molecule)
 tucan_string = serialize_molecule(canonical_molecule)
 

@@ -1,26 +1,29 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
 // https://github.com/microsoft/vscode-dev-containers/tree/v0.205.2/containers/docker-existing-dockerfile
 {
-	"name": "TUCAN",
-	"image": "mcr.microsoft.com/vscode/devcontainers/python:3.11",
-	"customizations": {
-		"vscode": {
-			"extensions": [
-				"ms-toolsai.jupyter",
-				"ms-python.python",
-				"ms-python.vscode-pylance",
-				"KevinRose.vsc-python-indent",
-				"streetsidesoftware.code-spell-checker",
-				"bungcip.better-toml"
-			],
-			"settings": {
-				"editor.formatOnSave": true,
-				"python.formatting.provider": "black",
-				"python.testing.unittestEnabled": false,
-				"python.testing.pytestEnabled": true,
-				"python.linting.mypyEnabled": true
-			}
-		}
-	},
-	"postCreateCommand": "pip install -e .[dev,drawing]"
+    "name": "TUCAN",
+    "image": "mcr.microsoft.com/vscode/devcontainers/python:3.11",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-toolsai.jupyter",
+                "ms-python.python",
+                "ms-python.vscode-pylance",
+                "KevinRose.vsc-python-indent",
+                "streetsidesoftware.code-spell-checker",
+                "bungcip.better-toml",
+                "eamodio.gitlens",
+                "GitHub.copilot"
+            ],
+            "settings": {
+                "editor.formatOnSave": true,
+                "editor.formatOnSaveMode": "file",
+                "python.formatting.provider": "black",
+                "python.testing.unittestEnabled": false,
+                "python.testing.pytestEnabled": true,
+                "python.linting.mypyEnabled": true
+            }
+        }
+    },
+    "postCreateCommand": "pip install --upgrade pip  && pip install -e .[dev,drawing]"
 }

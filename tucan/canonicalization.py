@@ -5,6 +5,7 @@ from typing import Iterator
 
 
 def partition_molecule_by_attribute(m: nx.Graph, attribute: str) -> nx.Graph:
+    # Node degree (i.e., number of neighbors) is encoded in length of individual attribute sequences.
     attr_seqs = [attribute_sequence(m, atom, attribute) for atom in m]
     unique_attr_seqs = sorted(set(attr_seqs))
     unique_attr_seqs_to_partitions = dict(
@@ -20,16 +21,25 @@ def partition_molecule_by_attribute(m: nx.Graph, attribute: str) -> nx.Graph:
     return m_partitioned
 
 
-def refine_partitions(m: nx.Graph) -> Iterator[nx.Graph]:
-    current_partitions = nx.get_node_attributes(m, "partition").values()
-    m_refined = partition_molecule_by_attribute(m, "partition")
-    refined_partitions = nx.get_node_attributes(m_refined, "partition").values()
+def get_number_of_partitions(m: nx.Graph) -> int:
+    return max(nx.get_node_attributes(m, "partition").values())
 
-    while max(current_partitions) != max(refined_partitions):
-        yield m_refined
-        current_partitions = refined_partitions
-        m_refined = partition_molecule_by_attribute(m_refined, "partition")
-        refined_partitions = nx.get_node_attributes(m_refined, "partition").values()
+
+def refine_partitions(m: nx.Graph) -> Iterator[nx.Graph]:
+    n_current_partitions = get_number_of_partitions(m)
+
+    if n_current_partitions == m.number_of_nodes() - 1:
+        # partitions are discrete (i.e., each node in a separate partition)
+        return m
+
+    m_refined = partition_molecule_by_attribute(m, "partition")
+    if get_number_of_partitions(m_refined) == n_current_partitions:
+        # no refinement possible
+        return m
+
+    yield m_refined
+
+    yield from refine_partitions(m_refined)
 
 
 def assign_canonical_labels(m: nx.Graph) -> dict[int, int]:

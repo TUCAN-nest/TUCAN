@@ -22,13 +22,13 @@ def partition_molecule_by_attribute(m: nx.Graph, attribute: str) -> nx.Graph:
 
 
 def get_number_of_partitions(m: nx.Graph) -> int:
-    return max(nx.get_node_attributes(m, "partition").values())
+    return len(set(nx.get_node_attributes(m, "partition").values()))
 
 
 def refine_partitions(m: nx.Graph) -> Iterator[nx.Graph]:
     n_current_partitions = get_number_of_partitions(m)
 
-    if n_current_partitions == m.number_of_nodes() - 1:
+    if n_current_partitions == m.number_of_nodes():
         # partitions are discrete (i.e., each node in a separate partition)
         return m
 

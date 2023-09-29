@@ -2,6 +2,7 @@ from tucan.graph_utils import attribute_sequence
 import networkx as nx
 from igraph import Graph as iGraph
 from typing import Iterator
+from collections import Counter
 
 
 def partition_molecule_by_attribute(m: nx.Graph, attribute: str) -> nx.Graph:
@@ -23,6 +24,28 @@ def partition_molecule_by_attribute(m: nx.Graph, attribute: str) -> nx.Graph:
 
 def get_number_of_partitions(m: nx.Graph) -> int:
     return len(set(nx.get_node_attributes(m, "partition").values()))
+
+
+def split_smallest_partition(m: nx.Graph) -> nx.Graph:
+    partitions = nx.get_node_attributes(m, "partition")
+    partition_sizes = Counter(sorted(partitions.values()))
+    smallest_partition = sorted(partition_sizes.items(), key=lambda item: item[1])[0][0]
+    smallest_vertex_from_smallest_partition = min(
+        [
+            vertex
+            for vertex, partition in partitions.items()
+            if partition == smallest_partition
+        ]
+    )
+    n_partitions = len(set(partitions.values()))
+    m_split = m.copy()
+    nx.set_node_attributes(
+        m_split,
+        {smallest_vertex_from_smallest_partition: n_partitions + 1},
+        "partition",
+    )
+
+    return m_split
 
 
 def refine_partitions(m: nx.Graph) -> Iterator[nx.Graph]:

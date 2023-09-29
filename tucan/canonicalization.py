@@ -23,7 +23,7 @@ def partition_molecule_by_attribute(m: nx.Graph, attribute: str) -> nx.Graph:
 
 
 def get_number_of_partitions(m: nx.Graph) -> int:
-    return max(nx.get_node_attributes(m, PARTITION).values())
+    return len(set(nx.get_node_attributes(m, PARTITION).values()))
 
 
 def refine_partitions(m: nx.Graph) -> Generator[nx.Graph, None, None]:

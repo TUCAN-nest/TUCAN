@@ -1,6 +1,6 @@
 from collections import Counter, deque
 
-from tucan.graph_attributes import ATOMIC_NUMBER
+from tucan.graph_attributes import ATOMIC_NUMBER, ELEMENT_SYMBOL
 from tucan.graph_utils import sort_molecule_by_attribute
 from operator import gt, lt, eq
 from typing import Callable
@@ -55,7 +55,7 @@ def _write_sum_formula(m: nx.Graph) -> str:
     ----------
     [1] doi:10.1021/ja02046a005
     """
-    element_counts = Counter(nx.get_node_attributes(m, "element_symbol").values())
+    element_counts = Counter(nx.get_node_attributes(m, ELEMENT_SYMBOL).values())
     sum_formula_string = ""
     carbon_count = element_counts.pop("C", None)
     if carbon_count:

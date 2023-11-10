@@ -1,7 +1,7 @@
 import pytest
 import re
 
-from tucan.graph_attributes import ATOMIC_NUMBER
+from tucan.graph_attributes import ATOMIC_NUMBER, ELEMENT_SYMBOL
 from tucan.io import graph_from_file, graph_from_molfile_text
 from tucan.io.exception import MolfileParserException
 from tucan.io.molfile_v3000_reader import (
@@ -23,7 +23,7 @@ def test_parsing_atom_block():
     atom_attrs, star_atoms = _parse_atom_block(filecontent)
     assert atom_attrs == {
         0: {
-            "element_symbol": "C",
+            ELEMENT_SYMBOL: "C",
             ATOMIC_NUMBER: 6,
             "partition": 0,
             "x_coord": 11.137,
@@ -31,7 +31,7 @@ def test_parsing_atom_block():
             "z_coord": 0.0,
         },
         1: {
-            "element_symbol": "C",
+            ELEMENT_SYMBOL: "C",
             ATOMIC_NUMBER: 6,
             "partition": 0,
             "x_coord": 12.1745,
@@ -39,7 +39,7 @@ def test_parsing_atom_block():
             "z_coord": 0.0,
         },
         2: {
-            "element_symbol": "C",
+            ELEMENT_SYMBOL: "C",
             ATOMIC_NUMBER: 6,
             "partition": 0,
             "x_coord": 11.6567,
@@ -47,7 +47,7 @@ def test_parsing_atom_block():
             "z_coord": 0.0,
         },
         3: {
-            "element_symbol": "C",
+            ELEMENT_SYMBOL: "C",
             ATOMIC_NUMBER: 6,
             "partition": 0,
             "x_coord": 12.1745,
@@ -55,7 +55,7 @@ def test_parsing_atom_block():
             "z_coord": 0.0,
         },
         4: {
-            "element_symbol": "C",
+            ELEMENT_SYMBOL: "C",
             ATOMIC_NUMBER: 6,
             "partition": 0,
             "x_coord": 11.137,
@@ -63,7 +63,7 @@ def test_parsing_atom_block():
             "z_coord": 0.0,
         },
         5: {
-            "element_symbol": "C",
+            ELEMENT_SYMBOL: "C",
             ATOMIC_NUMBER: 6,
             "partition": 0,
             "x_coord": 11.658,
@@ -71,7 +71,7 @@ def test_parsing_atom_block():
             "z_coord": 0.0,
         },
         6: {
-            "element_symbol": "N",
+            ELEMENT_SYMBOL: "N",
             ATOMIC_NUMBER: 7,
             "partition": 0,
             "x_coord": 11.6691,
@@ -80,7 +80,7 @@ def test_parsing_atom_block():
             "chg": 1,
         },
         7: {
-            "element_symbol": "O",
+            ELEMENT_SYMBOL: "O",
             ATOMIC_NUMBER: 8,
             "partition": 0,
             "x_coord": 12.1887,
@@ -89,7 +89,7 @@ def test_parsing_atom_block():
             "chg": -1,
         },
         8: {
-            "element_symbol": "O",
+            ELEMENT_SYMBOL: "O",
             ATOMIC_NUMBER: 8,
             "partition": 0,
             "x_coord": 11.1495,
@@ -97,7 +97,7 @@ def test_parsing_atom_block():
             "z_coord": 0.0,
         },
         9: {
-            "element_symbol": "N",
+            ELEMENT_SYMBOL: "N",
             ATOMIC_NUMBER: 7,
             "partition": 0,
             "x_coord": 8.8633,
@@ -106,7 +106,7 @@ def test_parsing_atom_block():
             "chg": 1,
         },
         10: {
-            "element_symbol": "O",
+            ELEMENT_SYMBOL: "O",
             ATOMIC_NUMBER: 8,
             "partition": 0,
             "x_coord": 9.0299,
@@ -115,7 +115,7 @@ def test_parsing_atom_block():
             "chg": -1,
         },
         11: {
-            "element_symbol": "O",
+            ELEMENT_SYMBOL: "O",
             ATOMIC_NUMBER: 8,
             "partition": 0,
             "x_coord": 8.3437,
@@ -123,7 +123,7 @@ def test_parsing_atom_block():
             "z_coord": 0.0,
         },
         12: {
-            "element_symbol": "N",
+            ELEMENT_SYMBOL: "N",
             ATOMIC_NUMBER: 7,
             "partition": 0,
             "x_coord": 13.8431,
@@ -132,7 +132,7 @@ def test_parsing_atom_block():
             "chg": 1,
         },
         13: {
-            "element_symbol": "O",
+            ELEMENT_SYMBOL: "O",
             ATOMIC_NUMBER: 8,
             "partition": 0,
             "x_coord": 14.3627,
@@ -141,7 +141,7 @@ def test_parsing_atom_block():
             "chg": -1,
         },
         14: {
-            "element_symbol": "O",
+            ELEMENT_SYMBOL: "O",
             ATOMIC_NUMBER: 8,
             "partition": 0,
             "x_coord": 13.3607,
@@ -149,7 +149,7 @@ def test_parsing_atom_block():
             "z_coord": 0.0,
         },
         15: {
-            "element_symbol": "H",
+            ELEMENT_SYMBOL: "H",
             ATOMIC_NUMBER: 1,
             "partition": 0,
             "x_coord": 9.4208,
@@ -157,7 +157,7 @@ def test_parsing_atom_block():
             "z_coord": 0.0,
         },
         16: {
-            "element_symbol": "H",
+            ELEMENT_SYMBOL: "H",
             ATOMIC_NUMBER: 1,
             "partition": 0,
             "x_coord": 14.0661,
@@ -165,7 +165,7 @@ def test_parsing_atom_block():
             "z_coord": 0.0,
         },
         17: {
-            "element_symbol": "H",
+            ELEMENT_SYMBOL: "H",
             ATOMIC_NUMBER: 1,
             "partition": 0,
             "x_coord": 11.2046,
@@ -180,7 +180,7 @@ def test_graph_from_file_with_multi_attachment():
     graph = graph_from_file(
         "tests/molfiles/chromocene-multi-attachment/chromocene-multi-attachment.mol"
     )
-    node_indices, elements = zip(*graph.nodes.data("element_symbol"))
+    node_indices, elements = zip(*graph.nodes.data(ELEMENT_SYMBOL))
 
     # "star" atoms do not end up as graph nodes
     assert "".join(elements) == 10 * "C" + "Cr" + 10 * "H"

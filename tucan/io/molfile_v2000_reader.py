@@ -4,7 +4,7 @@ from tucan.element_attributes import (
     MOLFILE_V2000_CHARGES,
     detect_hydrogen_isotopes,
 )
-from tucan.graph_attributes import ATOMIC_NUMBER
+from tucan.graph_attributes import ATOMIC_NUMBER, ELEMENT_SYMBOL
 from tucan.io.exception import MolfileParserException
 
 
@@ -42,7 +42,7 @@ def _parse_atom_line(line: str) -> dict[str, Any]:
     element_symbol, isotope_mass = detect_hydrogen_isotopes(element_symbol)
 
     atom_attrs = {
-        "element_symbol": element_symbol,
+        ELEMENT_SYMBOL: element_symbol,
         ATOMIC_NUMBER: ELEMENT_ATTRS[element_symbol][ATOMIC_NUMBER],
         "partition": 0,
         "x_coord": _to_float(line[0:10]),  # xxxxx.xxxx

@@ -1,6 +1,7 @@
 from datetime import datetime
 import networkx as nx
 import tucan
+from tucan.graph_attributes import X_COORD, Y_COORD, Z_COORD
 
 
 def graph_to_molfile(graph: nx.Graph, calc_coordinates=False) -> str:
@@ -69,9 +70,9 @@ def _add_atom_block(lines: list[str], graph: nx.Graph, calc_coordinates: bool):
     _add_v30_line(lines, "BEGIN ATOM")
 
     for index, attrs in graph.nodes(data=True):
-        x = coords[index][0] if calc_coordinates else attrs.get("x_coord", 0)
-        y = coords[index][1] if calc_coordinates else attrs.get("y_coord", 0)
-        z = 0 if calc_coordinates else attrs.get("z_coord", 0)
+        x = coords[index][0] if calc_coordinates else attrs.get(X_COORD, 0)
+        y = coords[index][1] if calc_coordinates else attrs.get(Y_COORD, 0)
+        z = 0 if calc_coordinates else attrs.get(Z_COORD, 0)
 
         charge = f" CHG={chg}" if (chg := attrs.get("chg")) and -15 <= chg <= 15 else ""
         radical = f" RAD={rad}" if (rad := attrs.get("rad")) and 0 < rad <= 3 else ""

@@ -4,7 +4,13 @@ from tucan.element_attributes import (
     MOLFILE_V2000_CHARGES,
     detect_hydrogen_isotopes,
 )
-from tucan.graph_attributes import ATOMIC_NUMBER, ELEMENT_SYMBOL
+from tucan.graph_attributes import (
+    ATOMIC_NUMBER,
+    ELEMENT_SYMBOL,
+    X_COORD,
+    Y_COORD,
+    Z_COORD,
+)
 from tucan.io.exception import MolfileParserException
 
 
@@ -45,9 +51,9 @@ def _parse_atom_line(line: str) -> dict[str, Any]:
         ELEMENT_SYMBOL: element_symbol,
         ATOMIC_NUMBER: ELEMENT_ATTRS[element_symbol][ATOMIC_NUMBER],
         "partition": 0,
-        "x_coord": _to_float(line[0:10]),  # xxxxx.xxxx
-        "y_coord": _to_float(line[10:20]),  # yyyyy.yyyy
-        "z_coord": _to_float(line[20:30]),  # zzzzz.zzzz
+        X_COORD: _to_float(line[0:10]),  # xxxxx.xxxx
+        Y_COORD: _to_float(line[10:20]),  # yyyyy.yyyy
+        Z_COORD: _to_float(line[20:30]),  # zzzzz.zzzz
     }
     atom_attrs |= MOLFILE_V2000_CHARGES.get(_to_int(line[36:39]), {})  # ccc
 

@@ -9,6 +9,8 @@ not officially assigned so far and were thus set to the same value as for Mt.
 from __future__ import annotations
 from typing import Final
 
+from tucan.graph_attributes import ATOMIC_NUMBER
+
 element_symbols = [
     "H",
     "He",
@@ -375,7 +377,7 @@ element_names = [
 ]
 
 ELEMENT_ATTRS: Final[dict[str, dict[str, str | int]]] = {
-    s: {"atomic_number": n, "element_name": e, "element_color": c}
+    s: {ATOMIC_NUMBER: n, "element_name": e, "element_color": c}
     for s, n, e, c in zip(
         element_symbols, atomic_numbers, element_names, element_colors
     )

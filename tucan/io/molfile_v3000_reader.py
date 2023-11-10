@@ -2,6 +2,7 @@ import re
 from collections import deque
 from typing import Any
 from tucan.element_attributes import ELEMENT_ATTRS, detect_hydrogen_isotopes
+from tucan.graph_attributes import ATOMIC_NUMBER
 from tucan.io.exception import MolfileParserException
 
 
@@ -99,7 +100,7 @@ def _parse_atom_attributes(
 
     atom_attrs = {
         "element_symbol": element_symbol,
-        "atomic_number": ELEMENT_ATTRS[element_symbol]["atomic_number"],
+        ATOMIC_NUMBER: ELEMENT_ATTRS[element_symbol][ATOMIC_NUMBER],
         "partition": 0,
         "x_coord": float(line[4]),
         "y_coord": float(line[5]),

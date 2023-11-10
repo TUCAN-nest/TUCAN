@@ -1,4 +1,6 @@
 from collections import Counter, deque
+
+from tucan.graph_attributes import ATOMIC_NUMBER
 from tucan.graph_utils import sort_molecule_by_attribute
 from operator import gt, lt, eq
 from typing import Callable
@@ -7,7 +9,7 @@ import networkx as nx
 
 def serialize_molecule(m: nx.Graph) -> str:
     """Serialize a molecule."""
-    m_sorted = sort_molecule_by_attribute(_assign_final_labels(m), "atomic_number")
+    m_sorted = sort_molecule_by_attribute(_assign_final_labels(m), ATOMIC_NUMBER)
     serialization = _write_sum_formula(m_sorted)
     serialization += f"/{_write_edge_list(m_sorted)}"
     node_attributes = _write_node_attributes(m_sorted)

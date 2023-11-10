@@ -1,5 +1,7 @@
 import pytest
 import re
+
+from tucan.graph_attributes import ATOMIC_NUMBER
 from tucan.io import graph_from_file, graph_from_molfile_text
 from tucan.io.exception import MolfileParserException
 from tucan.io.molfile_v3000_reader import (
@@ -22,7 +24,7 @@ def test_parsing_atom_block():
     assert atom_attrs == {
         0: {
             "element_symbol": "C",
-            "atomic_number": 6,
+            ATOMIC_NUMBER: 6,
             "partition": 0,
             "x_coord": 11.137,
             "y_coord": -9.481,
@@ -30,7 +32,7 @@ def test_parsing_atom_block():
         },
         1: {
             "element_symbol": "C",
-            "atomic_number": 6,
+            ATOMIC_NUMBER: 6,
             "partition": 0,
             "x_coord": 12.1745,
             "y_coord": -9.4807,
@@ -38,7 +40,7 @@ def test_parsing_atom_block():
         },
         2: {
             "element_symbol": "C",
-            "atomic_number": 6,
+            ATOMIC_NUMBER: 6,
             "partition": 0,
             "x_coord": 11.6567,
             "y_coord": -9.1811,
@@ -46,7 +48,7 @@ def test_parsing_atom_block():
         },
         3: {
             "element_symbol": "C",
-            "atomic_number": 6,
+            ATOMIC_NUMBER: 6,
             "partition": 0,
             "x_coord": 12.1745,
             "y_coord": -10.0809,
@@ -54,7 +56,7 @@ def test_parsing_atom_block():
         },
         4: {
             "element_symbol": "C",
-            "atomic_number": 6,
+            ATOMIC_NUMBER: 6,
             "partition": 0,
             "x_coord": 11.137,
             "y_coord": -10.0835,
@@ -62,7 +64,7 @@ def test_parsing_atom_block():
         },
         5: {
             "element_symbol": "C",
-            "atomic_number": 6,
+            ATOMIC_NUMBER: 6,
             "partition": 0,
             "x_coord": 11.658,
             "y_coord": -10.3804,
@@ -70,7 +72,7 @@ def test_parsing_atom_block():
         },
         6: {
             "element_symbol": "N",
-            "atomic_number": 7,
+            ATOMIC_NUMBER: 7,
             "partition": 0,
             "x_coord": 11.6691,
             "y_coord": -7.3712,
@@ -79,7 +81,7 @@ def test_parsing_atom_block():
         },
         7: {
             "element_symbol": "O",
-            "atomic_number": 8,
+            ATOMIC_NUMBER: 8,
             "partition": 0,
             "x_coord": 12.1887,
             "y_coord": -7.0712,
@@ -88,7 +90,7 @@ def test_parsing_atom_block():
         },
         8: {
             "element_symbol": "O",
-            "atomic_number": 8,
+            ATOMIC_NUMBER: 8,
             "partition": 0,
             "x_coord": 11.1495,
             "y_coord": -7.0712,
@@ -96,7 +98,7 @@ def test_parsing_atom_block():
         },
         9: {
             "element_symbol": "N",
-            "atomic_number": 7,
+            ATOMIC_NUMBER: 7,
             "partition": 0,
             "x_coord": 8.8633,
             "y_coord": -11.1246,
@@ -105,7 +107,7 @@ def test_parsing_atom_block():
         },
         10: {
             "element_symbol": "O",
-            "atomic_number": 8,
+            ATOMIC_NUMBER: 8,
             "partition": 0,
             "x_coord": 9.0299,
             "y_coord": -12.4412,
@@ -114,7 +116,7 @@ def test_parsing_atom_block():
         },
         11: {
             "element_symbol": "O",
-            "atomic_number": 8,
+            ATOMIC_NUMBER: 8,
             "partition": 0,
             "x_coord": 8.3437,
             "y_coord": -10.8246,
@@ -122,7 +124,7 @@ def test_parsing_atom_block():
         },
         12: {
             "element_symbol": "N",
-            "atomic_number": 7,
+            ATOMIC_NUMBER: 7,
             "partition": 0,
             "x_coord": 13.8431,
             "y_coord": -11.1804,
@@ -131,7 +133,7 @@ def test_parsing_atom_block():
         },
         13: {
             "element_symbol": "O",
-            "atomic_number": 8,
+            ATOMIC_NUMBER: 8,
             "partition": 0,
             "x_coord": 14.3627,
             "y_coord": -10.8804,
@@ -140,7 +142,7 @@ def test_parsing_atom_block():
         },
         14: {
             "element_symbol": "O",
-            "atomic_number": 8,
+            ATOMIC_NUMBER: 8,
             "partition": 0,
             "x_coord": 13.3607,
             "y_coord": -12.0324,
@@ -148,7 +150,7 @@ def test_parsing_atom_block():
         },
         15: {
             "element_symbol": "H",
-            "atomic_number": 1,
+            ATOMIC_NUMBER: 1,
             "partition": 0,
             "x_coord": 9.4208,
             "y_coord": -8.4533,
@@ -156,7 +158,7 @@ def test_parsing_atom_block():
         },
         16: {
             "element_symbol": "H",
-            "atomic_number": 1,
+            ATOMIC_NUMBER: 1,
             "partition": 0,
             "x_coord": 14.0661,
             "y_coord": -8.4162,
@@ -164,7 +166,7 @@ def test_parsing_atom_block():
         },
         17: {
             "element_symbol": "H",
-            "atomic_number": 1,
+            ATOMIC_NUMBER: 1,
             "partition": 0,
             "x_coord": 11.2046,
             "y_coord": -12.0581,

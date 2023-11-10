@@ -4,6 +4,8 @@ import pytest
 import networkx as nx
 from pathlib import Path
 from networkx.algorithms.components import is_connected
+
+from tucan.graph_attributes import ATOMIC_NUMBER
 from tucan.io import graph_from_file
 
 
@@ -26,7 +28,7 @@ def graph_from_dimacs(filepath):
     graph = nx.Graph()
     graph.add_nodes_from(node_labels)
     nx.set_node_attributes(graph, "C", "element_symbol")
-    nx.set_node_attributes(graph, 6, "atomic_number")
+    nx.set_node_attributes(graph, 6, ATOMIC_NUMBER)
     graph.add_edges_from(bonds)
 
     return graph

@@ -1,5 +1,7 @@
 import pytest
 from pathlib import Path
+
+from tucan.graph_attributes import CHG
 from tucan.io import graph_from_file
 from tucan.io.exception import MolfileParserException
 from tucan.io.molfile_v2000_reader import (
@@ -37,11 +39,11 @@ def test_graphs_from_v2000_and_v3000_molfiles_match(mol):
                 (2, 3),  # atom index is not in additional_attrs yet
             ],
             {
-                0: {"chg": 2},  # will add new key
+                0: {CHG: 2},  # will add new key
                 1: {"mass": 1},  # will overwrite value
             },
             {
-                0: {"chg": 2, "mass": 2},
+                0: {CHG: 2, "mass": 2},
                 1: {"mass": 13},
                 2: {"mass": 3},
             },

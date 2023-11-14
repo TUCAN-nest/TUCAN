@@ -2,6 +2,7 @@
 # Node attributes
 #
 ATOMIC_NUMBER = "atomic_number"
+CHG = "chg"
 ELEMENT_SYMBOL = "element_symbol"
 PARTITION = "partition"
 X_COORD = "x_coord"

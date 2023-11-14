@@ -2,6 +2,7 @@ from datetime import datetime
 import networkx as nx
 import tucan
 from tucan.graph_attributes import (
+    CHG,
     ELEMENT_SYMBOL,
     X_COORD,
     Y_COORD,
@@ -79,7 +80,7 @@ def _add_atom_block(lines: list[str], graph: nx.Graph, calc_coordinates: bool):
         y = coords[index][1] if calc_coordinates else attrs.get(Y_COORD, 0)
         z = 0 if calc_coordinates else attrs.get(Z_COORD, 0)
 
-        charge = f" CHG={chg}" if (chg := attrs.get("chg")) and -15 <= chg <= 15 else ""
+        charge = f" CHG={chg}" if (chg := attrs.get(CHG)) and -15 <= chg <= 15 else ""
         radical = f" RAD={rad}" if (rad := attrs.get("rad")) and 0 < rad <= 3 else ""
         atomic_mass = (
             f" MASS={mass}" if (mass := attrs.get("mass")) and mass > 0 else ""

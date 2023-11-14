@@ -6,6 +6,7 @@ from tucan.element_attributes import (
 )
 from tucan.graph_attributes import (
     ATOMIC_NUMBER,
+    CHG,
     ELEMENT_SYMBOL,
     PARTITION,
     X_COORD,
@@ -98,7 +99,7 @@ def _parse_attribute_block(
         if line.startswith("M  CHG"):
             # M  CHGnn8 aaa vvv ...
             _merge_tuples_into_additional_attributes(
-                _parse_atom_value_assignments(line, atom_attrs), "chg", additional_attrs
+                _parse_atom_value_assignments(line, atom_attrs), CHG, additional_attrs
             )
             reset_chg_and_rad = True
         elif line.startswith("M  RAD"):
@@ -122,7 +123,7 @@ def _parse_attribute_block(
 
     if reset_chg_and_rad:
         # CHG or RAD lines supersede all charge and radical values from the atom block.
-        _clear_atom_attribute("chg", atom_attrs)
+        _clear_atom_attribute(CHG, atom_attrs)
         _clear_atom_attribute("rad", atom_attrs)
     if reset_mass:
         # ISO lines supersede all isotope values from the atom block.

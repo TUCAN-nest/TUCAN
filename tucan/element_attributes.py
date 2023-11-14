@@ -9,7 +9,7 @@ not officially assigned so far and were thus set to the same value as for Mt.
 from __future__ import annotations
 from typing import Final
 
-from tucan.graph_attributes import ATOMIC_NUMBER
+from tucan.graph_attributes import ATOMIC_NUMBER, CHG
 
 element_symbols = [
     "H",
@@ -384,13 +384,13 @@ ELEMENT_ATTRS: Final[dict[str, dict[str, str | int]]] = {
 }
 
 MOLFILE_V2000_CHARGES: Final[dict[int, dict[str, int]]] = {
-    1: {"chg": 3},
-    2: {"chg": 2},
-    3: {"chg": 1},
+    1: {CHG: 3},
+    2: {CHG: 2},
+    3: {CHG: 1},
     4: {"rad": 2},  # doublet radical
-    5: {"chg": -1},
-    6: {"chg": -2},
-    7: {"chg": -3},
+    5: {CHG: -1},
+    6: {CHG: -2},
+    7: {CHG: -3},
 }
 
 

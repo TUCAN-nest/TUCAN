@@ -3,6 +3,7 @@ import re
 
 from tucan.graph_attributes import (
     ATOMIC_NUMBER,
+    CHG,
     ELEMENT_SYMBOL,
     PARTITION,
     X_COORD,
@@ -84,7 +85,7 @@ def test_parsing_atom_block():
             X_COORD: 11.6691,
             Y_COORD: -7.3712,
             Z_COORD: 0.0,
-            "chg": 1,
+            CHG: 1,
         },
         7: {
             ELEMENT_SYMBOL: "O",
@@ -93,7 +94,7 @@ def test_parsing_atom_block():
             X_COORD: 12.1887,
             Y_COORD: -7.0712,
             Z_COORD: 0.0,
-            "chg": -1,
+            CHG: -1,
         },
         8: {
             ELEMENT_SYMBOL: "O",
@@ -110,7 +111,7 @@ def test_parsing_atom_block():
             X_COORD: 8.8633,
             Y_COORD: -11.1246,
             Z_COORD: 0.0,
-            "chg": 1,
+            CHG: 1,
         },
         10: {
             ELEMENT_SYMBOL: "O",
@@ -119,7 +120,7 @@ def test_parsing_atom_block():
             X_COORD: 9.0299,
             Y_COORD: -12.4412,
             Z_COORD: 0.0,
-            "chg": -1,
+            CHG: -1,
         },
         11: {
             ELEMENT_SYMBOL: "O",
@@ -136,7 +137,7 @@ def test_parsing_atom_block():
             X_COORD: 13.8431,
             Y_COORD: -11.1804,
             Z_COORD: 0.0,
-            "chg": 1,
+            CHG: 1,
         },
         13: {
             ELEMENT_SYMBOL: "O",
@@ -145,7 +146,7 @@ def test_parsing_atom_block():
             X_COORD: 14.3627,
             Y_COORD: -10.8804,
             Z_COORD: 0.0,
-            "chg": -1,
+            CHG: -1,
         },
         14: {
             ELEMENT_SYMBOL: "O",

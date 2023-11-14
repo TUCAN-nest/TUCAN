@@ -1,3 +1,4 @@
+from tucan.graph_attributes import PARTITION
 from tucan.graph_utils import attribute_sequence
 import networkx as nx
 from igraph import Graph as iGraph
@@ -15,14 +16,14 @@ def partition_molecule_by_attribute(m: nx.Graph, attribute: str) -> nx.Graph:
 
     m_partitioned = m.copy()
     nx.set_node_attributes(
-        m_partitioned, dict(zip(list(m_partitioned), partitions)), "partition"
+        m_partitioned, dict(zip(list(m_partitioned), partitions)), PARTITION
     )
 
     return m_partitioned
 
 
 def get_number_of_partitions(m: nx.Graph) -> int:
-    return max(nx.get_node_attributes(m, "partition").values())
+    return max(nx.get_node_attributes(m, PARTITION).values())
 
 
 def refine_partitions(m: nx.Graph) -> Iterator[nx.Graph]:
@@ -32,7 +33,7 @@ def refine_partitions(m: nx.Graph) -> Iterator[nx.Graph]:
         # partitions are discrete (i.e., each node in a separate partition)
         return m
 
-    m_refined = partition_molecule_by_attribute(m, "partition")
+    m_refined = partition_molecule_by_attribute(m, PARTITION)
     if get_number_of_partitions(m_refined) == n_current_partitions:
         # no refinement possible
         return m
@@ -61,7 +62,7 @@ def assign_canonical_labels(m: nx.Graph) -> dict[int, int]:
 
     m_igraph = iGraph.from_networkx(m)
     old_labels = m_igraph.vs["_nx_name"]
-    partitions = m_igraph.vs["partition"]
+    partitions = m_igraph.vs[PARTITION]
     canonical_labels = m_igraph.canonical_permutation(color=partitions)
 
     return dict(zip(old_labels, canonical_labels))

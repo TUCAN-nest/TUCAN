@@ -4,7 +4,11 @@ from antlr4 import InputStream, CommonTokenStream
 from antlr4.error.ErrorListener import ErrorListener
 from antlr4.tree.Tree import ParseTreeWalker
 from tucan.element_attributes import ELEMENT_ATTRS
-from tucan.graph_attributes import ATOMIC_NUMBER, ELEMENT_SYMBOL
+from tucan.graph_attributes import (
+    ATOMIC_NUMBER,
+    ELEMENT_SYMBOL,
+    PARTITION,
+)
 from tucan.graph_utils import graph_from_molecule
 from tucan.parser.tucanLexer import tucanLexer
 from tucan.parser.tucanListener import tucanListener
@@ -93,7 +97,7 @@ class TucanListenerImpl(tucanListener):
         atom_attrs = {
             ELEMENT_SYMBOL: element,
             ATOMIC_NUMBER: ELEMENT_ATTRS[element][ATOMIC_NUMBER],
-            "partition": 0,
+            PARTITION: 0,
         }
 
         self._atoms.extend([atom_attrs.copy() for _ in range(count)])

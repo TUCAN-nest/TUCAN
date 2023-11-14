@@ -1,7 +1,11 @@
 import pytest
 import re
 
-from tucan.graph_attributes import ATOMIC_NUMBER, ELEMENT_SYMBOL
+from tucan.graph_attributes import (
+    ATOMIC_NUMBER,
+    ELEMENT_SYMBOL,
+    PARTITION,
+)
 from tucan.io import graph_from_tucan, TucanParserException
 from tucan.parser.parser import _prepare_parser, _walk_tree
 from tucan.test_utils import roundtrip_graph_tucan_graph_tucan_graph
@@ -21,31 +25,31 @@ def _extract_atoms_from_sum_formula(s):
         (
             "CHCl3",
             [
-                {ELEMENT_SYMBOL: "C", ATOMIC_NUMBER: 6, "partition": 0},
-                {ELEMENT_SYMBOL: "H", ATOMIC_NUMBER: 1, "partition": 0},
-                {ELEMENT_SYMBOL: "Cl", ATOMIC_NUMBER: 17, "partition": 0},
-                {ELEMENT_SYMBOL: "Cl", ATOMIC_NUMBER: 17, "partition": 0},
-                {ELEMENT_SYMBOL: "Cl", ATOMIC_NUMBER: 17, "partition": 0},
+                {ELEMENT_SYMBOL: "C", ATOMIC_NUMBER: 6, PARTITION: 0},
+                {ELEMENT_SYMBOL: "H", ATOMIC_NUMBER: 1, PARTITION: 0},
+                {ELEMENT_SYMBOL: "Cl", ATOMIC_NUMBER: 17, PARTITION: 0},
+                {ELEMENT_SYMBOL: "Cl", ATOMIC_NUMBER: 17, PARTITION: 0},
+                {ELEMENT_SYMBOL: "Cl", ATOMIC_NUMBER: 17, PARTITION: 0},
             ],
         ),
         (
             "ClH",
             [
-                {ELEMENT_SYMBOL: "Cl", ATOMIC_NUMBER: 17, "partition": 0},
-                {ELEMENT_SYMBOL: "H", ATOMIC_NUMBER: 1, "partition": 0},
+                {ELEMENT_SYMBOL: "Cl", ATOMIC_NUMBER: 17, PARTITION: 0},
+                {ELEMENT_SYMBOL: "H", ATOMIC_NUMBER: 1, PARTITION: 0},
             ],
         ),
         (
             "Cu",
             [
-                {ATOMIC_NUMBER: 29, ELEMENT_SYMBOL: "Cu", "partition": 0},
+                {ATOMIC_NUMBER: 29, ELEMENT_SYMBOL: "Cu", PARTITION: 0},
             ],
         ),
         (
             "CU",
             [
-                {ATOMIC_NUMBER: 6, ELEMENT_SYMBOL: "C", "partition": 0},
-                {ATOMIC_NUMBER: 92, ELEMENT_SYMBOL: "U", "partition": 0},
+                {ATOMIC_NUMBER: 6, ELEMENT_SYMBOL: "C", PARTITION: 0},
+                {ATOMIC_NUMBER: 92, ELEMENT_SYMBOL: "U", PARTITION: 0},
             ],
         ),
     ],
@@ -137,55 +141,55 @@ def test_overriding_node_attribute_raises_exception(
                 0: {
                     ELEMENT_SYMBOL: "H",
                     ATOMIC_NUMBER: 1,
-                    "partition": 0,
+                    PARTITION: 0,
                     "invariant_code": (1, 0, 0),
                 },
                 1: {
                     ELEMENT_SYMBOL: "H",
                     ATOMIC_NUMBER: 1,
-                    "partition": 0,
+                    PARTITION: 0,
                     "invariant_code": (1, 0, 0),
                 },
                 2: {
                     ELEMENT_SYMBOL: "H",
                     ATOMIC_NUMBER: 1,
-                    "partition": 0,
+                    PARTITION: 0,
                     "invariant_code": (1, 0, 0),
                 },
                 3: {
                     ELEMENT_SYMBOL: "H",
                     ATOMIC_NUMBER: 1,
-                    "partition": 0,
+                    PARTITION: 0,
                     "invariant_code": (1, 0, 0),
                 },
                 4: {
                     ELEMENT_SYMBOL: "H",
                     ATOMIC_NUMBER: 1,
-                    "partition": 0,
+                    PARTITION: 0,
                     "invariant_code": (1, 0, 0),
                 },
                 5: {
                     ELEMENT_SYMBOL: "H",
                     ATOMIC_NUMBER: 1,
-                    "partition": 0,
+                    PARTITION: 0,
                     "invariant_code": (1, 0, 0),
                 },
                 6: {
                     ELEMENT_SYMBOL: "C",
                     ATOMIC_NUMBER: 6,
-                    "partition": 0,
+                    PARTITION: 0,
                     "invariant_code": (6, 0, 0),
                 },
                 7: {
                     ELEMENT_SYMBOL: "C",
                     ATOMIC_NUMBER: 6,
-                    "partition": 0,
+                    PARTITION: 0,
                     "invariant_code": (6, 0, 0),
                 },
                 8: {
                     ELEMENT_SYMBOL: "O",
                     ATOMIC_NUMBER: 8,
-                    "partition": 0,
+                    PARTITION: 0,
                     "invariant_code": (8, 0, 0),
                 },
             },
@@ -197,7 +201,7 @@ def test_overriding_node_attribute_raises_exception(
                 0: {
                     ELEMENT_SYMBOL: "Xe",
                     ATOMIC_NUMBER: 54,
-                    "partition": 0,
+                    PARTITION: 0,
                     "invariant_code": (54, 0, 0),
                 }
             },
@@ -209,46 +213,46 @@ def test_overriding_node_attribute_raises_exception(
                 0: {
                     ELEMENT_SYMBOL: "H",
                     ATOMIC_NUMBER: 1,
-                    "partition": 0,
+                    PARTITION: 0,
                     "invariant_code": (1, 0, 0),
                 },
                 1: {
                     ELEMENT_SYMBOL: "H",
                     ATOMIC_NUMBER: 1,
-                    "partition": 0,
+                    PARTITION: 0,
                     "invariant_code": (1, 0, 0),
                 },
                 2: {
                     ELEMENT_SYMBOL: "H",
                     ATOMIC_NUMBER: 1,
-                    "partition": 0,
+                    PARTITION: 0,
                     "invariant_code": (1, 0, 0),
                 },
                 3: {
                     ELEMENT_SYMBOL: "H",
                     ATOMIC_NUMBER: 1,
-                    "partition": 0,
+                    PARTITION: 0,
                     "mass": 2,
                     "invariant_code": (1, 2, 0),
                 },
                 4: {
                     ELEMENT_SYMBOL: "C",
                     ATOMIC_NUMBER: 6,
-                    "partition": 0,
+                    PARTITION: 0,
                     "mass": 14,
                     "invariant_code": (6, 14, 0),
                 },
                 5: {
                     ELEMENT_SYMBOL: "C",
                     ATOMIC_NUMBER: 6,
-                    "partition": 0,
+                    PARTITION: 0,
                     "rad": 3,
                     "invariant_code": (6, 0, 3),
                 },
                 6: {
                     ELEMENT_SYMBOL: "O",
                     ATOMIC_NUMBER: 8,
-                    "partition": 0,
+                    PARTITION: 0,
                     "mass": 17,
                     "invariant_code": (8, 17, 0),
                 },
@@ -261,13 +265,13 @@ def test_overriding_node_attribute_raises_exception(
                 0: {
                     ELEMENT_SYMBOL: "H",
                     ATOMIC_NUMBER: 1,
-                    "partition": 0,
+                    PARTITION: 0,
                     "invariant_code": (1, 0, 0),
                 },
                 1: {
                     ELEMENT_SYMBOL: "C",
                     ATOMIC_NUMBER: 6,
-                    "partition": 0,
+                    PARTITION: 0,
                     "rad": 3,
                     "mass": 13,
                     "invariant_code": (6, 13, 3),

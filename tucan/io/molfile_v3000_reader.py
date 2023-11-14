@@ -5,6 +5,7 @@ from tucan.element_attributes import ELEMENT_ATTRS, detect_hydrogen_isotopes
 from tucan.graph_attributes import (
     ATOMIC_NUMBER,
     ELEMENT_SYMBOL,
+    PARTITION,
     X_COORD,
     Y_COORD,
     Z_COORD,
@@ -107,7 +108,7 @@ def _parse_atom_attributes(
     atom_attrs = {
         ELEMENT_SYMBOL: element_symbol,
         ATOMIC_NUMBER: ELEMENT_ATTRS[element_symbol][ATOMIC_NUMBER],
-        "partition": 0,
+        PARTITION: 0,
         X_COORD: float(line[4]),
         Y_COORD: float(line[5]),
         Z_COORD: float(line[6]),

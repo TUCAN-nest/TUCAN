@@ -7,6 +7,7 @@ from tucan.element_attributes import (
 from tucan.graph_attributes import (
     ATOMIC_NUMBER,
     ELEMENT_SYMBOL,
+    PARTITION,
     X_COORD,
     Y_COORD,
     Z_COORD,
@@ -50,7 +51,7 @@ def _parse_atom_line(line: str) -> dict[str, Any]:
     atom_attrs = {
         ELEMENT_SYMBOL: element_symbol,
         ATOMIC_NUMBER: ELEMENT_ATTRS[element_symbol][ATOMIC_NUMBER],
-        "partition": 0,
+        PARTITION: 0,
         X_COORD: _to_float(line[0:10]),  # xxxxx.xxxx
         Y_COORD: _to_float(line[10:20]),  # yyyyy.yyyy
         Z_COORD: _to_float(line[20:30]),  # zzzzz.zzzz

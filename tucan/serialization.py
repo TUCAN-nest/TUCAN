@@ -1,6 +1,10 @@
 from collections import Counter, deque
 
-from tucan.graph_attributes import ATOMIC_NUMBER, ELEMENT_SYMBOL
+from tucan.graph_attributes import (
+    ATOMIC_NUMBER,
+    ELEMENT_SYMBOL,
+    PARTITION,
+)
 from tucan.graph_utils import sort_molecule_by_attribute
 from operator import gt, lt, eq
 from typing import Callable
@@ -77,7 +81,7 @@ def _assign_final_labels(
     smallest possible labels.
     This is not part of (and not required for) the canonicalization.
     The re-labeling is for cosmetic purposes."""
-    partitions = m.nodes.data("partition")
+    partitions = m.nodes.data(PARTITION)
     labels_by_partition = _labels_by_partition(m)
     final_labels = {}
     nx.set_node_attributes(m, False, "explored")
@@ -118,10 +122,10 @@ def _assign_final_labels(
 
 def _labels_by_partition(m: nx.Graph) -> dict[int, list[int]]:
     """Create dictionary of partitions to node labels."""
-    partitions = set(sorted([v for _, v in m.nodes.data("partition")]))
+    partitions = set(sorted([v for _, v in m.nodes.data(PARTITION)]))
     labels_by_partition: dict[int, list[int]] = {p: [] for p in partitions}
     for a in m:
-        labels_by_partition[m.nodes[a]["partition"]].append(a)
+        labels_by_partition[m.nodes[a][PARTITION]].append(a)
     labels_by_partition.update(
         (k, sorted(list(v), reverse=True)) for k, v in labels_by_partition.items()
     )

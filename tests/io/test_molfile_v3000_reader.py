@@ -4,6 +4,7 @@ import re
 from tucan.graph_attributes import (
     ATOMIC_NUMBER,
     ELEMENT_SYMBOL,
+    PARTITION,
     X_COORD,
     Y_COORD,
     Z_COORD,
@@ -31,7 +32,7 @@ def test_parsing_atom_block():
         0: {
             ELEMENT_SYMBOL: "C",
             ATOMIC_NUMBER: 6,
-            "partition": 0,
+            PARTITION: 0,
             X_COORD: 11.137,
             Y_COORD: -9.481,
             Z_COORD: 0.0,
@@ -39,7 +40,7 @@ def test_parsing_atom_block():
         1: {
             ELEMENT_SYMBOL: "C",
             ATOMIC_NUMBER: 6,
-            "partition": 0,
+            PARTITION: 0,
             X_COORD: 12.1745,
             Y_COORD: -9.4807,
             Z_COORD: 0.0,
@@ -47,7 +48,7 @@ def test_parsing_atom_block():
         2: {
             ELEMENT_SYMBOL: "C",
             ATOMIC_NUMBER: 6,
-            "partition": 0,
+            PARTITION: 0,
             X_COORD: 11.6567,
             Y_COORD: -9.1811,
             Z_COORD: 0.0,
@@ -55,7 +56,7 @@ def test_parsing_atom_block():
         3: {
             ELEMENT_SYMBOL: "C",
             ATOMIC_NUMBER: 6,
-            "partition": 0,
+            PARTITION: 0,
             X_COORD: 12.1745,
             Y_COORD: -10.0809,
             Z_COORD: 0.0,
@@ -63,7 +64,7 @@ def test_parsing_atom_block():
         4: {
             ELEMENT_SYMBOL: "C",
             ATOMIC_NUMBER: 6,
-            "partition": 0,
+            PARTITION: 0,
             X_COORD: 11.137,
             Y_COORD: -10.0835,
             Z_COORD: 0.0,
@@ -71,7 +72,7 @@ def test_parsing_atom_block():
         5: {
             ELEMENT_SYMBOL: "C",
             ATOMIC_NUMBER: 6,
-            "partition": 0,
+            PARTITION: 0,
             X_COORD: 11.658,
             Y_COORD: -10.3804,
             Z_COORD: 0.0,
@@ -79,7 +80,7 @@ def test_parsing_atom_block():
         6: {
             ELEMENT_SYMBOL: "N",
             ATOMIC_NUMBER: 7,
-            "partition": 0,
+            PARTITION: 0,
             X_COORD: 11.6691,
             Y_COORD: -7.3712,
             Z_COORD: 0.0,
@@ -88,7 +89,7 @@ def test_parsing_atom_block():
         7: {
             ELEMENT_SYMBOL: "O",
             ATOMIC_NUMBER: 8,
-            "partition": 0,
+            PARTITION: 0,
             X_COORD: 12.1887,
             Y_COORD: -7.0712,
             Z_COORD: 0.0,
@@ -97,7 +98,7 @@ def test_parsing_atom_block():
         8: {
             ELEMENT_SYMBOL: "O",
             ATOMIC_NUMBER: 8,
-            "partition": 0,
+            PARTITION: 0,
             X_COORD: 11.1495,
             Y_COORD: -7.0712,
             Z_COORD: 0.0,
@@ -105,7 +106,7 @@ def test_parsing_atom_block():
         9: {
             ELEMENT_SYMBOL: "N",
             ATOMIC_NUMBER: 7,
-            "partition": 0,
+            PARTITION: 0,
             X_COORD: 8.8633,
             Y_COORD: -11.1246,
             Z_COORD: 0.0,
@@ -114,7 +115,7 @@ def test_parsing_atom_block():
         10: {
             ELEMENT_SYMBOL: "O",
             ATOMIC_NUMBER: 8,
-            "partition": 0,
+            PARTITION: 0,
             X_COORD: 9.0299,
             Y_COORD: -12.4412,
             Z_COORD: 0.0,
@@ -123,7 +124,7 @@ def test_parsing_atom_block():
         11: {
             ELEMENT_SYMBOL: "O",
             ATOMIC_NUMBER: 8,
-            "partition": 0,
+            PARTITION: 0,
             X_COORD: 8.3437,
             Y_COORD: -10.8246,
             Z_COORD: 0.0,
@@ -131,7 +132,7 @@ def test_parsing_atom_block():
         12: {
             ELEMENT_SYMBOL: "N",
             ATOMIC_NUMBER: 7,
-            "partition": 0,
+            PARTITION: 0,
             X_COORD: 13.8431,
             Y_COORD: -11.1804,
             Z_COORD: 0.0,
@@ -140,7 +141,7 @@ def test_parsing_atom_block():
         13: {
             ELEMENT_SYMBOL: "O",
             ATOMIC_NUMBER: 8,
-            "partition": 0,
+            PARTITION: 0,
             X_COORD: 14.3627,
             Y_COORD: -10.8804,
             Z_COORD: 0.0,
@@ -149,7 +150,7 @@ def test_parsing_atom_block():
         14: {
             ELEMENT_SYMBOL: "O",
             ATOMIC_NUMBER: 8,
-            "partition": 0,
+            PARTITION: 0,
             X_COORD: 13.3607,
             Y_COORD: -12.0324,
             Z_COORD: 0.0,
@@ -157,7 +158,7 @@ def test_parsing_atom_block():
         15: {
             ELEMENT_SYMBOL: "H",
             ATOMIC_NUMBER: 1,
-            "partition": 0,
+            PARTITION: 0,
             X_COORD: 9.4208,
             Y_COORD: -8.4533,
             Z_COORD: 0.0,
@@ -165,7 +166,7 @@ def test_parsing_atom_block():
         16: {
             ELEMENT_SYMBOL: "H",
             ATOMIC_NUMBER: 1,
-            "partition": 0,
+            PARTITION: 0,
             X_COORD: 14.0661,
             Y_COORD: -8.4162,
             Z_COORD: 0.0,
@@ -173,7 +174,7 @@ def test_parsing_atom_block():
         17: {
             ELEMENT_SYMBOL: "H",
             ATOMIC_NUMBER: 1,
-            "partition": 0,
+            PARTITION: 0,
             X_COORD: 11.2046,
             Y_COORD: -12.0581,
             Z_COORD: 0.0,

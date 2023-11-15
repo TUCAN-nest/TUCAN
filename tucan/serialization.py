@@ -10,7 +10,7 @@ from tucan.graph_attributes import (
 )
 from tucan.graph_utils import sort_molecule_by_attribute
 from operator import gt, lt, eq
-from typing import Callable
+from typing import Callable, Final
 import networkx as nx
 
 
@@ -34,7 +34,7 @@ def _write_edge_list(m: nx.Graph) -> str:
     return edge_list_string
 
 
-_SERIALIZER_NODE_ATTRIBUTE_MAPPING = {
+_SERIALIZER_NODE_ATTRIBUTE_MAPPING: Final[dict[str, str]] = {
     MASS: "mass",
     RAD: "rad",
 }

@@ -45,14 +45,14 @@ def _extract_atoms_from_sum_formula(s):
         (
             "Cu",
             [
-                {ATOMIC_NUMBER: 29, ELEMENT_SYMBOL: "Cu", PARTITION: 0},
+                {ELEMENT_SYMBOL: "Cu", ATOMIC_NUMBER: 29, PARTITION: 0},
             ],
         ),
         (
             "CU",
             [
-                {ATOMIC_NUMBER: 6, ELEMENT_SYMBOL: "C", PARTITION: 0},
-                {ATOMIC_NUMBER: 92, ELEMENT_SYMBOL: "U", PARTITION: 0},
+                {ELEMENT_SYMBOL: "C", ATOMIC_NUMBER: 6, PARTITION: 0},
+                {ELEMENT_SYMBOL: "U", ATOMIC_NUMBER: 92, PARTITION: 0},
             ],
         ),
     ],

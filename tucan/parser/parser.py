@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import networkx as nx
-from typing import Any
+from typing import Any, Final
 from antlr4 import InputStream, CommonTokenStream
 from antlr4.error.ErrorListener import ErrorListener
 from antlr4.tree.Tree import ParseTreeWalker
@@ -34,7 +36,7 @@ def graph_from_tucan(tucan: str) -> nx.Graph:
     return listener.to_graph()
 
 
-def _prepare_parser(to_parse: str) -> nx.Graph:
+def _prepare_parser(to_parse: str) -> tucanParser:
     stream = InputStream(to_parse)
     lexer = tucanLexer(stream)
     token_stream = CommonTokenStream(lexer)
@@ -49,14 +51,14 @@ def _prepare_parser(to_parse: str) -> nx.Graph:
     return parser
 
 
-def _walk_tree(tree):
+def _walk_tree(tree) -> TucanListenerImpl:
     walker = ParseTreeWalker()
     listener = TucanListenerImpl()
     walker.walk(listener, tree)
     return listener
 
 
-_DESERIALIZER_NODE_ATTRIBUTE_MAPPING = {
+_DESERIALIZER_NODE_ATTRIBUTE_MAPPING: Final[dict[str, str]] = {
     v: k for k, v in _SERIALIZER_NODE_ATTRIBUTE_MAPPING.items()
 }
 

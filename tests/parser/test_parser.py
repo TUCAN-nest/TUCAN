@@ -5,6 +5,7 @@ from tucan.graph_attributes import (
     ATOMIC_NUMBER,
     ELEMENT_SYMBOL,
     PARTITION,
+    RAD,
 )
 from tucan.io import graph_from_tucan, TucanParserException
 from tucan.parser.parser import _prepare_parser, _walk_tree
@@ -102,12 +103,12 @@ def _extract_node_attributes(s):
     [
         ("", {}),
         ("(1:mass=2)", {0: {"mass": 2}}),
-        ("(2:rad=5)", {1: {"rad": 5}}),
-        ("(1234:rad=5,mass=10)", {1233: {"mass": 10, "rad": 5}}),
-        ("(1:mass=10)(2:rad=1)", {0: {"mass": 10}, 1: {"rad": 1}}),
+        ("(2:rad=5)", {1: {RAD: 5}}),
+        ("(1234:rad=5,mass=10)", {1233: {"mass": 10, RAD: 5}}),
+        ("(1:mass=10)(2:rad=1)", {0: {"mass": 10}, 1: {RAD: 1}}),
         (
             "(1:mass=123456789)(1:rad=987654321)",
-            {0: {"mass": 123456789, "rad": 987654321}},
+            {0: {"mass": 123456789, RAD: 987654321}},
         ),
     ],
 )
@@ -246,7 +247,7 @@ def test_overriding_node_attribute_raises_exception(
                     ELEMENT_SYMBOL: "C",
                     ATOMIC_NUMBER: 6,
                     PARTITION: 0,
-                    "rad": 3,
+                    RAD: 3,
                     "invariant_code": (6, 0, 3),
                 },
                 6: {
@@ -272,7 +273,7 @@ def test_overriding_node_attribute_raises_exception(
                     ELEMENT_SYMBOL: "C",
                     ATOMIC_NUMBER: 6,
                     PARTITION: 0,
-                    "rad": 3,
+                    RAD: 3,
                     "mass": 13,
                     "invariant_code": (6, 13, 3),
                 },

@@ -7,6 +7,7 @@ from tucan.graph_attributes import (
     CHG,
     ELEMENT_SYMBOL,
     PARTITION,
+    RAD,
     X_COORD,
     Y_COORD,
     Z_COORD,
@@ -120,7 +121,7 @@ def _parse_atom_attributes(
         "mass": [int(i.split("=")[1]) for i in line if "MASS" in i]
         if not isotope_mass
         else [isotope_mass],
-        "rad": [int(i.split("=")[1]) for i in line if "RAD" in i],
+        RAD: [int(i.split("=")[1]) for i in line if "RAD" in i],
     }
     for key, val in optional_attrs.items():
         if val:

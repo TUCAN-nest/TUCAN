@@ -13,6 +13,7 @@ from tucan.graph_utils import graph_from_molecule
 from tucan.parser.tucanLexer import tucanLexer
 from tucan.parser.tucanListener import tucanListener
 from tucan.parser.tucanParser import tucanParser
+from tucan.serialization import _SERIALIZER_NODE_ATTRIBUTE_MAPPING
 
 
 def graph_from_tucan(tucan: str) -> nx.Graph:
@@ -53,6 +54,11 @@ def _walk_tree(tree):
     listener = TucanListenerImpl()
     walker.walk(listener, tree)
     return listener
+
+
+_DESERIALIZER_NODE_ATTRIBUTE_MAPPING = {
+    v: k for k, v in _SERIALIZER_NODE_ATTRIBUTE_MAPPING.items()
+}
 
 
 class TucanListenerImpl(tucanListener):
@@ -107,12 +113,13 @@ class TucanListenerImpl(tucanListener):
 
     def _add_node_attribute(self, node_index, key, value):
         attrs_for_node = self._node_attributes.setdefault(node_index - 1, {})
+        attr_key = _DESERIALIZER_NODE_ATTRIBUTE_MAPPING[key]
 
-        if key in attrs_for_node:
+        if attr_key in attrs_for_node:
             raise TucanParserException(
                 f'Atom {node_index}: Attribute "{key}" was already defined.'
             )
-        attrs_for_node[key] = value
+        attrs_for_node[attr_key] = value
 
     def to_graph(self) -> nx.Graph:
         # node index validation

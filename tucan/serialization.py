@@ -4,6 +4,7 @@ from tucan.graph_attributes import (
     ATOMIC_NUMBER,
     ELEMENT_SYMBOL,
     PARTITION,
+    RAD,
 )
 from tucan.graph_utils import sort_molecule_by_attribute
 from operator import gt, lt, eq
@@ -31,12 +32,19 @@ def _write_edge_list(m: nx.Graph) -> str:
     return edge_list_string
 
 
+_SERIALIZER_NODE_ATTRIBUTE_MAPPING = {
+    "mass": "mass",
+    RAD: "rad",
+}
+
+
 def _write_node_attributes(m: nx.Graph) -> str:
     node_attribute_string = ""
-    for node in sorted(m.nodes(data=True)):
-        label, attrs = node
+    for label, attrs in sorted(m.nodes(data=True)):
         available_attrs = [
-            f"{attr}={attrs[attr]}" for attr in ("mass", "rad") if attr in attrs
+            f"{_SERIALIZER_NODE_ATTRIBUTE_MAPPING[attr]}={attrs[attr]}"
+            for attr in _SERIALIZER_NODE_ATTRIBUTE_MAPPING
+            if attr in attrs
         ]
         if not available_attrs:
             continue

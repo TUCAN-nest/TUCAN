@@ -2,6 +2,7 @@ from datetime import datetime
 import networkx as nx
 import tucan
 from tucan.graph_attributes import (
+    BOND_TYPE,
     CHG,
     ELEMENT_SYMBOL,
     MASS,
@@ -102,7 +103,7 @@ def _add_bond_block(lines: list[str], graph: nx.Graph):
 
     for index, edge in enumerate(graph.edges(data=True), start=1):
         node_index1, node_index2, attrs = edge
-        bond_type = attrs.get("bond_type", 1)
+        bond_type = attrs.get(BOND_TYPE, 1)
 
         _add_v30_line(lines, f"{index} {bond_type} {node_index1 + 1} {node_index2 + 1}")
 

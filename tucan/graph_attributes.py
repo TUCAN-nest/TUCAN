@@ -14,3 +14,8 @@ Z_COORD = "z_coord"
 
 # for internal use
 EXPLORED = "explored"
+
+#
+# Bond attributes
+#
+BOND_TYPE = "bond_type"

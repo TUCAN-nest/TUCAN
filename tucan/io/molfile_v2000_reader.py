@@ -6,6 +6,7 @@ from tucan.element_attributes import (
 )
 from tucan.graph_attributes import (
     ATOMIC_NUMBER,
+    BOND_TYPE,
     CHG,
     ELEMENT_SYMBOL,
     MASS,
@@ -85,7 +86,7 @@ def _parse_bond_line(
     _validate_atom_index(index1, atom_attrs, line)
     _validate_atom_index(index2, atom_attrs, line)
 
-    bond_attrs = {"bond_type": _to_int(line[6:9])}  # ttt
+    bond_attrs = {BOND_TYPE: _to_int(line[6:9])}  # ttt
 
     return (index1, index2), bond_attrs
 

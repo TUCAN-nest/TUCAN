@@ -4,6 +4,7 @@ from typing import Any
 from tucan.element_attributes import ELEMENT_ATTRS, detect_hydrogen_isotopes
 from tucan.graph_attributes import (
     ATOMIC_NUMBER,
+    BOND_TYPE,
     CHG,
     ELEMENT_SYMBOL,
     MASS,
@@ -181,7 +182,7 @@ def _parse_bond_block(
 
 
 def _parse_bond_attributes(line: list[str]) -> dict[str, int]:
-    return {"bond_type": int(line[3])}
+    return {BOND_TYPE: int(line[3])}
 
 
 def _parse_bond_line_with_star_atom(

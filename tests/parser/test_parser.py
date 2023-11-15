@@ -4,6 +4,7 @@ import re
 from tucan.graph_attributes import (
     ATOMIC_NUMBER,
     ELEMENT_SYMBOL,
+    MASS,
     PARTITION,
     RAD,
 )
@@ -102,13 +103,13 @@ def _extract_node_attributes(s):
     "node_attributes, expected_node_attributes",
     [
         ("", {}),
-        ("(1:mass=2)", {0: {"mass": 2}}),
+        ("(1:mass=2)", {0: {MASS: 2}}),
         ("(2:rad=5)", {1: {RAD: 5}}),
-        ("(1234:rad=5,mass=10)", {1233: {"mass": 10, RAD: 5}}),
-        ("(1:mass=10)(2:rad=1)", {0: {"mass": 10}, 1: {RAD: 1}}),
+        ("(1234:rad=5,mass=10)", {1233: {MASS: 10, RAD: 5}}),
+        ("(1:mass=10)(2:rad=1)", {0: {MASS: 10}, 1: {RAD: 1}}),
         (
             "(1:mass=123456789)(1:rad=987654321)",
-            {0: {"mass": 123456789, RAD: 987654321}},
+            {0: {MASS: 123456789, RAD: 987654321}},
         ),
     ],
 )
@@ -233,14 +234,14 @@ def test_overriding_node_attribute_raises_exception(
                     ELEMENT_SYMBOL: "H",
                     ATOMIC_NUMBER: 1,
                     PARTITION: 0,
-                    "mass": 2,
+                    MASS: 2,
                     "invariant_code": (1, 2, 0),
                 },
                 4: {
                     ELEMENT_SYMBOL: "C",
                     ATOMIC_NUMBER: 6,
                     PARTITION: 0,
-                    "mass": 14,
+                    MASS: 14,
                     "invariant_code": (6, 14, 0),
                 },
                 5: {
@@ -254,7 +255,7 @@ def test_overriding_node_attribute_raises_exception(
                     ELEMENT_SYMBOL: "O",
                     ATOMIC_NUMBER: 8,
                     PARTITION: 0,
-                    "mass": 17,
+                    MASS: 17,
                     "invariant_code": (8, 17, 0),
                 },
             },
@@ -274,7 +275,7 @@ def test_overriding_node_attribute_raises_exception(
                     ATOMIC_NUMBER: 6,
                     PARTITION: 0,
                     RAD: 3,
-                    "mass": 13,
+                    MASS: 13,
                     "invariant_code": (6, 13, 3),
                 },
             },

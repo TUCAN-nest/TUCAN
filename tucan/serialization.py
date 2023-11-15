@@ -3,6 +3,7 @@ from collections import Counter, deque
 from tucan.graph_attributes import (
     ATOMIC_NUMBER,
     ELEMENT_SYMBOL,
+    MASS,
     PARTITION,
     RAD,
 )
@@ -33,7 +34,7 @@ def _write_edge_list(m: nx.Graph) -> str:
 
 
 _SERIALIZER_NODE_ATTRIBUTE_MAPPING = {
-    "mass": "mass",
+    MASS: "mass",
     RAD: "rad",
 }
 

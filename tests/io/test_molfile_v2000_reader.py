@@ -5,6 +5,7 @@ from tucan.graph_attributes import (
     ATOMIC_NUMBER,
     CHG,
     ELEMENT_SYMBOL,
+    MASS,
     PARTITION,
     RAD,
     X_COORD,
@@ -107,12 +108,12 @@ def test_parse_atom_line_charge_field(line, expected_additional_attr):
             ],
             {
                 0: {CHG: 2},  # will add new key
-                1: {"mass": 1},  # will overwrite value
+                1: {MASS: 1},  # will overwrite value
             },
             {
-                0: {CHG: 2, "mass": 2},
-                1: {"mass": 13},
-                2: {"mass": 3},
+                0: {CHG: 2, MASS: 2},
+                1: {MASS: 13},
+                2: {MASS: 3},
             },
         ),
     ],
@@ -120,7 +121,7 @@ def test_parse_atom_line_charge_field(line, expected_additional_attr):
 def test_merge_tuples_into_additional_attributes(
     tuples, additional_attrs, expected_additional_attrs_after_merge
 ):
-    _merge_tuples_into_additional_attributes(tuples, "mass", additional_attrs)
+    _merge_tuples_into_additional_attributes(tuples, MASS, additional_attrs)
     assert additional_attrs == expected_additional_attrs_after_merge
 
 

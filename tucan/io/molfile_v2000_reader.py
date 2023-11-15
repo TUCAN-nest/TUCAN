@@ -8,6 +8,7 @@ from tucan.graph_attributes import (
     ATOMIC_NUMBER,
     CHG,
     ELEMENT_SYMBOL,
+    MASS,
     PARTITION,
     RAD,
     X_COORD,
@@ -63,7 +64,7 @@ def _parse_atom_line(line: str) -> dict[str, Any]:
     # Field "dd" (mass difference) is ignored. Only consider hydrogen
     # isotopes (D and T) here and "M  ISO" in the attribute block (later).
     if isotope_mass:
-        atom_attrs["mass"] = isotope_mass
+        atom_attrs[MASS] = isotope_mass
 
     return atom_attrs
 
@@ -113,7 +114,7 @@ def _parse_attribute_block(
             # M  ISOnn8 aaa vvv ...
             _merge_tuples_into_additional_attributes(
                 _parse_atom_value_assignments(line, atom_attrs),
-                "mass",
+                MASS,
                 additional_attrs,
             )
             reset_mass = True
@@ -128,7 +129,7 @@ def _parse_attribute_block(
         _clear_atom_attribute(RAD, atom_attrs)
     if reset_mass:
         # ISO lines supersede all isotope values from the atom block.
-        _clear_atom_attribute("mass", atom_attrs)
+        _clear_atom_attribute(MASS, atom_attrs)
 
     _merge_atom_attributes_and_additional_attributes(atom_attrs, additional_attrs)
 

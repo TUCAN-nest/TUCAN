@@ -3,7 +3,11 @@ import networkx as nx
 import random
 from typing import Any, NamedTuple
 
-from tucan.graph_attributes import ATOMIC_NUMBER, RAD
+from tucan.graph_attributes import (
+    ATOMIC_NUMBER,
+    MASS,
+    RAD,
+)
 
 
 def graph_from_molecule(
@@ -12,7 +16,7 @@ def graph_from_molecule(
 ) -> nx.Graph:
     invariant_code_definitions = [
         InvariantCodeDefinition(ATOMIC_NUMBER),
-        InvariantCodeDefinition("mass", 0),
+        InvariantCodeDefinition(MASS, 0),
         InvariantCodeDefinition(RAD, 0),
     ]
     _add_invariant_code(atom_attrs, invariant_code_definitions)

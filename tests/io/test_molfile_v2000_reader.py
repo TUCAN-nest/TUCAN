@@ -1,11 +1,21 @@
 import pytest
 from pathlib import Path
 
-from tucan.graph_attributes import CHG
+from tucan.graph_attributes import (
+    ATOMIC_NUMBER,
+    CHG,
+    ELEMENT_SYMBOL,
+    PARTITION,
+    RAD,
+    X_COORD,
+    Y_COORD,
+    Z_COORD,
+)
 from tucan.io import graph_from_file
 from tucan.io.exception import MolfileParserException
 from tucan.io.molfile_v2000_reader import (
     _merge_tuples_into_additional_attributes,
+    _parse_atom_line,
     _parse_atom_value_assignments,
     _to_int,
     _to_float,
@@ -27,6 +37,63 @@ def test_graphs_from_v2000_and_v3000_molfiles_match(mol):
         graph_v2000.edges(data=True), graph_v3000.edges(data=True), strict=True
     ):
         assert e1 == e2
+
+
+@pytest.mark.parametrize(
+    "line, expected_additional_attr",
+    [
+        (
+            "    0.0000    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0",
+            {},
+        ),
+        (
+            "    0.0000    0.0000    0.0000 C   0  1  0  0  0  0  0  0  0  0  0  0",
+            {CHG: 3},
+        ),
+        (
+            "    0.0000    0.0000    0.0000 C   0  2  0  0  0  0  0  0  0  0  0  0",
+            {CHG: 2},
+        ),
+        (
+            "    0.0000    0.0000    0.0000 C   0  3  0  0  0  0  0  0  0  0  0  0",
+            {CHG: 1},
+        ),
+        (
+            "    0.0000    0.0000    0.0000 C   0  4  0  0  0  0  0  0  0  0  0  0",
+            {RAD: 2},
+        ),
+        (
+            "    0.0000    0.0000    0.0000 C   0  5  0  0  0  0  0  0  0  0  0  0",
+            {CHG: -1},
+        ),
+        (
+            "    0.0000    0.0000    0.0000 C   0  6  0  0  0  0  0  0  0  0  0  0",
+            {CHG: -2},
+        ),
+        (
+            "    0.0000    0.0000    0.0000 C   0  7  0  0  0  0  0  0  0  0  0  0",
+            {CHG: -3},
+        ),
+        (
+            "    0.0000    0.0000    0.0000 C   0  8  0  0  0  0  0  0  0  0  0  0",
+            {},  # ignored
+        ),
+    ],
+)
+def test_parse_atom_line_charge_field(line, expected_additional_attr):
+    expected_attrs = {
+        ELEMENT_SYMBOL: "C",
+        ATOMIC_NUMBER: 6,
+        PARTITION: 0,
+        X_COORD: 0,
+        Y_COORD: 0,
+        Z_COORD: 0,
+    }
+    expected_attrs.update(expected_additional_attr)
+
+    atom_attrs = _parse_atom_line(line)
+
+    assert atom_attrs == expected_attrs
 
 
 @pytest.mark.parametrize(

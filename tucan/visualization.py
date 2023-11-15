@@ -4,7 +4,11 @@ import networkx as nx
 import plotly.graph_objects as go
 import plotly.subplots as sp
 
-from tucan.graph_attributes import ATOMIC_NUMBER, PARTITION
+from tucan.graph_attributes import (
+    ATOMIC_NUMBER,
+    INVARIANT_CODE,
+    PARTITION,
+)
 
 
 def _draw_networkx_graph(m, highlight, labels, ax):
@@ -121,10 +125,10 @@ def print_molecule(m, caption=""):
     print(caption)
     table = []
     for atom in sorted(list(m.nodes)):
-        invariant_code = m.nodes[atom]["invariant_code"]
+        invariant_code = m.nodes[atom][INVARIANT_CODE]
         partition = m.nodes[atom][PARTITION]
         neighbors = [
-            (n, m.nodes[n]["invariant_code"], m.nodes[n][PARTITION])
+            (n, m.nodes[n][INVARIANT_CODE], m.nodes[n][PARTITION])
             for n in m.neighbors(atom)
         ]
         neighbors = sorted(neighbors, key=lambda x: x[2], reverse=True)

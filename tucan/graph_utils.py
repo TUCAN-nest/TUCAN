@@ -5,6 +5,7 @@ from typing import Any, NamedTuple
 
 from tucan.graph_attributes import (
     ATOMIC_NUMBER,
+    INVARIANT_CODE,
     MASS,
     RAD,
 )
@@ -46,7 +47,7 @@ def _add_invariant_code(
             else attrs.get(icd.key, default_value)
             for icd in invariant_code_definitions
         )
-        atom_attrs[atom].update({"invariant_code": invariant_code})
+        atom_attrs[atom].update({INVARIANT_CODE: invariant_code})
 
 
 def sort_molecule_by_attribute(m: nx.Graph, attribute: str) -> nx.Graph:

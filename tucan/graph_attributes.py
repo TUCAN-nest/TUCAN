@@ -4,6 +4,7 @@
 ATOMIC_NUMBER = "atomic_number"
 CHG = "chg"
 ELEMENT_SYMBOL = "element_symbol"
+INVARIANT_CODE = "invariant_code"
 MASS = "mass"
 PARTITION = "partition"
 RAD = "rad"

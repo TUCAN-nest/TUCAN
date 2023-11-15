@@ -3,6 +3,7 @@ from collections import Counter, deque
 from tucan.graph_attributes import (
     ATOMIC_NUMBER,
     ELEMENT_SYMBOL,
+    EXPLORED,
     MASS,
     PARTITION,
     RAD,
@@ -93,17 +94,17 @@ def _assign_final_labels(
     partitions = m.nodes.data(PARTITION)
     labels_by_partition = _labels_by_partition(m)
     final_labels = {}
-    nx.set_node_attributes(m, False, "explored")
+    nx.set_node_attributes(m, False, EXPLORED)
 
     # outer loop iterates over all fragments of the graph (= graph components),
     # starting with the lowest unexplored node label
-    while unexplored := sorted([k for k, v in m.nodes(data="explored") if not v]):
+    while unexplored := sorted([k for k, v in m.nodes(data=EXPLORED) if not v]):
         atom_queue = deque([unexplored[0]])
 
         # inner loop reaches out to all atoms in a fragment
         while atom_queue:
             a = atom_queue.pop()
-            if m.nodes[a]["explored"]:
+            if m.nodes[a][EXPLORED]:
                 continue
             a_final = labels_by_partition[
                 partitions[a]
@@ -119,13 +120,13 @@ def _assign_final_labels(
                     n for n in neighbors if priority(partitions[a], partitions[n])
                 ]
                 neighbor_traversal_order.extend(sorted(neighbors_this_priority))
-            m.nodes[a]["explored"] = True
+            m.nodes[a][EXPLORED] = True
 
             atom_queue.extendleft(neighbor_traversal_order)
 
     assert len(final_labels) == len(m.nodes)
 
-    nx.set_node_attributes(m, False, "explored")
+    nx.set_node_attributes(m, False, EXPLORED)
     return nx.relabel_nodes(m, final_labels, copy=True)
 
 

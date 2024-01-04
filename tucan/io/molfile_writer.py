@@ -1,6 +1,16 @@
 from datetime import datetime
 import networkx as nx
 import tucan
+from tucan.graph_attributes import (
+    BOND_TYPE,
+    CHG,
+    ELEMENT_SYMBOL,
+    MASS,
+    RAD,
+    X_COORD,
+    Y_COORD,
+    Z_COORD,
+)
 
 
 def graph_to_molfile(graph: nx.Graph, calc_coordinates=False) -> str:
@@ -69,19 +79,17 @@ def _add_atom_block(lines: list[str], graph: nx.Graph, calc_coordinates: bool):
     _add_v30_line(lines, "BEGIN ATOM")
 
     for index, attrs in graph.nodes(data=True):
-        x = coords[index][0] if calc_coordinates else attrs.get("x_coord", 0)
-        y = coords[index][1] if calc_coordinates else attrs.get("y_coord", 0)
-        z = 0 if calc_coordinates else attrs.get("z_coord", 0)
+        x = coords[index][0] if calc_coordinates else attrs.get(X_COORD, 0)
+        y = coords[index][1] if calc_coordinates else attrs.get(Y_COORD, 0)
+        z = 0 if calc_coordinates else attrs.get(Z_COORD, 0)
 
-        charge = f" CHG={chg}" if (chg := attrs.get("chg")) and -15 <= chg <= 15 else ""
-        radical = f" RAD={rad}" if (rad := attrs.get("rad")) and 0 < rad <= 3 else ""
-        atomic_mass = (
-            f" MASS={mass}" if (mass := attrs.get("mass")) and mass > 0 else ""
-        )
+        charge = f" CHG={chg}" if (chg := attrs.get(CHG)) and -15 <= chg <= 15 else ""
+        radical = f" RAD={rad}" if (rad := attrs.get(RAD)) and 0 < rad <= 3 else ""
+        atomic_mass = f" MASS={mass}" if (mass := attrs.get(MASS)) and mass > 0 else ""
 
         _add_v30_line(
             lines,
-            f"{index + 1} {attrs['element_symbol']} {x:.6f} {y:.6f} {z:.6f} 0{charge}{radical}{atomic_mass}",
+            f"{index + 1} {attrs[ELEMENT_SYMBOL]} {x:.6f} {y:.6f} {z:.6f} 0{charge}{radical}{atomic_mass}",
         )
 
     _add_v30_line(lines, "END ATOM")
@@ -95,7 +103,7 @@ def _add_bond_block(lines: list[str], graph: nx.Graph):
 
     for index, edge in enumerate(graph.edges(data=True), start=1):
         node_index1, node_index2, attrs = edge
-        bond_type = attrs.get("bond_type", 1)
+        bond_type = attrs.get(BOND_TYPE, 1)
 
         _add_v30_line(lines, f"{index} {bond_type} {node_index1 + 1} {node_index2 + 1}")
 

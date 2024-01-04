@@ -2,6 +2,18 @@ import re
 from collections import deque
 from typing import Any
 from tucan.element_attributes import ELEMENT_ATTRS, detect_hydrogen_isotopes
+from tucan.graph_attributes import (
+    ATOMIC_NUMBER,
+    BOND_TYPE,
+    CHG,
+    ELEMENT_SYMBOL,
+    MASS,
+    PARTITION,
+    RAD,
+    X_COORD,
+    Y_COORD,
+    Z_COORD,
+)
 from tucan.io.exception import MolfileParserException
 
 
@@ -98,20 +110,20 @@ def _parse_atom_attributes(
     element_symbol, isotope_mass = detect_hydrogen_isotopes(element_symbol)
 
     atom_attrs = {
-        "element_symbol": element_symbol,
-        "atomic_number": ELEMENT_ATTRS[element_symbol]["atomic_number"],
-        "partition": 0,
-        "x_coord": float(line[4]),
-        "y_coord": float(line[5]),
-        "z_coord": float(line[6]),
+        ELEMENT_SYMBOL: element_symbol,
+        ATOMIC_NUMBER: ELEMENT_ATTRS[element_symbol][ATOMIC_NUMBER],
+        PARTITION: 0,
+        X_COORD: float(line[4]),
+        Y_COORD: float(line[5]),
+        Z_COORD: float(line[6]),
     }
 
     optional_attrs = {
-        "chg": [int(i.split("=")[1]) for i in line if "CHG" in i],
-        "mass": [int(i.split("=")[1]) for i in line if "MASS" in i]
+        CHG: [int(i.split("=")[1]) for i in line if "CHG" in i],
+        MASS: [int(i.split("=")[1]) for i in line if "MASS" in i]
         if not isotope_mass
         else [isotope_mass],
-        "rad": [int(i.split("=")[1]) for i in line if "RAD" in i],
+        RAD: [int(i.split("=")[1]) for i in line if "RAD" in i],
     }
     for key, val in optional_attrs.items():
         if val:
@@ -170,7 +182,7 @@ def _parse_bond_block(
 
 
 def _parse_bond_attributes(line: list[str]) -> dict[str, int]:
-    return {"bond_type": int(line[3])}
+    return {BOND_TYPE: int(line[3])}
 
 
 def _parse_bond_line_with_star_atom(

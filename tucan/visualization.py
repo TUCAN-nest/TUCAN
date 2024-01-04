@@ -4,6 +4,12 @@ import networkx as nx
 import plotly.graph_objects as go
 import plotly.subplots as sp
 
+from tucan.graph_attributes import (
+    ATOMIC_NUMBER,
+    INVARIANT_CODE,
+    PARTITION,
+)
+
 
 def _draw_networkx_graph(m, highlight, labels, ax):
     highlight_colors = list(nx.get_node_attributes(m, highlight).values())
@@ -69,7 +75,7 @@ def _draw_networkx_graph_3d(m, highlight, labels, fig, col):
 
 
 def draw_molecules(
-    m_list, caption_list, labels=None, highlight="atomic_number", title="", dim=2
+    m_list, caption_list, labels=None, highlight=ATOMIC_NUMBER, title="", dim=2
 ):
     """Draw molecule(s).
 
@@ -80,8 +86,10 @@ def draw_molecules(
     dim: int
         Plot in "2" (default) or "3" dimensions.
     """
-    if highlight not in ["atomic_number", "partition"]:
-        print("Please select one of {'partition', 'atomic_number'} for `highlight`.")
+    if highlight not in [ATOMIC_NUMBER, PARTITION]:
+        print(
+            f"Please select one of {{'{PARTITION}', '{ATOMIC_NUMBER}'}} for `highlight`."
+        )
         return
     n_molecules = len(m_list)
 
@@ -117,10 +125,10 @@ def print_molecule(m, caption=""):
     print(caption)
     table = []
     for atom in sorted(list(m.nodes)):
-        invariant_code = m.nodes[atom]["invariant_code"]
-        partition = m.nodes[atom]["partition"]
+        invariant_code = m.nodes[atom][INVARIANT_CODE]
+        partition = m.nodes[atom][PARTITION]
         neighbors = [
-            (n, m.nodes[n]["invariant_code"], m.nodes[n]["partition"])
+            (n, m.nodes[n][INVARIANT_CODE], m.nodes[n][PARTITION])
             for n in m.neighbors(atom)
         ]
         neighbors = sorted(neighbors, key=lambda x: x[2], reverse=True)

@@ -1,9 +1,22 @@
 import pytest
 from pathlib import Path
+
+from tucan.graph_attributes import (
+    ATOMIC_NUMBER,
+    CHG,
+    ELEMENT_SYMBOL,
+    MASS,
+    PARTITION,
+    RAD,
+    X_COORD,
+    Y_COORD,
+    Z_COORD,
+)
 from tucan.io import graph_from_file
 from tucan.io.exception import MolfileParserException
 from tucan.io.molfile_v2000_reader import (
     _merge_tuples_into_additional_attributes,
+    _parse_atom_line,
     _parse_atom_value_assignments,
     _to_int,
     _to_float,
@@ -28,6 +41,63 @@ def test_graphs_from_v2000_and_v3000_molfiles_match(mol):
 
 
 @pytest.mark.parametrize(
+    "line, expected_additional_attr",
+    [
+        (
+            "    0.0000    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0",
+            {},
+        ),
+        (
+            "    0.0000    0.0000    0.0000 C   0  1  0  0  0  0  0  0  0  0  0  0",
+            {CHG: 3},
+        ),
+        (
+            "    0.0000    0.0000    0.0000 C   0  2  0  0  0  0  0  0  0  0  0  0",
+            {CHG: 2},
+        ),
+        (
+            "    0.0000    0.0000    0.0000 C   0  3  0  0  0  0  0  0  0  0  0  0",
+            {CHG: 1},
+        ),
+        (
+            "    0.0000    0.0000    0.0000 C   0  4  0  0  0  0  0  0  0  0  0  0",
+            {RAD: 2},
+        ),
+        (
+            "    0.0000    0.0000    0.0000 C   0  5  0  0  0  0  0  0  0  0  0  0",
+            {CHG: -1},
+        ),
+        (
+            "    0.0000    0.0000    0.0000 C   0  6  0  0  0  0  0  0  0  0  0  0",
+            {CHG: -2},
+        ),
+        (
+            "    0.0000    0.0000    0.0000 C   0  7  0  0  0  0  0  0  0  0  0  0",
+            {CHG: -3},
+        ),
+        (
+            "    0.0000    0.0000    0.0000 C   0  8  0  0  0  0  0  0  0  0  0  0",
+            {},  # ignored
+        ),
+    ],
+)
+def test_parse_atom_line_charge_field(line, expected_additional_attr):
+    expected_attrs = {
+        ELEMENT_SYMBOL: "C",
+        ATOMIC_NUMBER: 6,
+        PARTITION: 0,
+        X_COORD: 0,
+        Y_COORD: 0,
+        Z_COORD: 0,
+    }
+    expected_attrs.update(expected_additional_attr)
+
+    atom_attrs = _parse_atom_line(line)
+
+    assert atom_attrs == expected_attrs
+
+
+@pytest.mark.parametrize(
     "tuples, additional_attrs, expected_additional_attrs_after_merge",
     [
         (
@@ -37,13 +107,13 @@ def test_graphs_from_v2000_and_v3000_molfiles_match(mol):
                 (2, 3),  # atom index is not in additional_attrs yet
             ],
             {
-                0: {"chg": 2},  # will add new key
-                1: {"mass": 1},  # will overwrite value
+                0: {CHG: 2},  # will add new key
+                1: {MASS: 1},  # will overwrite value
             },
             {
-                0: {"chg": 2, "mass": 2},
-                1: {"mass": 13},
-                2: {"mass": 3},
+                0: {CHG: 2, MASS: 2},
+                1: {MASS: 13},
+                2: {MASS: 3},
             },
         ),
     ],
@@ -51,7 +121,7 @@ def test_graphs_from_v2000_and_v3000_molfiles_match(mol):
 def test_merge_tuples_into_additional_attributes(
     tuples, additional_attrs, expected_additional_attrs_after_merge
 ):
-    _merge_tuples_into_additional_attributes(tuples, "mass", additional_attrs)
+    _merge_tuples_into_additional_attributes(tuples, MASS, additional_attrs)
     assert additional_attrs == expected_additional_attrs_after_merge
 
 

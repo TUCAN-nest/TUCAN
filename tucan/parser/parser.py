@@ -1,13 +1,21 @@
+from __future__ import annotations
+
 import networkx as nx
-from typing import Any
+from typing import Any, Final
 from antlr4 import InputStream, CommonTokenStream
 from antlr4.error.ErrorListener import ErrorListener
 from antlr4.tree.Tree import ParseTreeWalker
 from tucan.element_attributes import ELEMENT_ATTRS
+from tucan.graph_attributes import (
+    ATOMIC_NUMBER,
+    ELEMENT_SYMBOL,
+    PARTITION,
+)
 from tucan.graph_utils import graph_from_molecule
 from tucan.parser.tucanLexer import tucanLexer
 from tucan.parser.tucanListener import tucanListener
 from tucan.parser.tucanParser import tucanParser
+from tucan.serialization import _SERIALIZER_NODE_ATTRIBUTE_MAPPING
 
 
 def graph_from_tucan(tucan: str) -> nx.Graph:
@@ -28,7 +36,7 @@ def graph_from_tucan(tucan: str) -> nx.Graph:
     return listener.to_graph()
 
 
-def _prepare_parser(to_parse: str) -> nx.Graph:
+def _prepare_parser(to_parse: str) -> tucanParser:
     stream = InputStream(to_parse)
     lexer = tucanLexer(stream)
     token_stream = CommonTokenStream(lexer)
@@ -43,11 +51,16 @@ def _prepare_parser(to_parse: str) -> nx.Graph:
     return parser
 
 
-def _walk_tree(tree):
+def _walk_tree(tree) -> TucanListenerImpl:
     walker = ParseTreeWalker()
     listener = TucanListenerImpl()
     walker.walk(listener, tree)
     return listener
+
+
+_DESERIALIZER_NODE_ATTRIBUTE_MAPPING: Final[dict[str, str]] = {
+    v: k for k, v in _SERIALIZER_NODE_ATTRIBUTE_MAPPING.items()
+}
 
 
 class TucanListenerImpl(tucanListener):
@@ -90,9 +103,9 @@ class TucanListenerImpl(tucanListener):
 
     def _add_atoms(self, element, count):
         atom_attrs = {
-            "element_symbol": element,
-            "atomic_number": ELEMENT_ATTRS[element]["atomic_number"],
-            "partition": 0,
+            ELEMENT_SYMBOL: element,
+            ATOMIC_NUMBER: ELEMENT_ATTRS[element][ATOMIC_NUMBER],
+            PARTITION: 0,
         }
 
         self._atoms.extend([atom_attrs.copy() for _ in range(count)])
@@ -102,12 +115,13 @@ class TucanListenerImpl(tucanListener):
 
     def _add_node_attribute(self, node_index, key, value):
         attrs_for_node = self._node_attributes.setdefault(node_index - 1, {})
+        attr_key = _DESERIALIZER_NODE_ATTRIBUTE_MAPPING[key]
 
-        if key in attrs_for_node:
+        if attr_key in attrs_for_node:
             raise TucanParserException(
                 f'Atom {node_index}: Attribute "{key}" was already defined.'
             )
-        attrs_for_node[key] = value
+        attrs_for_node[attr_key] = value
 
     def to_graph(self) -> nx.Graph:
         # node index validation
@@ -115,7 +129,7 @@ class TucanListenerImpl(tucanListener):
             self._validate_atom_index(i1)
             self._validate_atom_index(i2)
 
-        sorted_atoms = sorted(self._atoms, key=lambda a: a["atomic_number"])
+        sorted_atoms = sorted(self._atoms, key=lambda a: a[ATOMIC_NUMBER])
 
         # dict of dict (atom_index -> dict of atom attributes)
         atoms_dict: dict[int, dict[str, Any]] = {

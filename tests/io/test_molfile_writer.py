@@ -1,4 +1,6 @@
 import pytest
+
+from tucan.graph_attributes import X_COORD, Y_COORD, Z_COORD
 from tucan.io import graph_from_molfile_text, graph_to_molfile
 from tucan.io.molfile_writer import _add_header, _add_v30_line
 
@@ -34,9 +36,9 @@ def test_recalculate_atom_coordinates():
         ).nodes(data=True)
 
         for key, orig_atom_attrs in atoms_with_orig_coords:
-            assert orig_atom_attrs["x_coord"] != atoms_with_new_coords[key]["x_coord"]
-            assert orig_atom_attrs["y_coord"] != atoms_with_new_coords[key]["y_coord"]
-            assert atoms_with_new_coords[key]["z_coord"] == 0.0
+            assert orig_atom_attrs[X_COORD] != atoms_with_new_coords[key][X_COORD]
+            assert orig_atom_attrs[Y_COORD] != atoms_with_new_coords[key][Y_COORD]
+            assert atoms_with_new_coords[key][Z_COORD] == 0.0
 
 
 def test_add_header():

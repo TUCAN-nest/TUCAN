@@ -3,6 +3,7 @@ from tucan.canonicalization import (
     partition_molecule_by_attribute,
     refine_partitions,
 )
+from tucan.graph_attributes import ATOMIC_NUMBER, PARTITION
 from tucan.serialization import serialize_molecule
 from tucan.graph_utils import permute_molecule
 from tucan.test_utils import permutation_invariance
@@ -21,31 +22,31 @@ import pytest
 )
 def test_partition_molecule_by_attribute(m, expected_partitions):
     m_partitioned = partition_molecule_by_attribute(
-        graph_from_file(f"tests/molfiles/{m}/{m}.mol"), "atomic_number"
+        graph_from_file(f"tests/molfiles/{m}/{m}.mol"), ATOMIC_NUMBER
     )
-    partitions = sorted(nx.get_node_attributes(m_partitioned, "partition").values())
+    partitions = sorted(nx.get_node_attributes(m_partitioned, PARTITION).values())
 
     assert partitions == expected_partitions
 
 
 def test_partition_molecule_by_attribute_is_stable(m):
-    m_partitioned = partition_molecule_by_attribute(m, "atomic_number")
-    m_re_partitioned = partition_molecule_by_attribute(m_partitioned, "atomic_number")
+    m_partitioned = partition_molecule_by_attribute(m, ATOMIC_NUMBER)
+    m_re_partitioned = partition_molecule_by_attribute(m_partitioned, ATOMIC_NUMBER)
 
-    assert sorted(
-        nx.get_node_attributes(m_partitioned, "partition").values()
-    ) == sorted(nx.get_node_attributes(m_re_partitioned, "partition").values())
+    assert sorted(nx.get_node_attributes(m_partitioned, PARTITION).values()) == sorted(
+        nx.get_node_attributes(m_re_partitioned, PARTITION).values()
+    )
 
 
 def test_refine_partitions(m):
-    m_partitioned = partition_molecule_by_attribute(m, "atomic_number")
+    m_partitioned = partition_molecule_by_attribute(m, ATOMIC_NUMBER)
     m_refined = list(refine_partitions(m_partitioned))
 
     assert all(
         max_p_i < max_p_j
         for max_p_i, max_p_j in pairwise(
             (
-                max(nx.get_node_attributes(m_rfnd, "partition").values())
+                max(nx.get_node_attributes(m_rfnd, PARTITION).values())
                 for m_rfnd in m_refined
             )
         )

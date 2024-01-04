@@ -4,6 +4,18 @@ from tucan.element_attributes import (
     MOLFILE_V2000_CHARGES,
     detect_hydrogen_isotopes,
 )
+from tucan.graph_attributes import (
+    ATOMIC_NUMBER,
+    BOND_TYPE,
+    CHG,
+    ELEMENT_SYMBOL,
+    MASS,
+    PARTITION,
+    RAD,
+    X_COORD,
+    Y_COORD,
+    Z_COORD,
+)
 from tucan.io.exception import MolfileParserException
 
 
@@ -41,19 +53,19 @@ def _parse_atom_line(line: str) -> dict[str, Any]:
     element_symbol, isotope_mass = detect_hydrogen_isotopes(element_symbol)
 
     atom_attrs = {
-        "element_symbol": element_symbol,
-        "atomic_number": ELEMENT_ATTRS[element_symbol]["atomic_number"],
-        "partition": 0,
-        "x_coord": _to_float(line[0:10]),  # xxxxx.xxxx
-        "y_coord": _to_float(line[10:20]),  # yyyyy.yyyy
-        "z_coord": _to_float(line[20:30]),  # zzzzz.zzzz
+        ELEMENT_SYMBOL: element_symbol,
+        ATOMIC_NUMBER: ELEMENT_ATTRS[element_symbol][ATOMIC_NUMBER],
+        PARTITION: 0,
+        X_COORD: _to_float(line[0:10]),  # xxxxx.xxxx
+        Y_COORD: _to_float(line[10:20]),  # yyyyy.yyyy
+        Z_COORD: _to_float(line[20:30]),  # zzzzz.zzzz
     }
     atom_attrs |= MOLFILE_V2000_CHARGES.get(_to_int(line[36:39]), {})  # ccc
 
     # Field "dd" (mass difference) is ignored. Only consider hydrogen
     # isotopes (D and T) here and "M  ISO" in the attribute block (later).
     if isotope_mass:
-        atom_attrs["mass"] = isotope_mass
+        atom_attrs[MASS] = isotope_mass
 
     return atom_attrs
 
@@ -74,7 +86,7 @@ def _parse_bond_line(
     _validate_atom_index(index1, atom_attrs, line)
     _validate_atom_index(index2, atom_attrs, line)
 
-    bond_attrs = {"bond_type": _to_int(line[6:9])}  # ttt
+    bond_attrs = {BOND_TYPE: _to_int(line[6:9])}  # ttt
 
     return (index1, index2), bond_attrs
 
@@ -90,20 +102,20 @@ def _parse_attribute_block(
         if line.startswith("M  CHG"):
             # M  CHGnn8 aaa vvv ...
             _merge_tuples_into_additional_attributes(
-                _parse_atom_value_assignments(line, atom_attrs), "chg", additional_attrs
+                _parse_atom_value_assignments(line, atom_attrs), CHG, additional_attrs
             )
             reset_chg_and_rad = True
         elif line.startswith("M  RAD"):
             # M  RADnn8 aaa vvv ...
             _merge_tuples_into_additional_attributes(
-                _parse_atom_value_assignments(line, atom_attrs), "rad", additional_attrs
+                _parse_atom_value_assignments(line, atom_attrs), RAD, additional_attrs
             )
             reset_chg_and_rad = True
         elif line.startswith("M  ISO"):
             # M  ISOnn8 aaa vvv ...
             _merge_tuples_into_additional_attributes(
                 _parse_atom_value_assignments(line, atom_attrs),
-                "mass",
+                MASS,
                 additional_attrs,
             )
             reset_mass = True
@@ -114,11 +126,11 @@ def _parse_attribute_block(
 
     if reset_chg_and_rad:
         # CHG or RAD lines supersede all charge and radical values from the atom block.
-        _clear_atom_attribute("chg", atom_attrs)
-        _clear_atom_attribute("rad", atom_attrs)
+        _clear_atom_attribute(CHG, atom_attrs)
+        _clear_atom_attribute(RAD, atom_attrs)
     if reset_mass:
         # ISO lines supersede all isotope values from the atom block.
-        _clear_atom_attribute("mass", atom_attrs)
+        _clear_atom_attribute(MASS, atom_attrs)
 
     _merge_atom_attributes_and_additional_attributes(atom_attrs, additional_attrs)
 

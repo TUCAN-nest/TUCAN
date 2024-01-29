@@ -88,7 +88,8 @@ def draw_molecules(
     """
     if highlight not in [ATOMIC_NUMBER, PARTITION]:
         print(
-            f"Please select one of {{'{PARTITION}', '{ATOMIC_NUMBER}'}} for `highlight`."
+            f"Please select one of {{'{PARTITION}', '{ATOMIC_NUMBER}'}} for"
+            " `highlight`."
         )
         return
     n_molecules = len(m_list)

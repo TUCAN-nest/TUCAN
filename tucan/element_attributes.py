@@ -6,6 +6,7 @@ as taken from http://jmol.sourceforge.net/jscolors with the exception of H,
 which was set to lightgrey for better visibility. Colors beyond meitnerium are
 not officially assigned so far and were thus set to the same value as for Mt.
 """
+
 from __future__ import annotations
 from typing import Final
 

@@ -15,13 +15,15 @@ from tucan.io import TucanParserException, graph_from_tucan
         (
             "CH4/(1-2)/(1:=14)",
             re.escape(
-                "line 1:13 missing {'mass', 'rad'} at '='\nCH4/(1-2)/(1:=14)\n             ^"
+                "line 1:13 missing {'mass', 'rad'} at '='\nCH4/(1-2)/(1:=14)\n         "
+                "    ^"
             ),
         ),
         (
             "CH4/(1-2)/(1:massmass=14)",
             re.escape(
-                "line 1:17 extraneous input 'mass' expecting '='\nCH4/(1-2)/(1:massmass=14)\n                 ^^^^"
+                "line 1:17 extraneous input 'mass' expecting"
+                " '='\nCH4/(1-2)/(1:massmass=14)\n                 ^^^^"
             ),
         ),
         (
@@ -31,7 +33,8 @@ from tucan.io import TucanParserException, graph_from_tucan
         (
             "CH4/(1-)",
             re.escape(
-                "line 1:7 mismatched input ')' expecting {'1', '2', '3', '4', '5', '6', '7', '8', '9', GREATER_THAN_NINE}\nCH4/(1-)\n       ^"
+                "line 1:7 mismatched input ')' expecting {'1', '2', '3', '4', '5', '6',"
+                " '7', '8', '9', GREATER_THAN_NINE}\nCH4/(1-)\n       ^"
             ),
         ),
     ],

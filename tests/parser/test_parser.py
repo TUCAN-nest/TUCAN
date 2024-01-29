@@ -128,7 +128,10 @@ def test_node_attributes(node_attributes, expected_node_attributes):
 def test_overriding_node_attribute_raises_exception(
     node_attributes, offending_node_index, offending_key
 ):
-    expected_error_msg = f'^Atom {offending_node_index}: Attribute "{offending_key}" was already defined.$'
+    expected_error_msg = (
+        f'^Atom {offending_node_index}: Attribute "{offending_key}" was already'
+        " defined.$"
+    )
     with pytest.raises(TucanParserException, match=expected_error_msg):
         _extract_node_attributes(node_attributes)
 

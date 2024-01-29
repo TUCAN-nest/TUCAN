@@ -42,9 +42,11 @@ def _add_invariant_code(
 ) -> None:
     for atom, attrs in atom_attrs.items():
         invariant_code = tuple(
-            attrs[icd.key]
-            if (default_value := icd.default_value) is None
-            else attrs.get(icd.key, default_value)
+            (
+                attrs[icd.key]
+                if (default_value := icd.default_value) is None
+                else attrs.get(icd.key, default_value)
+            )
             for icd in invariant_code_definitions
         )
         atom_attrs[atom].update({INVARIANT_CODE: invariant_code})

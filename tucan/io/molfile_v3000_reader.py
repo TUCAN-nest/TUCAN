@@ -78,13 +78,15 @@ def _parse_atom_block(
 
     if (begin_atom_str := " ".join(lines[atom_block_offset - 1][2:])) != "BEGIN ATOM":
         raise MolfileParserException(
-            f'Expected "BEGIN ATOM" on line {atom_block_offset}, found "{begin_atom_str}"'
+            f'Expected "BEGIN ATOM" on line {atom_block_offset}, found'
+            f' "{begin_atom_str}"'
         )
     if (
         end_atom_str := " ".join(lines[atom_block_offset + atom_count][2:])
     ) != "END ATOM":
         raise MolfileParserException(
-            f'Expected "END ATOM" on line {atom_block_offset + atom_count + 1}, found "{end_atom_str}"'
+            f'Expected "END ATOM" on line {atom_block_offset + atom_count + 1}, found'
+            f' "{end_atom_str}"'
         )
 
     atom_attrs = {}
@@ -120,9 +122,11 @@ def _parse_atom_attributes(
 
     optional_attrs = {
         CHG: [int(i.split("=")[1]) for i in line if "CHG" in i],
-        MASS: [int(i.split("=")[1]) for i in line if "MASS" in i]
-        if not isotope_mass
-        else [isotope_mass],
+        MASS: (
+            [int(i.split("=")[1]) for i in line if "MASS" in i]
+            if not isotope_mass
+            else [isotope_mass]
+        ),
         RAD: [int(i.split("=")[1]) for i in line if "RAD" in i],
     }
     for key, val in optional_attrs.items():
@@ -147,13 +151,15 @@ def _parse_bond_block(
 
     if (begin_bond_str := " ".join(lines[bond_block_offset - 1][2:])) != "BEGIN BOND":
         raise MolfileParserException(
-            f'Expected "BEGIN BOND" on line {bond_block_offset}, found "{begin_bond_str}"'
+            f'Expected "BEGIN BOND" on line {bond_block_offset}, found'
+            f' "{begin_bond_str}"'
         )
     if (
         end_bond_str := " ".join(lines[bond_block_offset + bond_count][2:])
     ) != "END BOND":
         raise MolfileParserException(
-            f'Expected "END BOND" on line {bond_block_offset + bond_count + 1}, found "{end_bond_str}"'
+            f'Expected "END BOND" on line {bond_block_offset + bond_count + 1}, found'
+            f' "{end_bond_str}"'
         )
 
     bonds = {}
@@ -166,7 +172,8 @@ def _parse_bond_block(
         atom2_is_star = atom2_index in star_atoms
         if atom1_is_star and atom2_is_star:
             raise MolfileParserException(
-                f'Two "star" atoms (index {atom1_index + 1} and {atom2_index + 1}) may not be connected'
+                f'Two "star" atoms (index {atom1_index + 1} and {atom2_index + 1}) may'
+                " not be connected"
             )
         elif atom1_is_star:
             bond_tuples = _parse_bond_line_with_star_atom(line, atom2_index)
@@ -197,7 +204,8 @@ def _parse_bond_line_with_star_atom(
     numbers = [int(num) for num in endpts_token[8:-1].split()]
     if (expected_n_endpts := numbers[0]) != (n_endpts := len(numbers) - 1):
         raise MolfileParserException(
-            f'Error in "{endpts_token}": Expected {expected_n_endpts} endpoints, found {n_endpts}'
+            f'Error in "{endpts_token}": Expected {expected_n_endpts} endpoints, found'
+            f" {n_endpts}"
         )
 
     return [(start_atom_index, end_atom_index - 1) for end_atom_index in numbers[1:]]

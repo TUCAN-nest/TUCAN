@@ -4,10 +4,12 @@ build-backend = "flit_core.buildapi"
 
 [project]
 name = "tucan"
-authors = [{name = "Jan C. Brammer", email = "jan.c.brammer@gmail.com"}]
+authors = [{ name = "Jan C. Brammer", email = "jan.c.brammer@gmail.com" }]
 readme = "README.md"
-license = {file = "LICENSE"}
-classifiers = ["License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)"]
+license = { file = "LICENSE" }
+classifiers = [
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+]
 dynamic = ["version", "description"]
 
 dependencies = [
@@ -17,33 +19,26 @@ dependencies = [
     "tabulate >=0.9.0",
     "types-tabulate >= 0.9.0",
     "igraph >=0.10.3",
-    "antlr4-python3-runtime == 4.11.1"
+    "antlr4-python3-runtime == 4.11.1",
 ]
 
 [project.optional-dependencies]
 drawing = [
-    "plotly",    # interactive 3D drawings
+    "plotly",     # interactive 3D drawings
     "notebook",
-    "ipywidgets"
+    "ipywidgets",
 ]
-dev = [
-    "black",
-    "flake8",
-    "pytest",
-    "syrupy",
-    "mypy"
-]
+dev = ["pytest", "syrupy"]
+
 
 [tool.pytest.ini_options]
 minversion = "6.0"
 addopts = """
     -v
     --durations=5"""
-testpaths = [
-    "tests",
-]
+testpaths = ["tests"]
 
-[tool.black]    # https://lyz-code.github.io/blue-book/devops/black/
+[tool.black] # https://lyz-code.github.io/blue-book/devops/black/
 extend-exclude = 'tucan/parser/tucan.*\.py'
 
 [tool.mypy]

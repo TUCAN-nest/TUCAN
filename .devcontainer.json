@@ -2,7 +2,12 @@
 // For config options, see the README at: https://github.com/devcontainers/templates/tree/main/src/python
 {
     "name": "TUCAN",
-    "image": "mcr.microsoft.com/vscode/devcontainers/python:3.11",
+    "image": "python:3.12-bookworm",
+    "features": {
+        "ghcr.io/devcontainers/features/common-utils:2": {
+            "configureZshAsDefaultShell": true
+        }
+    },
     "customizations": {
         "vscode": {
             "extensions": [
@@ -11,7 +16,7 @@
                 "ms-python.vscode-pylance",
                 "KevinRose.vsc-python-indent",
                 "streetsidesoftware.code-spell-checker",
-                "bungcip.better-toml",
+                "tamasfe.even-better-toml",
                 "eamodio.gitlens",
                 "GitHub.copilot",
                 "ms-python.black-formatter",

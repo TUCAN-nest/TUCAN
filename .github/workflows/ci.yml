@@ -21,7 +21,11 @@ jobs:
       - name: pytest
         run: pytest
       - name: black
-        run: black . --check --diff
+        run: |
+          pip install black
+          black . --check --diff
       - name: mypy
-        run: mypy tucan
+        run: |
+          pip install mypy
+          mypy tucan
 

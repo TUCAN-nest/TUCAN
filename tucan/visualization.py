@@ -27,7 +27,7 @@ def _draw_networkx_graph(m, highlight, labels, ax):
     )
 
 
-def _draw_networkx_graph_3d(m, highlight, labels, fig, col):
+def _draw_networkx_graph_3d(m, highlight, labels, fig, col, row):
     coords = nx.kamada_kawai_layout(m, dim=3)
     highlight_colors = list(nx.get_node_attributes(m, highlight).values())
     labels = list(map(str, list(m.nodes))) if not labels else labels
@@ -71,7 +71,7 @@ def _draw_networkx_graph_3d(m, highlight, labels, fig, col):
         textfont=dict(size=7.5),
     )
 
-    fig.add_traces([trace_edges, trace_nodes], rows=1, cols=col)
+    fig.add_traces([trace_edges, trace_nodes], rows=row, cols=col)
 
 
 def draw_molecules(
@@ -93,23 +93,28 @@ def draw_molecules(
         )
         return
     n_molecules = len(m_list)
+    n_cols = min(n_molecules, 4)
+    n_rows = n_molecules // n_cols + 1
 
     if dim == 2:
-        fig = plt.figure(figsize=(n_molecules * 6, 6))
+        fig = plt.figure(figsize=(n_cols * 6, n_rows * 6))
         fig.suptitle(title)
         for i, m in enumerate(m_list):
-            ax = fig.add_subplot(1, n_molecules, i + 1, title=caption_list[i])
+            ax = fig.add_subplot(n_rows, n_cols, i + 1, title=caption_list[i])
             _draw_networkx_graph(m, highlight, labels, ax)
     elif dim == 3:
         fig = sp.make_subplots(
-            rows=1,
-            cols=n_molecules,
+            rows=n_rows,
+            cols=n_cols,
             subplot_titles=caption_list,
-            specs=[[{"is_3d": True}] * n_molecules],
-            horizontal_spacing=0.1 / n_molecules,
+            specs=[[{"is_3d": True}] * n_cols] * n_rows,
+            horizontal_spacing=0.1 / n_cols,
+            vertical_spacing=0.1 / n_rows,
         )
         for i, m in enumerate(m_list):
-            _draw_networkx_graph_3d(m, highlight, labels, fig, i + 1)
+            col = i % n_cols + 1
+            row = i // n_cols + 1
+            _draw_networkx_graph_3d(m, highlight, labels, fig, col, row)
         fig.update_layout(showlegend=False, title=title)
         fig.update_scenes(
             patch=dict(

@@ -73,6 +73,7 @@ def test_permutation(m):
     assert m.edges != m_permu.edges
 
 
+@pytest.mark.timeout(10)
 def test_permutation_invariance(m):
     permutation_invariance(m)
 

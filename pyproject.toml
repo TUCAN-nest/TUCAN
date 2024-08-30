@@ -28,7 +28,7 @@ drawing = [
     "notebook",
     "ipywidgets",
 ]
-dev = ["pytest", "syrupy"]
+dev = ["pytest", "pytest-timeout", "syrupy"]
 
 
 [tool.pytest.ini_options]

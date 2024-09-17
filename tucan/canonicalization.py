@@ -3,7 +3,6 @@ from tucan.graph_utils import attribute_sequence
 import networkx as nx
 from typing import Generator
 from collections import Counter
-from itertools import combinations
 
 
 def partition_molecule_by_attribute(m: nx.Graph, attribute: str) -> nx.Graph:
@@ -68,12 +67,24 @@ def get_refinement_tree_node_children(m: nx.Graph) -> Generator[nx.Graph, None, 
 
 
 def filter_out_automorphisms(ms: list[nx.Graph]) -> list[nx.Graph]:
-    # TODO: Make this more efficient. E.g., compare labelings as in `get_canonical_molecule()`?
-    node_matcher = nx.algorithms.isomorphism.categorical_node_match(PARTITION, 0)
-    filtered_ms = set(ms)
-    for m_i, m_j in combinations(ms, 2):
-        if nx.is_isomorphic(m_i, m_j, node_match=node_matcher):
-            filtered_ms.discard(m_j)
+    filtered_ms = set()
+    labelings = set()
+
+    for m in ms:
+        m_relabeled_by_partition = nx.relabel_nodes(
+            m,
+            dict(zip(list(m), nx.get_node_attributes(m, PARTITION).values())),
+            copy=True,
+        )
+        labeling = tuple(
+            sorted([tuple(sorted(edge)) for edge in m_relabeled_by_partition.edges()])
+        )
+
+        if labeling in labelings:
+            continue
+
+        labelings.add(labeling)
+        filtered_ms.add(m)
 
     return list(filtered_ms)
 

@@ -67,6 +67,7 @@ def get_refinement_tree_node_children(m: nx.Graph) -> Generator[nx.Graph, None, 
 
 
 def filter_out_automorphisms(ms: list[nx.Graph]) -> list[nx.Graph]:
+    # Caution: Mutates `ms` in-place.
     filtered_ms = set()
     labelings = set()
 
@@ -74,7 +75,6 @@ def filter_out_automorphisms(ms: list[nx.Graph]) -> list[nx.Graph]:
         m_relabeled_by_partition = nx.relabel_nodes(
             m,
             dict(zip(list(m), nx.get_node_attributes(m, PARTITION).values())),
-            copy=True,
         )
         labeling = tuple(
             sorted([tuple(sorted(edge)) for edge in m_relabeled_by_partition.edges()])
@@ -89,14 +89,16 @@ def filter_out_automorphisms(ms: list[nx.Graph]) -> list[nx.Graph]:
     return list(filtered_ms)
 
 
-def get_refinement_tree_levels(m: nx.Graph) -> Generator[list[nx.Graph], None, None]:
+def get_refinement_tree_levels(
+    m: nx.Graph, filter_automorphisms: bool = True
+) -> Generator[list[nx.Graph], None, None]:
     """
     Build BFS refinement-tree and yield each level.
     """
     parents = [m]
 
     while True:
-        yield filter_out_automorphisms(parents)
+        yield parents
         if all(map(partitioning_is_discrete, parents)):
             return
 
@@ -105,7 +107,9 @@ def get_refinement_tree_levels(m: nx.Graph) -> Generator[list[nx.Graph], None, N
             for parent in parents
             for child in get_refinement_tree_node_children(parent)
         ]
-        parents = children
+        parents = (
+            filter_out_automorphisms(children) if filter_automorphisms else children
+        )
 
 
 def get_canonical_molecule(ms: list[nx.Graph]) -> nx.Graph:

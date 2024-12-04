@@ -74,7 +74,7 @@ def attribute_sequence(
         [m.nodes[n][attribute] for n in m.neighbors(atom)], reverse=True
     )
 
-    return tuple([attr_atom] + attr_neighbors)
+    return (attr_atom, *attr_neighbors)
 
 
 def permute_molecule(m: nx.Graph, random_seed: float = 1.0) -> nx.Graph:

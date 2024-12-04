@@ -101,7 +101,7 @@ def get_refinement_tree_levels(
     """
     parents = [m]
 
-    while True:
+    while parents:
         yield parents
         if all(map(partitioning_is_discrete, parents)):
             return

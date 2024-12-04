@@ -5,7 +5,9 @@ from typing import Generator
 from collections import Counter
 
 
-def partition_molecule_by_attribute(m: nx.Graph, attribute: str) -> nx.Graph:
+def partition_molecule_by_attribute(
+    m: nx.Graph, attribute: str, copy: bool = True
+) -> nx.Graph:
     # Node degree (i.e., number of neighbors) is encoded in length of individual attribute sequences.
     attr_seqs = [attribute_sequence(m, atom, attribute) for atom in m]
     unique_attr_seqs = sorted(set(attr_seqs))
@@ -14,7 +16,7 @@ def partition_molecule_by_attribute(m: nx.Graph, attribute: str) -> nx.Graph:
     )
     partitions = [unique_attr_seqs_to_partitions[attr_seq] for attr_seq in attr_seqs]
 
-    m_partitioned = m.copy()
+    m_partitioned = m.copy() if copy else m
     nx.set_node_attributes(
         m_partitioned, dict(zip(list(m_partitioned), partitions)), PARTITION
     )
@@ -31,9 +33,11 @@ def partitioning_is_discrete(m):
 
 
 def refine_partitions(m: nx.Graph) -> Generator[nx.Graph, None, None]:
-    m_refined = partition_molecule_by_attribute(m, PARTITION)
+    n_partitions = get_number_of_partitions(m)
+    m_refined = partition_molecule_by_attribute(m, PARTITION, copy=False)
+    n_partitions_refined = get_number_of_partitions(m_refined)
 
-    if get_number_of_partitions(m_refined) == get_number_of_partitions(m):
+    if n_partitions == n_partitions_refined:
         # No more refinement possible.
         yield m_refined
         return

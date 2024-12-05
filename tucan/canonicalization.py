@@ -45,20 +45,22 @@ def refine_partitions(m: nx.Graph) -> Generator[nx.Graph, None, None]:
     yield from refine_partitions(m_refined)
 
 
+def get_target_partition(m: nx.Graph) -> int:
+    partitions = nx.get_node_attributes(m, PARTITION).values()
+    partition_sizes = Counter(sorted(partitions))
+
+    return max(partition_sizes, key=partition_sizes.get)  # type: ignore
+
+
 def get_refinement_tree_node_children(m: nx.Graph) -> Generator[nx.Graph, None, None]:
     n_partitions = get_number_of_partitions(m)
-    partitions = nx.get_node_attributes(m, PARTITION)
-    partition_sizes = Counter(sorted(partitions.values()))
-    largest_partition = max(partition_sizes, key=partition_sizes.get)  # type: ignore
+    target_partition = get_target_partition(m)
 
-    for atom, partition in m.nodes(data=PARTITION):
-        if partition_sizes[partition] == 1:
-            # No need to artificially split singleton partitions.
-            continue
-        if partition != largest_partition:
+    for atom, partition in m.nodes(data=PARTITION):  # type: ignore
+        if partition != target_partition:
             continue
 
-        # Split largest partition.
+        # Split target partition.
         m_artificially_split = m.copy()
         nx.set_node_attributes(
             m_artificially_split,

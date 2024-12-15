@@ -20,22 +20,19 @@ def partition_molecule_by_attribute(
     nx.set_node_attributes(
         m_partitioned, dict(zip(list(m_partitioned), partitions)), PARTITION
     )
+    m_partitioned.graph["n_partitions"] = len(unique_attr_seqs)
 
     return m_partitioned
 
 
-def get_number_of_partitions(m: nx.Graph) -> int:
-    return len(set(nx.get_node_attributes(m, PARTITION).values()))
-
-
 def partitioning_is_discrete(m):
-    return get_number_of_partitions(m) == m.number_of_nodes()
+    return m.graph["n_partitions"] == m.number_of_nodes()
 
 
 def refine_partitions(m: nx.Graph) -> Generator[nx.Graph, None, None]:
-    n_partitions = get_number_of_partitions(m)
+    n_partitions = m.graph["n_partitions"]
     m_refined = partition_molecule_by_attribute(m, PARTITION, copy=False)
-    n_partitions_refined = get_number_of_partitions(m_refined)
+    n_partitions_refined = m_refined.graph["n_partitions"]
 
     if n_partitions == n_partitions_refined:
         # No more refinement possible.
@@ -53,7 +50,7 @@ def get_target_partition(m: nx.Graph) -> int:
 
 
 def get_refinement_tree_node_children(m: nx.Graph) -> Generator[nx.Graph, None, None]:
-    n_partitions = get_number_of_partitions(m)
+    n_partitions = m.graph["n_partitions"]
     target_partition = get_target_partition(m)
 
     for atom, partition in m.nodes(data=PARTITION):  # type: ignore

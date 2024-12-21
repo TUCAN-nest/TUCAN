@@ -75,12 +75,9 @@ def filter_out_automorphisms(ms: list[nx.Graph]) -> list[nx.Graph]:
     labelings = set()
 
     for m in ms:
-        m_relabeled_by_partition = nx.relabel_nodes(
-            m,
-            dict(zip(list(m), nx.get_node_attributes(m, PARTITION).values())),
-        )
+        partitions = list(nx.get_node_attributes(m, PARTITION).values())
         labeling = tuple(
-            sorted([tuple(sorted(edge)) for edge in m_relabeled_by_partition.edges()])
+            sorted([tuple(sorted(partitions[n] for n in edge)) for edge in m.edges()])
         )
 
         if labeling in labelings:

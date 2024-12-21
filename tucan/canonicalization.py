@@ -1,5 +1,5 @@
 from tucan.graph_attributes import PARTITION, INVARIANT_CODE
-from tucan.graph_utils import attribute_sequence
+from tucan.graph_utils import get_attribute_sequences
 import networkx as nx
 from typing import Generator
 from collections import Counter
@@ -9,7 +9,7 @@ def partition_molecule_by_attribute(
     m: nx.Graph, attribute: str, copy: bool = True
 ) -> nx.Graph:
     # Node degree (i.e., number of neighbors) is encoded in length of individual attribute sequences.
-    attr_seqs = [attribute_sequence(m, atom, attribute) for atom in m]
+    attr_seqs = get_attribute_sequences(m, attribute)
     unique_attr_seqs = sorted(set(attr_seqs))
     unique_attr_seqs_to_partitions = dict(
         zip(unique_attr_seqs, range(len(unique_attr_seqs)))

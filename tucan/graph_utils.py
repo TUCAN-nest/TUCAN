@@ -54,9 +54,9 @@ def _add_invariant_code(
 
 def sort_molecule_by_attribute(m: nx.Graph, attribute: str) -> nx.Graph:
     """Sort atoms by attribute."""
-    attr_with_labels = [
-        (attribute_sequence(m, atom, attribute), atom) for atom in m
-    ]  # [(A, 0), (C, 1), (B, 2)]
+    attr_with_labels = zip(
+        get_attribute_sequences(m, attribute), list(m.nodes)
+    )  # [(A, 0), (C, 1), (B, 2)]
     sorted_attr, labels_sorted_by_attr = zip(
         *sorted(attr_with_labels)
     )  # (A, B, C), (0, 2, 1)
@@ -66,15 +66,15 @@ def sort_molecule_by_attribute(m: nx.Graph, attribute: str) -> nx.Graph:
     )
 
 
-def attribute_sequence(
-    m: nx.Graph, atom: int, attribute: str
-) -> tuple[str | int | float, ...]:
-    attr_atom = m.nodes[atom][attribute]
-    attr_neighbors = sorted(
-        [m.nodes[n][attribute] for n in m.neighbors(atom)], reverse=True
-    )
+def get_attribute_sequences(
+    m: nx.Graph, attribute: str
+) -> list[tuple[str | int | float, ...]]:
+    m_attrs = dict(m.nodes(data=attribute))  # type: ignore
 
-    return (attr_atom, *attr_neighbors)
+    return [
+        (attr, *sorted([m_attrs[n] for n in m.neighbors(node)], reverse=True))
+        for node, attr in m_attrs.items()
+    ]  # type: ignore
 
 
 def permute_molecule(m: nx.Graph, random_seed: float = 1.0) -> nx.Graph:

@@ -25,10 +25,6 @@ def partition_molecule_by_attribute(
     return m_partitioned
 
 
-def partitioning_is_discrete(m):
-    return m.graph["n_partitions"] == m.number_of_nodes()
-
-
 def refine_partitions(m: nx.Graph) -> Generator[nx.Graph, None, None]:
     n_partitions = m.graph["n_partitions"]
     m_refined = partition_molecule_by_attribute(m, PARTITION, copy=False)
@@ -87,6 +83,10 @@ def filter_out_automorphisms(ms: list[nx.Graph]) -> list[nx.Graph]:
         filtered_ms.add(m)
 
     return list(filtered_ms)
+
+
+def partitioning_is_discrete(m):
+    return m.graph["n_partitions"] == m.number_of_nodes()
 
 
 def get_refinement_tree_levels(

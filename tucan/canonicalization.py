@@ -54,12 +54,18 @@ def get_refinement_tree_node_children(m: nx.Graph) -> Generator[nx.Graph, None, 
             continue
 
         # Split target partition.
-        m_artificially_split = m.copy()
+        m_artificially_split = (
+            nx.Graph()
+        )  # Instantiate a new graph instead of using m.copy() to improve performance.
+        m_artificially_split.add_nodes_from(m.nodes(data=True))
+        m_artificially_split.add_edges_from(m.edges(data=True))
         nx.set_node_attributes(
             m_artificially_split,
             {atom: n_partitions},  # Partitions are zero-based.
             PARTITION,
         )
+        m_artificially_split.graph["n_partitions"] = n_partitions + 1
+
         m_artificially_refined = list(refine_partitions(m_artificially_split))[-1]
 
         yield m_artificially_refined

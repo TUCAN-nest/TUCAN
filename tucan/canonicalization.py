@@ -17,9 +17,12 @@ def partition_molecule_by_attribute(
     partitions = [unique_attr_seqs_to_partitions[attr_seq] for attr_seq in attr_seqs]
 
     m_partitioned = m.copy() if copy else m
-    nx.set_node_attributes(
-        m_partitioned, dict(zip(list(m_partitioned), partitions)), PARTITION
-    )
+
+    for atom, partition in enumerate(partitions):
+        m_partitioned.nodes[atom][
+            PARTITION
+        ] = partition  # Setting partition attribute directly is faster than using nx.set_node_attributes() for batch update.
+
     m_partitioned.graph["n_partitions"] = len(unique_attr_seqs)
 
     return m_partitioned
@@ -59,11 +62,9 @@ def get_refinement_tree_node_children(m: nx.Graph) -> Generator[nx.Graph, None, 
         )  # Instantiate a new graph instead of using m.copy() to improve performance.
         m_artificially_split.add_nodes_from(m.nodes(data=True))
         m_artificially_split.add_edges_from(m.edges(data=True))
-        nx.set_node_attributes(
-            m_artificially_split,
-            {atom: n_partitions},  # Partitions are zero-based.
-            PARTITION,
-        )
+        m_artificially_split.nodes[atom][
+            PARTITION
+        ] = n_partitions  # Partitions are zero-based.
         m_artificially_split.graph["n_partitions"] = n_partitions + 1
 
         m_artificially_refined = list(refine_partitions(m_artificially_split))[-1]

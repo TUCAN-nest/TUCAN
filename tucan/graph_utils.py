@@ -72,8 +72,13 @@ def get_attribute_sequences(
     m_attrs = dict(m.nodes(data=attribute))  # type: ignore
 
     return [
-        (attr, *sorted([m_attrs[n] for n in m.neighbors(node)], reverse=True))
-        for node, attr in m_attrs.items()
+        (
+            attr,
+            *sorted(
+                [m_attrs[neighbor] for neighbor in m.neighbors(atom)], reverse=True
+            ),
+        )
+        for atom, attr in m_attrs.items()
     ]  # type: ignore
 
 

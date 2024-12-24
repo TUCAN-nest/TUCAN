@@ -74,9 +74,7 @@ def get_attribute_sequences(
     return [
         (
             attr,
-            *sorted(
-                [m_attrs[neighbor] for neighbor in m.neighbors(atom)], reverse=True
-            ),
+            *sorted([m_attrs[neighbor] for neighbor in m.neighbors(atom)]),
         )
         for atom, attr in m_attrs.items()
     ]  # type: ignore

@@ -89,6 +89,11 @@ pip install git+https://github.com/TUCAN-nest/TUCAN.git#egg=tucan[dev,drawing]
 
 Have a look at the [pyproject.toml](https://github.com/TUCAN-nest/TUCAN/blob/HEAD/pyproject.toml) for details regarding the optional dependencies.
 
+# Other projects using TUCAN
+Other researchers have found TUCAN useful to integrate into their projects. You'll find a list of references to these works below. If your paper is missing, please let us know.
+* [J.A. Stebani, I.I. Aguirre, G.A. Siddiqui, D. Wragg, A. Gagliardi, A. Casini, J. Chem. Theory Comput. 2025, 21, 12278-12288](https://doi.org/10.1021/acs.jctc.5c01465)
+* [S. Kuhn, M. Fischer, H. Rull, C. Fares, Molecules 2025, 30, 3442](https://doi.org/10.3390/molecules30163442)
+
 # Contributors
 * Claudia Kellner (Universität Würzburg) - molecule test set
 * Alexander Hoffmann (RWTH Aachen) - molecule test set
@@ -101,10 +106,5 @@ Have a look at the [pyproject.toml](https://github.com/TUCAN-nest/TUCAN/blob/HEA
 Funded by the [Deutsche Forschungsgemeinschaft (DFG, German Research Foundation)](https://www.dfg.de/) under the [National Research Data Infrastructure – NFDI4Chem](https://nfdi4chem.de/) – Projektnummer **441958208**.
 
 <img src="https://upload.wikimedia.org/wikipedia/commons/8/86/DFG-logo-blau.svg" alt="DFG logo"/>
-
-# Other projects using TUCAN
-Other researchers have found TUCAN useful to integrate into their project. You'll find a list of references to these works below. If your paper is missing, please let us know.
-* [paper](https://doi.org/10.3390/molecules30163442)
-* [paper](https://doi.org/10.1021/acs.jctc.5c01465)
 
 [^1]:TUCAN stands for **tu**ple **can**onicalization, since we're using 2-tuples to represent the bonds of our canonicalized molecules. Besides, [Wikipedia informs us](https://en.wikipedia.org/wiki/Toco_toucan) that in the tucán's native parlance, "_tu canonicalización_" expresses our hope that this software will help canonicalize _your_ molecules.

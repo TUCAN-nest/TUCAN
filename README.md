@@ -102,4 +102,9 @@ Funded by the [Deutsche Forschungsgemeinschaft (DFG, German Research Foundation)
 
 <img src="https://upload.wikimedia.org/wikipedia/commons/8/86/DFG-logo-blau.svg" alt="DFG logo"/>
 
+# Other projects using TUCAN
+Other researchers have found TUCAN useful to integrate into their project. You'll find a list of references to these works below. If your paper is missing, please let us know.
+* [paper](https://doi.org/10.3390/molecules30163442)
+* [paper](https://doi.org/10.1021/acs.jctc.5c01465)
+
 [^1]:TUCAN stands for **tu**ple **can**onicalization, since we're using 2-tuples to represent the bonds of our canonicalized molecules. Besides, [Wikipedia informs us](https://en.wikipedia.org/wiki/Toco_toucan) that in the tucán's native parlance, "_tu canonicalización_" expresses our hope that this software will help canonicalize _your_ molecules.

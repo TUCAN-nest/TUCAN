@@ -91,8 +91,8 @@ Have a look at the [pyproject.toml](https://github.com/TUCAN-nest/TUCAN/blob/HEA
 
 # Other projects using TUCAN
 Other researchers have found TUCAN useful to integrate into their projects. You'll find a list of references to these works below. If your paper is missing, please let us know.
-* [J.A. Stebani, I.I. Aguirre, G.A. Siddiqui, D. Wragg, A. Gagliardi, A. Casini, J. Chem. Theory Comput. 2025, 21, 12278-12288](https://doi.org/10.1021/acs.jctc.5c01465)
-* [S. Kuhn, M. Fischer, H. Rull, C. Fares, Molecules 2025, 30, 3442](https://doi.org/10.3390/molecules30163442)
+* [J.A. Stebani, I.I. Aguirre, G.A. Siddiqui, D. Wragg, A. Gagliardi, A. Casini, Computational Workflow to Unravel the Structural Dynamics of Supramolecular Metallacages in Solution, J. Chem. Theory Comput. 2025, 21, 12278-12288](https://doi.org/10.1021/acs.jctc.5c01465)
+* [S. Kuhn, M. Fischer, H. Rull, C. Fares, An NMR Database for Organic and Organometallic Compounds, Molecules 2025, 30, 3442](https://doi.org/10.3390/molecules30163442)
 
 # Contributors
 * Claudia Kellner (Universität Würzburg) - molecule test set

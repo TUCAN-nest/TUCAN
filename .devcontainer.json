@@ -2,7 +2,7 @@
 // For config options, see the README at: https://github.com/devcontainers/templates/tree/main/src/python
 {
     "name": "TUCAN",
-    "image": "python:3.12-bookworm",
+    "image": "python:3.13-bookworm",
     "features": {
         "ghcr.io/devcontainers/features/common-utils:2": {
             "configureZshAsDefaultShell": true

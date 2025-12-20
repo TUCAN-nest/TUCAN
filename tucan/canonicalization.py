@@ -11,9 +11,10 @@ def partition_molecule_by_attribute(
     # Node degree (i.e., number of neighbors) is encoded in length of individual attribute sequences.
     attr_seqs = get_attribute_sequences(m, attribute)
     unique_attr_seqs = sorted(set(attr_seqs))
-    unique_attr_seqs_to_partitions = dict(
-        zip(unique_attr_seqs, range(len(unique_attr_seqs)))
-    )
+    unique_attr_seqs_to_partitions = {
+        attr_seq: partition for partition, attr_seq in enumerate(unique_attr_seqs)
+    }
+
     partitions = [unique_attr_seqs_to_partitions[attr_seq] for attr_seq in attr_seqs]
 
     m_partitioned = m.copy() if copy else m

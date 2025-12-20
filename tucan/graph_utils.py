@@ -70,11 +70,12 @@ def get_attribute_sequences(
     m: nx.Graph, attribute: str
 ) -> list[tuple[str | int | float, ...]]:
     m_attrs = dict(m.nodes(data=attribute))  # type: ignore
+    m_neighbors = dict(m.adjacency())
 
     return [
         (
             attr,
-            *sorted([m_attrs[neighbor] for neighbor in m.neighbors(atom)]),
+            *sorted([m_attrs[neighbor] for neighbor in m_neighbors[atom]]),
         )
         for atom, attr in m_attrs.items()
     ]  # type: ignore

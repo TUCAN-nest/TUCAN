@@ -52,33 +52,34 @@ def _add_invariant_code(
         atom_attrs[atom].update({INVARIANT_CODE: invariant_code})
 
 
-def sort_molecule_by_attribute(m: nx.Graph, attribute: str) -> nx.Graph:
-    """Sort atoms by attribute."""
-    attr_with_labels = zip(
-        get_attribute_sequences(m, attribute), list(m.nodes)
-    )  # [(A, 0), (C, 1), (B, 2)]
-    sorted_attr, labels_sorted_by_attr = zip(
-        *sorted(attr_with_labels)
-    )  # (A, B, C), (0, 2, 1)
-
-    return nx.relabel_nodes(
-        m, dict(zip(labels_sorted_by_attr, list(range(m.number_of_nodes())))), copy=True
+def get_attribute_sequences(
+    attributes: dict[int, Any], neighbors: dict[int, tuple[int]]
+) -> tuple[tuple[Any, ...], ...]:
+    return tuple(
+        (attribute, *neighbor_attrs)
+        for node, attribute in attributes.items()
+        for neighbor_attrs in [[attributes[neighbor] for neighbor in neighbors[node]]]
+        for _ in [neighbor_attrs.sort()]
     )
 
 
-def get_attribute_sequences(
-    m: nx.Graph, attribute: str
-) -> list[tuple[str | int | float, ...]]:
-    m_attrs = dict(m.nodes(data=attribute))  # type: ignore
-    m_neighbors = dict(m.adjacency())
+def sort_molecule_by_attribute(m: nx.Graph, attribute: str) -> nx.Graph:
+    """Sort atoms by attribute."""
+    attributes = dict(nx.get_node_attributes(m, attribute))
+    neighbors = {node: tuple(m[node]) for node in m}
 
-    return [
-        (
-            attr,
-            *sorted([m_attrs[neighbor] for neighbor in m_neighbors[atom]]),
-        )
-        for atom, attr in m_attrs.items()
-    ]  # type: ignore
+    attr_with_labels = zip(
+        get_attribute_sequences(attributes, neighbors), attributes.keys(), strict=True
+    )  # [(A, 0), (C, 1), (B, 2)]
+    sorted_attr, labels_sorted_by_attr = zip(
+        *sorted(attr_with_labels), strict=True
+    )  # (A, B, C), (0, 2, 1)
+
+    return nx.relabel_nodes(
+        m,
+        dict(zip(labels_sorted_by_attr, list(range(m.number_of_nodes())), strict=True)),
+        copy=True,
+    )
 
 
 def permute_molecule(m: nx.Graph, random_seed: float = 1.0) -> nx.Graph:

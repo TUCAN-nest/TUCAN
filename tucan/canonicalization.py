@@ -1,45 +1,66 @@
 from tucan.graph_attributes import PARTITION, INVARIANT_CODE
 from tucan.graph_utils import get_attribute_sequences
 import networkx as nx
-from typing import Generator
+from typing import Generator, Any
 from collections import Counter
 
 
-def partition_molecule_by_attribute(
-    m: nx.Graph, attribute: str, copy: bool = True
-) -> nx.Graph:
+def get_partitions_from_attribute(
+    attributes: dict[int, Any], neighbors: dict[int, tuple[int]]
+) -> dict[int, int]:
     # Node degree (i.e., number of neighbors) is encoded in length of individual attribute sequences.
-    attr_seqs = get_attribute_sequences(m, attribute)
+    attr_seqs = get_attribute_sequences(attributes, neighbors)
     unique_attr_seqs = sorted(set(attr_seqs))
     unique_attr_seqs_to_partitions = {
         attr_seq: partition for partition, attr_seq in enumerate(unique_attr_seqs)
     }
 
-    partitions = [unique_attr_seqs_to_partitions[attr_seq] for attr_seq in attr_seqs]
+    return dict(
+        zip(
+            attributes.keys(),
+            [unique_attr_seqs_to_partitions[attr_seq] for attr_seq in attr_seqs],
+            strict=True,
+        )
+    )
 
+
+def set_partitions(
+    m: nx.Graph, partitions: dict[int, int], copy: bool = True
+) -> nx.Graph:
     m_partitioned = m.copy() if copy else m
 
-    for atom, partition in enumerate(partitions):
+    for atom, partition in partitions.items():
         m_partitioned.nodes[atom][
             PARTITION
         ] = partition  # Setting partition attribute directly is faster than using nx.set_node_attributes() for batch update.
 
-    m_partitioned.graph["n_partitions"] = len(unique_attr_seqs)
+    m_partitioned.graph["n_partitions"] = len(set(partitions.values()))
 
     return m_partitioned
 
 
+def partition_molecule_by_attribute(m: nx.Graph, attribute: str) -> nx.Graph:
+    attributes = dict(nx.get_node_attributes(m, attribute))
+    neighbors = {node: tuple(m[node]) for node in m}
+    partitions = get_partitions_from_attribute(attributes, neighbors)
+
+    return set_partitions(m, partitions)
+
+
+def _refine_partitions(m: nx.Graph) -> Generator[dict[int, int], None, None]:
+    partitions = dict(nx.get_node_attributes(m, PARTITION))
+    neighbors = {node: tuple(m[node]) for node in m}
+
+    while True:
+        yield partitions
+        refined = get_partitions_from_attribute(partitions, neighbors)
+        if refined == partitions:
+            return
+        partitions = refined
+
+
 def refine_partitions(m: nx.Graph) -> Generator[nx.Graph, None, None]:
-    n_partitions = m.graph["n_partitions"]
-    m_refined = partition_molecule_by_attribute(m, PARTITION, copy=False)
-    n_partitions_refined = m_refined.graph["n_partitions"]
-
-    if n_partitions == n_partitions_refined:
-        # No more refinement possible.
-        yield m_refined
-        return
-
-    yield from refine_partitions(m_refined)
+    return (set_partitions(m, partitions) for partitions in _refine_partitions(m))
 
 
 def get_target_partition(m: nx.Graph) -> int:
@@ -68,7 +89,11 @@ def get_refinement_tree_node_children(m: nx.Graph) -> Generator[nx.Graph, None, 
         ] = n_partitions  # Partitions are zero-based.
         m_artificially_split.graph["n_partitions"] = n_partitions + 1
 
-        m_artificially_refined = list(refine_partitions(m_artificially_split))[-1]
+        m_artificially_refined = set_partitions(
+            m_artificially_split,
+            list(_refine_partitions(m_artificially_split))[-1],
+            False,
+        )
 
         yield m_artificially_refined
 
@@ -80,9 +105,14 @@ def filter_out_automorphisms(ms: list[nx.Graph]) -> list[nx.Graph]:
 
     for m in ms:
         partitions = list(nx.get_node_attributes(m, PARTITION).values())
-        labeling = tuple(
-            sorted([tuple(sorted(partitions[n] for n in edge)) for edge in m.edges()])
-        )
+        _labeling = []
+        for edge in m.edges():
+            edge_partitions = [partitions[n] for n in edge]
+            edge_partitions.sort()
+            _labeling.append(tuple(edge_partitions))
+
+        _labeling.sort()
+        labeling = tuple(_labeling)
 
         if labeling in labelings:
             continue

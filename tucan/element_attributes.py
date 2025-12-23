@@ -384,7 +384,7 @@ element_names = [
 ELEMENT_ATTRS: Final[dict[str, dict[str, str | int]]] = {
     s: {ATOMIC_NUMBER: n, "element_name": e, "element_color": c}
     for s, n, e, c in zip(
-        element_symbols, atomic_numbers, element_names, element_colors
+        element_symbols, atomic_numbers, element_names, element_colors, strict=True
     )
 }
 

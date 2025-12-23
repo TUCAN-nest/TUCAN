@@ -108,7 +108,9 @@ def _permute_molecule(m: nx.Graph) -> nx.Graph:
     labels = list(m.nodes)
     permuted_labels = list(labels)  # shallow copy
     random.shuffle(permuted_labels)
-    m_relabeled = nx.relabel_nodes(m, dict(zip(permuted_labels, labels)), copy=True)
+    m_relabeled = nx.relabel_nodes(
+        m, dict(zip(permuted_labels, labels, strict=True)), copy=True
+    )
 
     return _sort_molecule_by_label(m_relabeled)
 

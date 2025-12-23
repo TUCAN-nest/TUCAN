@@ -127,7 +127,7 @@ def get_canonical_molecule(ms: list[nx.Graph]) -> nx.Graph:
     for m in ms:
         m_relabeled_by_partition = nx.relabel_nodes(
             m,
-            dict(zip(list(m), nx.get_node_attributes(m, PARTITION).values())),
+            dict(m.nodes(data=PARTITION)),
             copy=True,
         )
         labeling = sorted([sorted(edge) for edge in m_relabeled_by_partition.edges()])

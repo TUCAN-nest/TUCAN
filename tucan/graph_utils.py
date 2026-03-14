@@ -55,12 +55,14 @@ def _add_invariant_code(
 def get_attribute_sequences(
     attributes: dict[int, Any], neighbors: dict[int, tuple[int]]
 ) -> tuple[tuple[Any, ...], ...]:
-    return tuple(
-        (attribute, *neighbor_attrs)
-        for node, attribute in attributes.items()
-        for neighbor_attrs in [[attributes[neighbor] for neighbor in neighbors[node]]]
-        for _ in [neighbor_attrs.sort()]
-    )
+    result = []
+    for node, attribute in attributes.items():
+        neighbor_attrs = [attributes[neighbor] for neighbor in neighbors[node]]
+        neighbor_attrs.sort()
+        neighbor_attrs.insert(0, attribute)
+        result.append(tuple(neighbor_attrs))
+
+    return tuple(result)
 
 
 def sort_molecule_by_attribute(m: nx.Graph, attribute: str) -> nx.Graph:

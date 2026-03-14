@@ -47,20 +47,39 @@ def partition_molecule_by_attribute(m: nx.Graph, attribute: str) -> nx.Graph:
     return set_partitions(m, partitions)
 
 
-def _refine_partitions(m: nx.Graph) -> Generator[dict[int, int], None, None]:
-    partitions = dict(nx.get_node_attributes(m, PARTITION))
-    neighbors = {node: tuple(m[node]) for node in m}
+def _refine_partitions(
+    partitions: list[int],
+    node_neighbors: list[tuple[int, list[int]]],
+) -> tuple[list[int], int]:
+    neighbors = {node: tuple(neighbors) for node, neighbors in node_neighbors}
+    nodes = tuple(neighbors.keys())
 
+    _partitions = partitions
     while True:
-        yield partitions
-        refined = get_partitions_from_attribute(partitions, neighbors)
-        if refined == partitions:
-            return
-        partitions = refined
+        attributes = {node: _partitions[node] for node in nodes}
+        seqs = get_attribute_sequences(attributes, neighbors)
+        unique_seqs = sorted(set(seqs))
+        seqs_to_partitions = {
+            seq: partition for partition, seq in enumerate(unique_seqs)
+        }
+        _partitions_refined = [seqs_to_partitions[seq] for seq in seqs]
+        if _partitions_refined == _partitions:
+            return _partitions, len(unique_seqs)
+
+        _partitions = _partitions_refined
 
 
 def refine_partitions(m: nx.Graph) -> Generator[nx.Graph, None, None]:
-    return (set_partitions(m, partitions) for partitions in _refine_partitions(m))
+    partitions = {node: m._node[node][PARTITION] for node in m}
+    neighbors = {node: tuple(m[node]) for node in m}
+
+    while True:
+        yield set_partitions(m, partitions)
+        refined = get_partitions_from_attribute(partitions, neighbors)
+        if refined == partitions:
+            return
+
+        partitions = refined
 
 
 def get_target_partition(m: nx.Graph) -> int:
@@ -70,32 +89,40 @@ def get_target_partition(m: nx.Graph) -> int:
     return max(partition_sizes, key=partition_sizes.get)  # type: ignore
 
 
+def _copy_graph(m: nx.Graph) -> nx.Graph:
+    graph = nx.Graph()
+    graph._node = {k: dict(v) for k, v in m._node.items()}
+    graph._adj = {k: dict(v) for k, v in m._adj.items()}
+    graph.graph = dict(m.graph)
+
+    return graph
+
+
 def get_refinement_tree_node_children(m: nx.Graph) -> Generator[nx.Graph, None, None]:
     n_partitions = m.graph["n_partitions"]
     target_partition = get_target_partition(m)
 
-    for atom, partition in m.nodes(data=PARTITION):  # type: ignore
+    # Precompute once per parent; all children share the same topology.
+    node_neighbors = [(node, list(m[node])) for node in m]
+    parent_partitions = [m._node[node][PARTITION] for node in m]
+
+    for node, partition in m.nodes(data=PARTITION):  # type: ignore
         if partition != target_partition:
             continue
 
-        # Split target partition.
-        m_artificially_split = (
-            nx.Graph()
-        )  # Instantiate a new graph instead of using m.copy() to improve performance.
-        m_artificially_split.add_nodes_from(m.nodes(data=True))
-        m_artificially_split.add_edges_from(m.edges(data=True))
-        m_artificially_split.nodes[atom][
-            PARTITION
-        ] = n_partitions  # Partitions are zero-based.
-        m_artificially_split.graph["n_partitions"] = n_partitions + 1
-
-        m_artificially_refined = set_partitions(
-            m_artificially_split,
-            list(_refine_partitions(m_artificially_split))[-1],
-            False,
+        partitions = list(parent_partitions)
+        partitions[node] = n_partitions  # Partitions are zero-based.
+        partitions_refined, n_partitions = _refine_partitions(
+            partitions, node_neighbors
         )
 
-        yield m_artificially_refined
+        m_refined = _copy_graph(m)
+        node_data = m_refined._node
+        for i, part in enumerate(partitions_refined):
+            node_data[i][PARTITION] = part
+        m_refined.graph["n_partitions"] = n_partitions
+
+        yield m_refined
 
 
 def filter_out_automorphisms(ms: list[nx.Graph]) -> list[nx.Graph]:

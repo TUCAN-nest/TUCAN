@@ -1,22 +1,19 @@
-from collections import Counter, deque
+from collections import Counter
 
 from tucan.graph_attributes import (
     ATOMIC_NUMBER,
     ELEMENT_SYMBOL,
-    EXPLORED,
     MASS,
-    PARTITION,
     RAD,
 )
 from tucan.graph_utils import sort_molecule_by_attribute
-from operator import gt, lt, eq
-from typing import Callable, Final
+from typing import Final
 import networkx as nx
 
 
 def serialize_molecule(m: nx.Graph) -> str:
     """Serialize a molecule."""
-    m_sorted = sort_molecule_by_attribute(_assign_final_labels(m), ATOMIC_NUMBER)
+    m_sorted = sort_molecule_by_attribute(m, ATOMIC_NUMBER)
     serialization = _write_sum_formula(m_sorted)
     serialization += f"/{_write_edge_list(m_sorted)}"
     node_attributes = _write_node_attributes(m_sorted)
@@ -81,62 +78,3 @@ def _write_sum_formula(m: nx.Graph) -> str:
         sum_formula_string += f"{k}{v}" if v > 1 else k
 
     return sum_formula_string
-
-
-def _assign_final_labels(
-    m: nx.Graph,
-    traversal_priorities: tuple[Callable, Callable, Callable] = (lt, gt, eq),
-) -> nx.Graph:
-    """Re-label nodes such that each node is connected to neighbors with the
-    smallest possible labels.
-    This is not part of (and not required for) the canonicalization.
-    The re-labeling is for cosmetic purposes."""
-    partitions = m.nodes.data(PARTITION)
-    labels_by_partition = _labels_by_partition(m)
-    final_labels = {}
-    nx.set_node_attributes(m, False, EXPLORED)
-
-    # outer loop iterates over all fragments of the graph (= graph components),
-    # starting with the lowest unexplored node label
-    while unexplored := sorted([k for k, v in m.nodes(data=EXPLORED) if not v]):
-        atom_queue = deque([unexplored[0]])
-
-        # inner loop reaches out to all atoms in a fragment
-        while atom_queue:
-            a = atom_queue.pop()
-            if m.nodes[a][EXPLORED]:
-                continue
-            a_final = labels_by_partition[
-                partitions[a]
-            ].pop()  # assign smallest label available in this partition
-            final_labels[a] = a_final
-
-            neighbors = list(m.neighbors(a))
-            neighbor_traversal_order = []
-            for priority in reversed(
-                traversal_priorities
-            ):  # reverse to preserve order of traversal priorities in queue
-                neighbors_this_priority = [
-                    n for n in neighbors if priority(partitions[a], partitions[n])
-                ]
-                neighbor_traversal_order.extend(sorted(neighbors_this_priority))
-            m.nodes[a][EXPLORED] = True
-
-            atom_queue.extendleft(neighbor_traversal_order)
-
-    assert len(final_labels) == len(m.nodes)
-
-    nx.set_node_attributes(m, False, EXPLORED)
-    return nx.relabel_nodes(m, final_labels, copy=True)
-
-
-def _labels_by_partition(m: nx.Graph) -> dict[int, list[int]]:
-    """Create dictionary of partitions to node labels."""
-    partitions = set(sorted([v for _, v in m.nodes.data(PARTITION)]))
-    labels_by_partition: dict[int, list[int]] = {p: [] for p in partitions}
-    for a in m:
-        labels_by_partition[m.nodes[a][PARTITION]].append(a)
-    labels_by_partition.update(
-        (k, sorted(list(v), reverse=True)) for k, v in labels_by_partition.items()
-    )
-    return labels_by_partition

@@ -7,6 +7,7 @@ from tucan.graph_attributes import (
     RAD,
 )
 from tucan.graph_utils import sort_molecule_by_attribute
+import tucan
 from typing import Final
 import networkx as nx
 
@@ -14,7 +15,8 @@ import networkx as nx
 def serialize_molecule(m: nx.Graph) -> str:
     """Serialize a molecule."""
     m_sorted = sort_molecule_by_attribute(m, ATOMIC_NUMBER)
-    serialization = _write_sum_formula(m_sorted)
+    serialization = f"TUCANv{tucan.__version__}/"
+    serialization += _write_sum_formula(m_sorted)
     serialization += f"/{_write_edge_list(m_sorted)}"
     node_attributes = _write_node_attributes(m_sorted)
     serialization += f"/{node_attributes}" if node_attributes else ""

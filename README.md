@@ -52,7 +52,7 @@ print(tucan_string)
 ```
 
 ```bash
-C2H4O2/(1-5)(2-5)(3-5)(4-8)(5-6)(6-7)(6-8)
+TUCANv0.1.0/C2H4O2/(1-5)(2-5)(3-5)(4-7)(5-6)(6-7)(6-8)
 ```
 
 Have a look at our [demo notebook](https://github.com/TUCAN-nest/TUCAN/blob/HEAD/docs/demo.ipynb) to see TUCAN at work.

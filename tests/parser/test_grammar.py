@@ -2,6 +2,7 @@ import pytest
 from tucan.element_attributes import element_symbols
 from tucan.io import TucanParserException, graph_from_tucan
 from tucan.parser.parser import _prepare_parser
+from tucan.test_utils import TUCAN_VERSION
 
 
 def _parse_sum_formula(s):
@@ -182,11 +183,11 @@ def test_cannot_parse_node_attributes(node_attributes):
 @pytest.mark.parametrize(
     "tucan",
     [
-        "/",
-        "//",
-        "C2H6O/(1-7)(2-7)(3-7)(4-8)(5-8)(6-9)(7-8)(8-9)",
-        "Xe/",
-        "C2H4O/(1-5)(2-5)(3-5)(4-7)(5-6)(6-7)/(4:mass=2)(5:mass=14)(6:rad=3)(7:mass=17)",
+        f"{TUCAN_VERSION}//",
+        f"{TUCAN_VERSION}//",
+        f"{TUCAN_VERSION}C2H6O/(1-7)(2-7)(3-7)(4-8)(5-8)(6-9)(7-8)(8-9)",
+        f"{TUCAN_VERSION}Xe/",
+        f"{TUCAN_VERSION}C2H4O/(1-5)(2-5)(3-5)(4-7)(5-6)(6-7)/(4:mass=2)(5:mass=14)(6:rad=3)(7:mass=17)",
     ],
 )
 def test_can_parse_tucan(tucan):
@@ -199,6 +200,9 @@ def test_can_parse_tucan(tucan):
         "",
         "C2H6O(1-7)(2-7)(3-7)(4-8)(5-8)(6-9)(7-8)(8-9)",
         "C2H6O(1-7)(2-7)(3-7)(4-8)(5-8)(6-9)(7-8)(8-9)/",
+        "TUCANv/C2H6O/(1-7)(2-7)(3-7)(4-8)(5-8)(6-9)(7-8)(8-9)",
+        "TUCANv4.2/C2H6O/(1-7)(2-7)(3-7)(4-8)(5-8)(6-9)(7-8)(8-9)",
+        "TUCANv4.2.1.3/C2H6O/(1-7)(2-7)(3-7)(4-8)(5-8)(6-9)(7-8)(8-9)",
     ],
 )
 def test_cannot_parse_tucan(tucan):

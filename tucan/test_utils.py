@@ -5,6 +5,8 @@ from tucan.graph_utils import permute_molecule
 from tucan.parser.parser import graph_from_tucan
 from tucan.serialization import serialize_molecule
 
+TUCAN_VERSION = "TUCANv0.4.2/"
+
 
 def permutation_invariance(m: nx.Graph, n_runs=10, random_seed=random.random()):
     """Tests that different permutations of the same molecular graph yield one

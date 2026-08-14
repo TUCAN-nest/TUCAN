@@ -3,7 +3,9 @@ grammar tucan;
 /*
  * TUCAN
  */
-tucan : sum_formula '/' tuples ('/' node_attributes)? EOF ;
+tucan : version '/' sum_formula '/' tuples ('/' node_attributes)? EOF ;
+
+version : 'TUCANv' zero_or_greater '.' zero_or_greater '.' zero_or_greater ;
 
 /*
  * Hill system formula
@@ -167,6 +169,7 @@ node_property_value : greater_than_zero ;
 /*
  * Numbers
  */
+zero_or_greater: '0' | greater_than_zero ;
 greater_than_zero : '1' | greater_than_one ;
 greater_than_one : '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | GREATER_THAN_NINE ;
 GREATER_THAN_NINE : [1-9] [0-9]+ ;

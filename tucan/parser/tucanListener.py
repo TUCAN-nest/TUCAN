@@ -1,6 +1,6 @@
-# Generated from tucan.g4 by ANTLR 4.11.1
+# Generated from tucan.g4 by ANTLR 4.13.2
 from antlr4 import *
-if __name__ is not None and "." in __name__:
+if "." in __name__:
     from .tucanParser import tucanParser
 else:
     from tucanParser import tucanParser
@@ -14,6 +14,15 @@ class tucanListener(ParseTreeListener):
 
     # Exit a parse tree produced by tucanParser#tucan.
     def exitTucan(self, ctx:tucanParser.TucanContext):
+        pass
+
+
+    # Enter a parse tree produced by tucanParser#version.
+    def enterVersion(self, ctx:tucanParser.VersionContext):
+        pass
+
+    # Exit a parse tree produced by tucanParser#version.
+    def exitVersion(self, ctx:tucanParser.VersionContext):
         pass
 
 
@@ -1211,6 +1220,15 @@ class tucanListener(ParseTreeListener):
 
     # Exit a parse tree produced by tucanParser#node_property_value.
     def exitNode_property_value(self, ctx:tucanParser.Node_property_valueContext):
+        pass
+
+
+    # Enter a parse tree produced by tucanParser#zero_or_greater.
+    def enterZero_or_greater(self, ctx:tucanParser.Zero_or_greaterContext):
+        pass
+
+    # Exit a parse tree produced by tucanParser#zero_or_greater.
+    def exitZero_or_greater(self, ctx:tucanParser.Zero_or_greaterContext):
         pass
 
 

@@ -11,7 +11,7 @@ from tucan.graph_attributes import (
 )
 from tucan.io import graph_from_tucan, TucanParserException
 from tucan.parser.parser import _prepare_parser, _walk_tree
-from tucan.test_utils import roundtrip_graph_tucan_graph_tucan_graph
+from tucan.test_utils import roundtrip_graph_tucan_graph_tucan_graph, TUCAN_VERSION
 
 
 def _extract_atoms_from_sum_formula(s):
@@ -139,10 +139,10 @@ def test_overriding_node_attribute_raises_exception(
 @pytest.mark.parametrize(
     "tucan, expected_atoms, expected_bonds",
     [
-        ("/", {}, []),
-        ("//", {}, []),
+        (f"{TUCAN_VERSION}/", {}, []),
+        (f"{TUCAN_VERSION}//", {}, []),
         (
-            "C2H6O/(1-7)(2-7)(3-7)(4-8)(5-8)(6-9)(7-8)(8-9)",
+            f"{TUCAN_VERSION}C2H6O/(1-7)(2-7)(3-7)(4-8)(5-8)(6-9)(7-8)(8-9)",
             {
                 0: {
                     ELEMENT_SYMBOL: "H",
@@ -202,7 +202,7 @@ def test_overriding_node_attribute_raises_exception(
             [(0, 6), (1, 6), (2, 6), (3, 7), (4, 7), (5, 8), (6, 7), (7, 8)],
         ),
         (
-            "Xe/",
+            f"{TUCAN_VERSION}Xe/",
             {
                 0: {
                     ELEMENT_SYMBOL: "Xe",
@@ -214,7 +214,7 @@ def test_overriding_node_attribute_raises_exception(
             [],
         ),
         (
-            "C2H4O/(1-5)(2-5)(3-5)(4-7)(5-6)(6-7)/(4:mass=2)(5:mass=14)(6:rad=3)(7:mass=17)",
+            f"{TUCAN_VERSION}C2H4O/(1-5)(2-5)(3-5)(4-7)(5-6)(6-7)/(4:mass=2)(5:mass=14)(6:rad=3)(7:mass=17)",
             {
                 0: {
                     ELEMENT_SYMBOL: "H",
@@ -266,7 +266,7 @@ def test_overriding_node_attribute_raises_exception(
             [(0, 4), (1, 4), (2, 4), (3, 6), (4, 5), (5, 6)],
         ),
         (
-            "CH/(2-1)(1-2)/(2:rad=3,mass=13)",
+            f"{TUCAN_VERSION}CH/(2-1)(1-2)/(2:rad=3,mass=13)",
             {
                 0: {
                     ELEMENT_SYMBOL: "H",
@@ -300,10 +300,10 @@ def test_roundtrip_molfile_graph_tucan_graph_tucan_graph(m):
 @pytest.mark.parametrize(
     "tucan, offending_node_index",
     [
-        ("CH/(1-3)", 3),
-        ("CH/(1-2)(5-1)", 5),
-        ("CH//(3:mass=1)", 3),
-        ("CH3//(1:mass=13)(5:rad=3)", 5),
+        (f"{TUCAN_VERSION}CH/(1-3)", 3),
+        (f"{TUCAN_VERSION}CH/(1-2)(5-1)", 5),
+        (f"{TUCAN_VERSION}CH//(3:mass=1)", 3),
+        (f"{TUCAN_VERSION}CH3//(1:mass=13)(5:rad=3)", 5),
     ],
 )
 def test_graph_from_tucan_invalid_node_index_raises_exception(

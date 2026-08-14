@@ -159,6 +159,7 @@ def get_refinement_tree_levels(
 ) -> Generator[list[nx.Graph], None, None]:
     """
     Build BFS refinement-tree and yield each level.
+    See https://doi.org/10.1016/j.jsc.2013.09.003 and https://pallini.di.uniroma1.it/SearchTree.html.
     """
     parents = [m]
 

@@ -1,38 +1,37 @@
 [build-system]
-requires = ["flit_core >=3.2,<4"]
-build-backend = "flit_core.buildapi"
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "tucan"
-authors = [{ name = "Jan C. Brammer", email = "jan.c.brammer@gmail.com" }]
+authors = [{ name = "Jan C. Brammer", email = "jan.brammer@pm.me" }]
 readme = "README.md"
 license = { file = "LICENSE" }
 classifiers = [
     "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
 ]
-dynamic = ["version", "description"]
+dynamic = ["version"]
 
 dependencies = [
-    "networkx >=3.0",
-    "scipy >=1.10.0",
-    "matplotlib >=3.6.2",
-    "tabulate >=0.9.0",
-    "types-tabulate >= 0.9.0",
-    "igraph >=0.10.3",
+    "networkx >=3.4",
+    "scipy >=1.15.3",
     "antlr4-python3-runtime == 4.13.2",
 ]
 
 [project.optional-dependencies]
 drawing = [
-    "plotly",     # interactive 3D drawings
+    "plotly",         # interactive 3D drawings
     "notebook",
     "ipywidgets",
+    "matplotlib",
+    "tabulate",
+    "types-tabulate",
 ]
 dev = ["pytest", "pytest-timeout", "syrupy"]
 
 
 [tool.pytest.ini_options]
-minversion = "6.0"
+minversion = "9.0"
 addopts = """
     -v
     --durations=5"""

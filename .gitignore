@@ -2,3 +2,4 @@ __pycache__/
 .vscode
 .pytest_cache
 tests/chembl_30_smiles.txt
+tucan.egg-info

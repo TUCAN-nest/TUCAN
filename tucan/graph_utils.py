@@ -53,7 +53,7 @@ def _add_invariant_code(
 
 
 def get_attribute_sequences(
-    attributes: dict[int, Any], neighbors: dict[int, tuple[int]]
+    attributes: dict[int, Any], neighbors: dict[int, tuple[int, ...]]
 ) -> tuple[tuple[Any, ...], ...]:
     result = []
     for node, attribute in attributes.items():

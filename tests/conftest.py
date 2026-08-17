@@ -8,7 +8,6 @@ from networkx.algorithms.components import is_connected
 from tucan.graph_attributes import ATOMIC_NUMBER, ELEMENT_SYMBOL
 from tucan.io import graph_from_file
 
-
 # Assertion rewriting
 # (see https://docs.pytest.org/en/stable/how-to/writing_plugins.html#assertion-rewriting)
 pytest.register_assert_rewrite("tucan.test_utils")

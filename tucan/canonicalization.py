@@ -6,7 +6,7 @@ from collections import Counter
 
 
 def get_partitions_from_attribute(
-    attributes: dict[int, Any], neighbors: dict[int, tuple[int]]
+    attributes: dict[int, Any], neighbors: dict[int, tuple[int, ...]]
 ) -> dict[int, int]:
     # Node degree (i.e., number of neighbors) is encoded in length of individual attribute sequences.
     attr_seqs = get_attribute_sequences(attributes, neighbors)

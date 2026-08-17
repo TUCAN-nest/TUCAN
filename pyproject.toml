@@ -27,7 +27,7 @@ drawing = [
     "tabulate",
     "types-tabulate",
 ]
-dev = ["pytest", "pytest-timeout", "syrupy"]
+dev = ["pytest", "pytest-timeout", "syrupy", "mypy", "black"]
 
 
 [tool.pytest.ini_options]

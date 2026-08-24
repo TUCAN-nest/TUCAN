@@ -47,3 +47,6 @@ exclude = ["parser/"]
 [[tool.mypy.overrides]]
 module = "tucan.parser.*"
 follow_imports = "skip"
+
+[tool.setuptools.dynamic]
+version = { attr = "tucan.__version__" }

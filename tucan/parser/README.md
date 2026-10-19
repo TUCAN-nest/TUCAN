@@ -1,8 +1,6 @@
 # Parser for TUCAN strings, ANTLR4 implementation
 
 Tucan grammar:
-* [tucan.ebnf](tucan.ebnf): grammar in W3C-style EBNF
-* [tucan.bnfplayground](tucan.bnfplayground): grammar in the [BNF Playground](https://bnfplayground.pauliankline.com/) format
 * [tucan.g4](tucan.g4): ANTLR4 grammar
 
 Other files:

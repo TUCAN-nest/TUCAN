@@ -32,5 +32,5 @@
             }
         }
     },
-    "postCreateCommand": "pip install --upgrade pip  && pip install -e .[dev,drawing] && ./install_antlr4.sh"
+    "postCreateCommand": "pip install --upgrade pip  && pip install -e .[dev,drawing]"
 }

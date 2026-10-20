@@ -15,7 +15,6 @@ dynamic = ["version"]
 dependencies = [
     "networkx >=3.4",
     "scipy >=1.15.3",
-    "antlr4-python3-runtime == 4.13.2",
 ]
 
 [project.optional-dependencies]

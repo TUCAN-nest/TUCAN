@@ -10,15 +10,12 @@ from tucan.graph_attributes import (
     RAD,
 )
 from tucan.io import graph_from_tucan, TucanParserException
-from tucan.parser.parser import _prepare_parser, _walk_tree
+from tucan.parser.parser import _Parser
 from tucan.test_utils import roundtrip_graph_tucan_graph_tucan_graph, TUCAN_VERSION
 
 
 def _extract_atoms_from_sum_formula(s):
-    parser = _prepare_parser(s)
-    tree = parser.sum_formula_start()
-    listener = _walk_tree(tree)
-    return listener._atoms
+    return _Parser(f"{TUCAN_VERSION}{s}/").parse_tucan()._atoms
 
 
 @pytest.mark.parametrize(
@@ -62,10 +59,7 @@ def test_atoms_from_sum_formula(sum_formula, expected_atoms):
 
 
 def _extract_bonds_from_tuples(s):
-    parser = _prepare_parser(s)
-    tree = parser.tuples_start()
-    listener = _walk_tree(tree)
-    return listener._bonds
+    return _Parser(f"{TUCAN_VERSION}/{s}").parse_tucan()._bonds
 
 
 @pytest.mark.parametrize(
@@ -94,10 +88,7 @@ def test_self_loop_in_tuples_raises_exception():
 
 
 def _extract_node_attributes(s):
-    parser = _prepare_parser(s)
-    tree = parser.node_attributes_start()
-    listener = _walk_tree(tree)
-    return listener._node_attributes
+    return _Parser(f"{TUCAN_VERSION}//{s}").parse_tucan()._node_attributes
 
 
 @pytest.mark.parametrize(
@@ -311,4 +302,4 @@ def test_graph_from_tucan_invalid_node_index_raises_exception(
 ):
     expected_error_msg = f"^Atom with index {offending_node_index} does not exist.$"
     with pytest.raises(TucanParserException, match=expected_error_msg):
-        graph = graph_from_tucan(tucan)
+        graph_from_tucan(tucan)

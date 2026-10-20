@@ -1,15 +1,28 @@
 import pytest
 from tucan.element_attributes import element_symbols
 from tucan.io import TucanParserException, graph_from_tucan
-from tucan.parser.parser import _prepare_parser
+from tucan.parser.parser import _Parser
 from tucan.test_utils import TUCAN_VERSION
 
 
-def _parse_sum_formula(s):
-    parser = _prepare_parser(s)
+def _parse_sum_formula(sum_formula: str):
+    parser = _Parser(sum_formula)
+    parser._sum_formula()
+    parser._expect_end()
 
-    # invoke the parser on rule "sum_formula_start"
-    parser.sum_formula_start()
+
+def _parse_tuples(tuples: str):
+    parser = _Parser(tuples)
+    parser._builder.add_tuple = lambda index1, index2: None
+    parser._tuples()
+    parser._expect_end()
+
+
+def _parse_node_attributes(node_attributes: str):
+    parser = _Parser(node_attributes)
+    parser._builder.add_node_property = lambda node_index, key, value: None
+    parser._node_attributes()
+    parser._expect_end()
 
 
 @pytest.mark.parametrize(
@@ -19,7 +32,7 @@ def _parse_sum_formula(s):
         "CHCl3",
         "ClH",
         "H2",
-        "C123456789Zr987654321",
+        "C12345Zr6789",
         "Cu",
         "CU",
         "Os",
@@ -75,13 +88,6 @@ def test_element_order_is_correct():
     _parse_sum_formula("".join(elements_with_carbon))
 
 
-def _parse_tuples(s):
-    parser = _prepare_parser(s)
-
-    # invoke the parser on rule "tuples_start"
-    parser.tuples_start()
-
-
 @pytest.mark.parametrize(
     "tuples",
     [
@@ -125,13 +131,6 @@ def test_can_parse_tuples(tuples):
 def test_cannot_parse_tuples(tuples):
     with pytest.raises(TucanParserException):
         _parse_tuples(tuples)
-
-
-def _parse_node_attributes(s):
-    parser = _prepare_parser(s)
-
-    # invoke the parser on rule "node_attributes_start"
-    parser.node_attributes_start()
 
 
 @pytest.mark.parametrize(

@@ -12,10 +12,7 @@ classifiers = [
 ]
 dynamic = ["version"]
 
-dependencies = [
-    "networkx >=3.4",
-    "scipy >=1.15.3",
-]
+dependencies = ["networkx >=3.4", "scipy >=1.15.3"]
 
 [project.optional-dependencies]
 drawing = [
@@ -28,7 +25,6 @@ drawing = [
 ]
 dev = ["pytest", "pytest-timeout", "syrupy", "mypy", "black"]
 
-
 [tool.pytest.ini_options]
 minversion = "9.0"
 addopts = """
@@ -36,16 +32,9 @@ addopts = """
     --durations=5"""
 testpaths = ["tests"]
 
-[tool.black] # https://lyz-code.github.io/blue-book/devops/black/
-extend-exclude = 'tucan/parser/tucan.*\.py'
-
 [tool.mypy]
 ignore_missing_imports = true
-exclude = ["parser/"]
-
-[[tool.mypy.overrides]]
-module = "tucan.parser.*"
-follow_imports = "skip"
+disable_error_code = ["import-untyped", "import-not-found"]
 
 [tool.setuptools.dynamic]
 version = { attr = "tucan.__version__" }
